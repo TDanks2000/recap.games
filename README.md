@@ -1,29 +1,101 @@
-# Create T3 App
+# recap.games
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+<div align="center">
+  <a href="https://github.com/tdanks2000/recap.games">
+    <img src="./public/icon.png" alt="Games Recaped Logo" width="150" />
+  </a>
+</div>
 
-## What's next? How do I make an app with this?
+## About
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+recap.games provides the latest updates from game conferences such as E3, SGF, and more. Stay informed on new game announcements, trailers
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Features
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+- **Conference Coverage**: Real‑time recaps from E3, SGF, Tokyo Game Show, and other major events.
+- **Easy Navigation**: Responsive UI built with Next.js and Tailwind CSS.
+- **Authentication**: Secure Email/Password and Discord OAuth via NextAuth.
+- **User Roles**: Admin, Editor, and Subscriber permissions for tailored access.
+- **Personalized Experience**: User dashboards powered by tRPC and TanStack Query.
 
-## Learn More
+## Installation
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+1. Clone the repository:
+   ```
+   git clone https://github.com/tdanks2000/recap.games.git
+   cd recap.games
+   ```
+2. Install dependencies (requires Bun v1+):
+   ```
+   bun install
+   ```
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Scripts
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+Use `bun run <script>` to manage development, build, and database tasks:
 
-## How do I deploy this?
+| Script                | Description                                        |
+| --------------------- | -------------------------------------------------- |
+| `bun run dev`         | Start development server                           |
+| `bun run build`       | Compile production build                           |
+| `bun run preview`     | Build & preview production                         |
+| `bun run start`       | Run production server                              |
+| `bun run typecheck`   | TypeScript type checking                           |
+| `bun run check`       | Run Biome lint and formatting                      |
+| `bun run db:generate` | Generate database migration files with drizzle-kit |
+| `bun run db:migrate`  | Apply database migrations                          |
+| `bun run db:seed`     | Seed initial data                                  |
+| `bun run db:studio`   | Launch Drizzle ORM Studio                          |
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+## Setup
+
+Create a `.env` file in the project root by copying `.env.example`:
+
+```
+cp .env.example .env
+```
+
+Edit `.env` with your credentials:
+
+```
+# Database (SQLite)
+DATABASE_URL="file:./db.sqlite"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-nextauth-secret"
+
+# Discord OAuth
+DISCORD_CLIENT_ID="your-discord-client-id"
+DISCORD_CLIENT_SECRET="your-discord-client-secret"
+```
+
+> **Tip:** Generate a strong `NEXTAUTH_SECRET` using:
+>
+> ```
+> npx next-auth secret
+> ```
+
+## Usage
+
+1. Start the dev server:
+   ```
+   bun run dev
+   ```
+2. Open `http://localhost:3000` in your browser.
+3. Sign in with Discord OAuth or Email/Password.
+4. Explore personalized features based on your role.
+
+## License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+---
+
+## ❤️ Mental Health Reminder
+
+<p align="start">
+  <a target="_blank" href="https://tdanks.com/mental-health/quote">
+    ❤️ You are great, you are enough, and your presence is valued. If you’re struggling with your mental health, please reach out to someone you love and consult a professional. You are not alone. ❤️
+  </a>
+</p>
