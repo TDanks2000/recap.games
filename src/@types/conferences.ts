@@ -6,6 +6,6 @@ import type { Stream } from "./streams";
 export type Conference = InferSelectModel<typeof conferences>;
 
 export interface ConferenceWithRelations extends Conference {
-  games: Array<GameWithRelations> | null | undefined;
-  streams: Array<Stream> | null | undefined;
+	games: Array<GameWithRelations> | null | undefined;
+	streams: Array<Stream> | null | undefined;
 }

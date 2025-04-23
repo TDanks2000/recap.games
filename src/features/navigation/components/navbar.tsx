@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import LogoLink from "./links/logo";
 import NavBarSearch from "./search";
 
@@ -40,7 +41,9 @@ const NavigationBar = () => {
 
       <div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4">
         <div>
-          <NavBarSearch />
+          <Suspense fallback={null}>
+            <NavBarSearch />
+          </Suspense>
         </div>
 
         <ModeToggle />

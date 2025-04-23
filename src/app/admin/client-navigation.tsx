@@ -5,29 +5,29 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type NavItem = {
-  name: string;
-  href: string;
+	name: string;
+	href: string;
 };
 
 interface ClientNavigationProps {
-  navItems: NavItem[];
+	navItems: NavItem[];
 }
 
 export function ClientNavigation({ navItems }: ClientNavigationProps) {
-  const pathname = usePathname();
+	const pathname = usePathname();
 
-  return (
-    <>
-      {navItems.map((item) => (
-        <Link key={item.href} href={item.href}>
-          <Button
-            variant={pathname === item.href ? "default" : "ghost"}
-            className="w-full justify-start"
-          >
-            {item.name}
-          </Button>
-        </Link>
-      ))}
-    </>
-  );
+	return (
+		<>
+			{navItems.map((item) => (
+				<Link key={item.href} href={item.href}>
+					<Button
+						variant={pathname === item.href ? "default" : "ghost"}
+						className="w-full justify-start"
+					>
+						{item.name}
+					</Button>
+				</Link>
+			))}
+		</>
+	);
 }

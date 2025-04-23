@@ -6,11 +6,11 @@ import bcrypt from "bcryptjs";
  * @returns The hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  // Generate a salt with cost factor 12 (recommended)
-  const salt = await bcrypt.genSalt(12);
+	// Generate a salt with cost factor 12 (recommended)
+	const salt = await bcrypt.genSalt(12);
 
-  // Hash the password with the generated salt
-  return bcrypt.hash(password, salt);
+	// Hash the password with the generated salt
+	return bcrypt.hash(password, salt);
 }
 
 /**
@@ -20,8 +20,8 @@ export async function hashPassword(password: string): Promise<string> {
  * @returns True if passwords match, false otherwise
  */
 export async function verifyPassword(
-  plainPassword: string,
-  hashedPassword: string
+	plainPassword: string,
+	hashedPassword: string,
 ): Promise<boolean> {
-  return bcrypt.compare(plainPassword, hashedPassword);
+	return bcrypt.compare(plainPassword, hashedPassword);
 }

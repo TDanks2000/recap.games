@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 
 const NavBarSearch = () => {
   const [open, setOpen] = useState(false);
@@ -63,20 +63,22 @@ const NavBarSearch = () => {
         </Button>
 
         {/* Search Input (Expands to the left) */}
-        <Input
-          ref={inputRef}
-          defaultValue={searchParams.get("search") ?? ""}
-          onChange={handleChange}
-          type="text"
-          placeholder="Search Games or Conferences"
-          aria-label="Search Games or Conferences"
-          onBlur={handleBlur}
-          onFocus={() => setOpen(true)}
-          className={cn(
-            "absolute right-0 rounded-md border border-border py-2 pr-[3.25rem] pl-4 transition-all duration-300 ease-in-out",
-            open ? "w-72 opacity-100" : "pointer-events-none w-0 opacity-0"
-          )}
-        />
+        <Suspense fallback={null}>
+          <Input
+            ref={inputRef}
+            defaultValue={searchParams.get("search") ?? ""}
+            onChange={handleChange}
+            type="text"
+            placeholder="Search Games or Conferences"
+            aria-label="Search Games or Conferences"
+            onBlur={handleBlur}
+            onFocus={() => setOpen(true)}
+            className={cn(
+              "absolute right-0 rounded-md border border-border py-2 pr-[3.25rem] pl-4 transition-all duration-300 ease-in-out",
+              open ? "w-72 opacity-100" : "pointer-events-none w-0 opacity-0"
+            )}
+          />
+        </Suspense>
       </div>
     </div>
   );
