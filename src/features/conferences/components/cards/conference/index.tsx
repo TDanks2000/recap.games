@@ -5,11 +5,12 @@ import DateTimeDetails from "./DateTimeDetails";
 
 interface ConferenceCardProps extends InferSelectModel<typeof conferences> {
   games?: Array<InferSelectModel<typeof games>> | null;
-  steams?: Array<InferSelectModel<typeof streams>> | null;
+  streams?: Array<InferSelectModel<typeof streams>> | null;
 }
 
 const ConferenceCard = (conference: ConferenceCardProps) => {
-  const stream = conference?.steams?.[0];
+  const stream = conference?.streams?.[0];
+
   return (
     <a
       href={stream?.link}
