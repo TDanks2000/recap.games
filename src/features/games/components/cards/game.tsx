@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -29,8 +31,17 @@ const GameCard = ({
   const image =
     media?.find((media) => media.type === MediaType.Image) ?? media?.[0];
 
+  const trailer = media?.find((media) => media.type === MediaType.Video);
+
   return (
-    <Card className="group w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]">
+    <Card
+      className="group w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]"
+      onClick={() => {
+        if (trailer) {
+          window.open(trailer?.link, "_blank");
+        }
+      }}
+    >
       <CardContent className="relative w-full p-0">
         {/* Badge in top-right corner */}
         {!!features?.length && (
