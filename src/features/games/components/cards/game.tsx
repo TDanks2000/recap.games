@@ -83,7 +83,7 @@ const GameCard = ({
           </CardTitle>
           {/* Release date */}
           <CardDescription className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm">
-            {releaseDate ? format(new Date(releaseDate ?? ""), "PPP") : "TBA"}
+            {releaseDate ? format(releaseDate, "PPP") : "TBA"}
           </CardDescription>
         </CardFooter>
       </a>
