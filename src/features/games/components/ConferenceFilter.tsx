@@ -25,7 +25,7 @@ export default function ConferenceFilter({
   return (
     <Select
       disabled={isErrored}
-      value={selectedConferences[selectedConferences.length - 1]?.toString()}
+      value={selectedConferences[selectedConferences?.length - 1]?.toString()}
       onValueChange={(value) => {
         const conferenceId = Number(value);
         const newConferences = selectedConferences.includes(conferenceId)

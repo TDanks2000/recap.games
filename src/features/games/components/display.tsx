@@ -21,7 +21,7 @@ const GamesDisplay = (options: GamesDisplayProps) => {
 
   const filteredGames = games?.filter(
     (game) =>
-      selectedConferences.length === 0 ||
+      selectedConferences?.length === 0 ||
       (game.conferenceId && selectedConferences.includes(game.conferenceId))
   );
 
@@ -39,7 +39,7 @@ const GamesDisplay = (options: GamesDisplayProps) => {
           selectedConferences={selectedConferences}
           onConferenceChange={(conferenceIds) => {
             const params = new URLSearchParams(searchParams);
-            if (conferenceIds.length > 0) {
+            if (conferenceIds?.length > 0) {
               params.set("conferences", conferenceIds.join(","));
             } else {
               params.delete("conferences");
@@ -65,7 +65,7 @@ const GamesDisplay = (options: GamesDisplayProps) => {
                 <div className="space-y-1">
                   <h3 className="font-semibold text-xl">No Games Found</h3>
                   <p className="text-sm text-muted-foreground">
-                    {selectedConferences.length > 0
+                    {selectedConferences?.length > 0
                       ? "Try adjusting your conference filter"
                       : "Check back later for new games"}
                   </p>

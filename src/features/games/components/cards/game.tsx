@@ -59,7 +59,7 @@ const GameCard = ({
               className={cn(
                 "aspect-video w-full transform object-cover transition-transform duration-500 group-hover:scale-110",
                 {
-                  "object-contain": !image?.link.length,
+                  "object-contain": !image?.link?.length,
                 }
               )}
             />
