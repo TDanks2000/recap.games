@@ -8,7 +8,7 @@ import {
   CardFooter,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, getImageFromURL } from "@/lib/utils";
 import type { InferSelectModel } from "drizzle-orm";
 import Image from "next/image";
 
@@ -27,8 +27,14 @@ const GameCard = ({
   releaseDate,
   title,
 }: GameCardProps) => {
-  const image =
+  const findMedia =
     media?.find((media) => media.type === MediaType.Image) ?? media?.[0];
+
+  const image = !media
+    ? ""
+    : findMedia?.type === MediaType.Image
+    ? findMedia.link
+    : getImageFromURL(findMedia?.link);
 
   const trailer = media?.find((media) => media.type === MediaType.Video);
 
@@ -51,14 +57,14 @@ const GameCard = ({
           {/* Game image */}
           <div className="relative overflow-hidden">
             <Image
-              src={image?.link ?? "/icon.png"}
+              src={image ?? "/icon.png"}
               alt={title ?? "Game"}
               width={300}
               height={160}
               className={cn(
                 "aspect-video w-full transform object-cover transition-transform duration-500 group-hover:scale-110",
                 {
-                  "object-contain": !image?.link?.length,
+                  "object-contain": !image?.length,
                 }
               )}
             />
