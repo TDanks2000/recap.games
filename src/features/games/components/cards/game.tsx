@@ -11,6 +11,7 @@ import {
 import { cn, getImageFromURL } from "@/lib/utils";
 import type { InferSelectModel } from "drizzle-orm";
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
 import { MediaType } from "@/@types";
 import type { conferences, games, media } from "@/server/db/schema";
@@ -20,30 +21,46 @@ interface GameCardProps extends InferSelectModel<typeof games> {
   media: Array<InferSelectModel<typeof media>>;
 }
 
-const GameCard = ({
+export default function GameCard({
   features,
   conference,
   media,
   releaseDate,
   title,
-}: GameCardProps) => {
-  const findMedia =
-    media?.find((media) => media.type === MediaType.Image) ?? media?.[0];
+}: GameCardProps) {
+  const selectedMedia = useMemo(() => media?.[0] ?? null, [media]);
 
-  const image = !media
-    ? ""
-    : findMedia?.type === MediaType.Image
-    ? findMedia.link
-    : getImageFromURL(findMedia?.link);
+  const [src, setSrc] = useState<string>(() => {
+    if (!selectedMedia) return "/icon.png";
+    if (selectedMedia.type === MediaType.Image) return selectedMedia.link;
+    return getImageFromURL(selectedMedia.link) ?? "/icon.png";
+  });
 
-  const trailer = media?.find((media) => media.type === MediaType.Video);
+  useEffect(() => {
+    if (!selectedMedia) {
+      setSrc("/icon.png");
+    } else if (selectedMedia.type === MediaType.Image) {
+      setSrc(selectedMedia.link);
+    } else {
+      setSrc(getImageFromURL(selectedMedia.link) ?? "/icon.png");
+    }
+  }, [selectedMedia]);
+
+  const trailerLink = useMemo(
+    () => media.find((m) => m.type === MediaType.Video)?.link,
+    [media]
+  );
 
   return (
-    <Card className="group w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]">
-      <a href={trailer?.link} target="_blank">
-        <CardContent className="relative w-full p-0">
-          {/* Badge in top-right corner */}
-          {!!features?.length && (
+    <Card
+      className={cn(
+        "group w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]",
+        { "pointer-events-none": !trailerLink }
+      )}
+    >
+      <a href={trailerLink ?? "#"} target="_blank" rel="noopener noreferrer">
+        <CardContent className="relative p-0">
+          {features?.length > 0 && (
             <div className="absolute top-2 right-2 z-10">
               <Badge
                 variant="secondary"
@@ -54,46 +71,37 @@ const GameCard = ({
             </div>
           )}
 
-          {/* Game image */}
           <div className="relative overflow-hidden">
             <Image
-              src={image ?? "/icon.png"}
-              alt={title ?? "Game"}
+              src={src}
+              alt={title || "Game"}
               width={300}
               height={160}
+              onError={() => setSrc("/icon.png")}
               className={cn(
                 "aspect-video w-full transform object-cover transition-transform duration-500 group-hover:scale-110",
-                {
-                  "object-contain": !image?.length,
-                }
+                { "object-contain": src === "/icon.png" }
               )}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
           </div>
-        </CardContent>
 
-        <CardFooter className="flex flex-col items-start gap-1.5 p-4">
-          {/* Event badge */}
-          <div className="flex flex-wrap gap-1.5">
+          <CardFooter className="flex flex-col items-start gap-1.5 p-4">
             <Badge
               variant="secondary"
               className="max-w-full truncate bg-primary/10 text-primary transition-colors hover:bg-primary/20"
             >
               {conference?.name ?? "Upcoming"}
             </Badge>
-          </div>
-          {/* Game title */}
-          <CardTitle className="line-clamp-2 font-semibold text-sm leading-tight tracking-tight transition-colors group-hover:text-primary sm:text-base">
-            {title ?? "??"}
-          </CardTitle>
-          {/* Release date */}
-          <CardDescription className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm">
-            {releaseDate?.toString()}
-          </CardDescription>
-        </CardFooter>
+            <CardTitle className="line-clamp-2 font-semibold text-sm leading-tight tracking-tight transition-colors group-hover:text-primary sm:text-base">
+              {title ?? "Untitled"}
+            </CardTitle>
+            <CardDescription className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm">
+              {releaseDate?.toString()}
+            </CardDescription>
+          </CardFooter>
+        </CardContent>
       </a>
     </Card>
   );
-};
-
-export default GameCard;
+}
