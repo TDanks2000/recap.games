@@ -69,6 +69,16 @@ const GamesDisplay = (options: GamesDisplayProps) => {
                       ? "Try adjusting your conference filter"
                       : "Check back later for new games"}
                   </p>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    Are you looking for last year's games?{" "}
+                    <a
+                      href="https://old.recap.games/"
+                      className="text-primary underline"
+                      target="_blank"
+                    >
+                      Visit the old recap website
+                    </a>
+                  </p>
                 </div>
               </div>
             )}
