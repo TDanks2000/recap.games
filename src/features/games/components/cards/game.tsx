@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
 import type { InferSelectModel } from "drizzle-orm";
 import Image from "next/image";
 
@@ -83,7 +82,7 @@ const GameCard = ({
           </CardTitle>
           {/* Release date */}
           <CardDescription className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm">
-            {releaseDate ? format(releaseDate, "PPP") : "TBA"}
+            {releaseDate?.toString()}
           </CardDescription>
         </CardFooter>
       </a>
