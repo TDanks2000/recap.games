@@ -142,17 +142,21 @@ export const conferenceRouter = createTRPCRouter({
         if (statusA === "upcoming") {
           const timeA = a.startTime
             ? new Date(a.startTime).getTime()
-            : Infinity;
+            : Number.POSITIVE_INFINITY;
           const timeB = b.startTime
             ? new Date(b.startTime).getTime()
-            : Infinity;
+            : Number.POSITIVE_INFINITY;
           return timeA - timeB;
         }
 
         // For ongoing events, prioritize those ending sooner
         if (statusA === "ongoing") {
-          const timeA = a.endTime ? new Date(a.endTime).getTime() : Infinity;
-          const timeB = b.endTime ? new Date(b.endTime).getTime() : Infinity;
+          const timeA = a.endTime
+            ? new Date(a.endTime).getTime()
+            : Number.POSITIVE_INFINITY;
+          const timeB = b.endTime
+            ? new Date(b.endTime).getTime()
+            : Number.POSITIVE_INFINITY;
           return timeA - timeB;
         }
 
@@ -162,12 +166,12 @@ export const conferenceRouter = createTRPCRouter({
             ? new Date(a.endTime).getTime()
             : a.startTime
             ? new Date(a.startTime).getTime()
-            : -Infinity;
+            : -Number.POSITIVE_INFINITY;
           const timeB = b.endTime
             ? new Date(b.endTime).getTime()
             : b.startTime
             ? new Date(b.startTime).getTime()
-            : -Infinity;
+            : -Number.POSITIVE_INFINITY;
           return timeB - timeA;
         }
 
