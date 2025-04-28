@@ -56,10 +56,10 @@ export const faqItems: FaqItem[] = [
     answer: (
       <p>
         Every announcement on recap.games includes a label indicating which
-        event it was revealed at—like Ubisoft forward, xbox games showcase, you
-        can also see the conferences and clicking one will take you to the
-        stream, along with you showing you the time it starts and an esitamte
-        from previous years of the end time
+        event it was revealed at—like Ubisoft Forward, Xbox Games Showcase, and
+        more. You can also click on the event name to go directly to the stream,
+        with the start time and an estimate of the end time based on previous
+        years' events.
       </p>
     ),
   },
@@ -69,7 +69,7 @@ export const faqItems: FaqItem[] = [
     answer: (
       <p>
         recap.games is a solo project, built and maintained by one person who’s
-        been following game showcases since the start of e3
+        been following game showcases since the start of E3.
       </p>
     ),
   },
@@ -137,6 +137,29 @@ export const faqItems: FaqItem[] = [
           Whether you missed an event or just want to rewatch the latest
           reveals, recap.games makes it easy to catch up on all the trailers you
           care about.
+        </p>
+      </div>
+    ),
+  },
+  {
+    id: "where-are-the-old-games",
+    question: "Where are all the old games?",
+    answer: (
+      <div className="space-y-2">
+        <p>
+          The games showcased prior to 2025 are available at{" "}
+          <a
+            href="https://old.recap.games"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline"
+          >
+            old.recap.games
+          </a>
+          . This new version of recap.games will only feature games from 2025
+          and beyond, as we focus on bringing you the most up-to-date
+          announcements, trailers, and gameplay from the latest showcases and
+          events.
         </p>
       </div>
     ),
