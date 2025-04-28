@@ -64,7 +64,7 @@ export default function GameCard({
             <div className="absolute top-2 right-2 z-10">
               <Badge
                 variant="secondary"
-                className="max-w-full truncate capitalize bg-black/50 backdrop-blur-sm transition-colors group-hover:bg-black/70"
+                className="max-w-full truncate bg-black/50 capitalize backdrop-blur-sm transition-colors group-hover:bg-black/70"
               >
                 {features[0]}
               </Badge>

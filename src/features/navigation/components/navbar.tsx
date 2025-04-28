@@ -18,7 +18,11 @@ const NavigationBar = () => {
     <header className="flex h-16 items-center gap-4 border-b bg-muted/40 px-4 md:px-6">
       <nav className="hidden flex-col gap-6 font-medium text-lg md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
         <LogoLink />
-        <div className="flex gap-4 lg:gap-6" />
+        <div className="flex gap-4 lg:gap-6">
+          <a href="/faq" className="transform-all hover:text-primary">
+            FAQ
+          </a>
+        </div>
       </nav>
 
       <Sheet>
@@ -35,6 +39,9 @@ const NavigationBar = () => {
         <SheetContent side="left" className="p-4">
           <nav className="grid gap-6 font-medium text-lg">
             <LogoLink />
+            <a href="/faq" className="transition-all hover:text-primary">
+              FAQ
+            </a>
           </nav>
         </SheetContent>
       </Sheet>

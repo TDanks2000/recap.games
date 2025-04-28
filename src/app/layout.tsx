@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 
-import type { Metadata, Viewport } from "next";
+import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
@@ -8,18 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
 import { TRPCReactProvider } from "@/trpc/react";
 
-// Define your canonical base URL here
 const BASE_URL = new URL("https://recap.games");
-
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  minimumScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
-  ],
-};
 
 export const metadata: Metadata = {
   metadataBase: BASE_URL,
@@ -28,16 +17,18 @@ export const metadata: Metadata = {
     template: "%s | Games Recapped",
   },
   description:
-    "Discover the ultimate roundup of Summer Game Fest and beyond, featuring trailers, demos, gameplay highlights, and livestreams. Stay ahead in the gaming universe with our comprehensive recap, bringing you the latest updates, insights, and reveals from the gaming industry's hottest events.",
+    "Explore the latest game trailers, gameplay demos, and exclusive reveals from Summer Game Fest and other major events. Stay updated with all the exciting video content from the gaming world in one place.",
   keywords: [
-    "summer game fest",
-    "gaming",
-    "trailers",
-    "demos",
+    "game trailers",
+    "gaming trailers",
+    "game announcements",
     "gameplay",
-    "livestreams",
-    "announcements",
+    "game reveals",
+    "Summer Game Fest trailers",
+    "gaming events",
+    "new game trailers",
     "gaming industry",
+    "trailers roundup",
   ],
   authors: [{ name: "Tommy Danks" }],
   creator: "Tommy Danks",
@@ -52,7 +43,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // Icons & Manifest
   icons: {
     icon: favicon(),
     shortcut: "/favicon.ico",
@@ -63,25 +53,25 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: BASE_URL.toString(),
-    title: "Games Recapped",
+    title: "Game Trailers Recapped",
     description:
-      "Discover trailers, demos, gameplay highlights, livestreams, and exclusive announcements from Summer Game Fest and beyond.",
-    siteName: "Games Recapped",
+      "Explore the latest trailers, gameplay demos, and exclusive announcements from Summer Game Fest and beyond.",
+    siteName: "Game Trailers Recapped",
     images: [
       {
         url: "/social-large.webp",
         width: 1200,
         height: 630,
-        alt: "Games Recapped Social Image",
+        alt: "Game Trailers Recapped Social Image",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Games Recap - Your Source for Gaming News",
+    title: "Game Trailers Recapped - Your Source for Gaming Trailers",
     description:
-      "Stay ahead in the gaming universe with trailers, demos, gameplay highlights, livestreams, and exclusive announcements.",
-    creator: "@YourTwitterHandle",
+      "Stay updated with the latest trailers, gameplay demos, and gaming news. Discover the hottest new game trailers from major events.",
+    creator: "@gamesrecapped",
     images: ["/social-large.webp"],
   },
 };
@@ -112,7 +102,7 @@ export default function RootLayout({
             url: BASE_URL.toString(),
             potentialAction: {
               "@type": "SearchAction",
-              target: `${BASE_URL.toString()}/search?query={search_term_string}`,
+              target: `${BASE_URL.toString()}/?search={search_term_string}`,
               "query-input": "required name=search_term_string",
             },
           })}
