@@ -127,9 +127,10 @@ export const conferenceRouter = createTRPCRouter({
         const statusA = getConferenceStatus(a);
         const statusB = getConferenceStatus(b);
 
+        // First, group by status priority
         const statusPriority = {
-          ongoing: 0,
-          upcoming: 1,
+          upcoming: 0,
+          ongoing: 1,
           ended: 2,
           unknown: 3,
         };
@@ -137,7 +138,8 @@ export const conferenceRouter = createTRPCRouter({
           return statusPriority[statusA] - statusPriority[statusB];
         }
 
-        if (statusA === "ongoing" || statusA === "upcoming") {
+        // For upcoming events, sort by start time
+        if (statusA === "upcoming") {
           const timeA = a.startTime
             ? new Date(a.startTime).getTime()
             : Infinity;
@@ -147,6 +149,14 @@ export const conferenceRouter = createTRPCRouter({
           return timeA - timeB;
         }
 
+        // For ongoing events, prioritize those ending sooner
+        if (statusA === "ongoing") {
+          const timeA = a.endTime ? new Date(a.endTime).getTime() : Infinity;
+          const timeB = b.endTime ? new Date(b.endTime).getTime() : Infinity;
+          return timeA - timeB;
+        }
+
+        // For ended events, most recent first
         if (statusA === "ended") {
           const timeA = a.endTime
             ? new Date(a.endTime).getTime()
@@ -158,7 +168,7 @@ export const conferenceRouter = createTRPCRouter({
             : b.startTime
             ? new Date(b.startTime).getTime()
             : -Infinity;
-          return timeB - timeA; // Most recently ended first
+          return timeB - timeA;
         }
 
         // For unknown status, sort by name
