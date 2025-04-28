@@ -164,4 +164,21 @@ export const faqItems: FaqItem[] = [
       </div>
     ),
   },
+  {
+    id: "why-are-there-ads-on-recap-games",
+    question: "Why are there ads on recap.games?",
+    answer: (
+      <div className="space-y-2">
+        <p>
+          recap.games is a free service, and ads help keep it running. As server
+          costs continue to rise, ads are essential for covering hosting,
+          development, and content updates.
+        </p>
+        <p>
+          We strive to keep ads non-intrusive, and your support through viewing
+          them allows us to keep the site running smoothly and affordably.
+        </p>
+      </div>
+    ),
+  },
 ];
