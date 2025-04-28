@@ -110,29 +110,59 @@ export const conferenceRouter = createTRPCRouter({
 
       const now = new Date();
       const sortedConferences = allConferences.sort((a, b) => {
-        const endTimeA = a.endTime ? new Date(a.endTime) : null;
-        const endTimeB = b.endTime ? new Date(b.endTime) : null;
-        const startTimeA = a.startTime ? new Date(a.startTime) : null;
-        const startTimeB = b.startTime ? new Date(b.startTime) : null;
+        // Helper function to determine conference status
+        const getConferenceStatus = (conf: typeof a) => {
+          const endTime = conf.endTime ? new Date(conf.endTime) : null;
+          const startTime = conf.startTime ? new Date(conf.startTime) : null;
 
-        const hasEndedA = endTimeA
-          ? endTimeA < now
-          : startTimeA && startTimeA < now;
-        const hasEndedB = endTimeB
-          ? endTimeB < now
-          : startTimeB && startTimeB < now;
+          if (endTime && endTime < now) return "ended";
+          if (startTime) {
+            if (startTime > now) return "upcoming";
+            if (!endTime || endTime > now) return "ongoing";
+            return "ended";
+          }
+          return "unknown";
+        };
 
-        if (hasEndedA === hasEndedB) {
-          if (endTimeA && endTimeB) {
-            return endTimeA.getTime() - endTimeB.getTime();
-          }
-          if (startTimeA && startTimeB) {
-            return startTimeA.getTime() - startTimeB.getTime();
-          }
-          return 0;
+        const statusA = getConferenceStatus(a);
+        const statusB = getConferenceStatus(b);
+
+        const statusPriority = {
+          ongoing: 0,
+          upcoming: 1,
+          ended: 2,
+          unknown: 3,
+        };
+        if (statusPriority[statusA] !== statusPriority[statusB]) {
+          return statusPriority[statusA] - statusPriority[statusB];
         }
 
-        return hasEndedA ? 1 : -1;
+        if (statusA === "ongoing" || statusA === "upcoming") {
+          const timeA = a.startTime
+            ? new Date(a.startTime).getTime()
+            : Infinity;
+          const timeB = b.startTime
+            ? new Date(b.startTime).getTime()
+            : Infinity;
+          return timeA - timeB;
+        }
+
+        if (statusA === "ended") {
+          const timeA = a.endTime
+            ? new Date(a.endTime).getTime()
+            : a.startTime
+            ? new Date(a.startTime).getTime()
+            : -Infinity;
+          const timeB = b.endTime
+            ? new Date(b.endTime).getTime()
+            : b.startTime
+            ? new Date(b.startTime).getTime()
+            : -Infinity;
+          return timeB - timeA; // Most recently ended first
+        }
+
+        // For unknown status, sort by name
+        return a.name.localeCompare(b.name);
       });
 
       return sortedConferences;
