@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
 import { TRPCReactProvider } from "@/trpc/react";
+import Script from "next/script";
 
 const BASE_URL = new URL("https://recap.games");
 
@@ -87,6 +88,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
       <head>
+        <Script
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6066620838335611"
+          crossOrigin="anonymous"
+        />
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
