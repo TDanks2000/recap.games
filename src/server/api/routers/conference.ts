@@ -106,9 +106,26 @@ export const conferenceRouter = createTRPCRouter({
           games: withGames,
           streams: withStreams,
         },
-        orderBy: conferences.startTime,
       });
 
-      return allConferences;
+      const now = new Date();
+      const sortedConferences = allConferences.sort((a, b) => {
+        const startTimeA = a.startTime ? new Date(a.startTime) : null;
+        const startTimeB = b.startTime ? new Date(b.startTime) : null;
+
+        const hasEndedA = startTimeA ? startTimeA < now : true;
+        const hasEndedB = startTimeB ? startTimeB < now : true;
+
+        if (hasEndedA === hasEndedB) {
+          if (startTimeA && startTimeB) {
+            return startTimeA.getTime() - startTimeB.getTime();
+          }
+          return 0;
+        }
+
+        return hasEndedA ? 1 : -1;
+      });
+
+      return sortedConferences;
     }),
 });
