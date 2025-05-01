@@ -8,10 +8,10 @@ import { combinedRouter } from "./routers/combined";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  game: gameRouter,
-  stream: streamRouter,
-  conference: conferenceRouter,
-  combined: combinedRouter,
+	game: gameRouter,
+	stream: streamRouter,
+	conference: conferenceRouter,
+	combined: combinedRouter,
 });
 
 // export type definition of API
