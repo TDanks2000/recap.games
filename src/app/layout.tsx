@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
 import { TRPCReactProvider } from "@/trpc/react";
 import Script from "next/script";
+import Footer from "@/components/footer";
 
 const BASE_URL = new URL("https://recap.games");
 
@@ -127,6 +128,7 @@ export default function RootLayout({
 						<TooltipProvider>
 							<NavigationBar />
 							{children}
+							<Footer />
 						</TooltipProvider>
 					</ThemeProvider>
 				</TRPCReactProvider>
