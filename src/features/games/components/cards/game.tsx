@@ -12,6 +12,7 @@ import { cn, getImageFromURL } from "@/lib/utils";
 import type { InferSelectModel } from "drizzle-orm";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
+import { format, isValid } from "date-fns";
 
 import { MediaType } from "@/@types";
 import type { conferences, games, media } from "@/server/db/schema";
@@ -29,7 +30,7 @@ export default function GameCard({
 	title,
 }: GameCardProps) {
 	const selectedMedia = useMemo(() => media?.[0] ?? null, [media]);
-
+	const [isLoading, setIsLoading] = useState(true);
 	const [src, setSrc] = useState<string>(() => {
 		if (!selectedMedia) return "/icon.png";
 		if (selectedMedia.type === MediaType.Image) return selectedMedia.link;
@@ -54,17 +55,24 @@ export default function GameCard({
 	return (
 		<Card
 			className={cn(
-				"group w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]",
-				{ "pointer-events-none": !trailerLink },
+				"group hover:-translate-y-1 relative w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]",
+				{ "pointer-events-none opacity-60": !trailerLink },
 			)}
+			aria-label={`Game card for ${title ?? "Untitled Game"}`}
 		>
-			<a href={trailerLink ?? "#"} target="_blank" rel="noopener noreferrer">
+			<a
+				href={trailerLink ?? "#"}
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label={`Watch trailer for ${title ?? "Untitled Game"}`}
+				className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+			>
 				<CardContent className="relative p-0">
 					{features?.length > 0 && (
 						<div className="absolute top-2 right-2 z-10">
 							<Badge
 								variant="secondary"
-								className="max-w-full truncate bg-black/50 capitalize backdrop-blur-sm transition-colors group-hover:bg-black/70"
+								className="max-w-full truncate bg-black/50 capitalize backdrop-blur-sm transition-all duration-300 group-hover:bg-black/70 group-hover:shadow-lg"
 							>
 								{features[0]}
 							</Badge>
@@ -72,33 +80,53 @@ export default function GameCard({
 					)}
 
 					<div className="relative overflow-hidden">
+						<div
+							className={cn(
+								"absolute inset-0 z-10 flex items-center justify-center bg-muted/10 backdrop-blur-[2px] transition-opacity duration-300",
+								{ "opacity-0": !isLoading },
+							)}
+						>
+							<div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+						</div>
 						<Image
 							src={src}
 							alt={title || "Game"}
 							width={300}
 							height={160}
 							onError={() => setSrc("/icon.png")}
+							onLoad={() => setIsLoading(false)}
 							className={cn(
-								"aspect-video w-full transform object-cover transition-transform duration-500 group-hover:scale-110",
+								"aspect-video w-full transform object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110",
 								{ "object-contain": src === "/icon.png" },
 							)}
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+						<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 					</div>
 
-					<CardFooter className="flex flex-col items-start gap-1.5 p-4">
+					<CardFooter className="flex flex-col items-start gap-2 p-4">
 						<Badge
 							variant="secondary"
-							className="max-w-full truncate bg-primary/10 text-primary transition-colors hover:bg-primary/20"
+							className="max-w-full truncate bg-primary/10 text-primary transition-all duration-300 hover:bg-primary/20 hover:shadow-md"
 						>
 							{conference?.name ?? "Upcoming"}
 						</Badge>
-						<CardTitle className="line-clamp-2 font-semibold text-sm leading-tight tracking-tight transition-colors group-hover:text-primary sm:text-base">
+
+						<CardDescription
+							className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm"
+							title={releaseDate?.toString()}
+						>
+							{releaseDate
+								? isValid(new Date(releaseDate))
+									? format(new Date(releaseDate), "MMMM do, yyyy")
+									: releaseDate.toString()
+								: "TBA"}
+						</CardDescription>
+						<CardTitle
+							className="line-clamp-2 font-semibold text-sm leading-tight transition-all duration-300 group-hover:text-primary sm:text-base"
+							title={title ?? "Untitled"}
+						>
 							{title ?? "Untitled"}
 						</CardTitle>
-						<CardDescription className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm">
-							{releaseDate?.toString()}
-						</CardDescription>
 					</CardFooter>
 				</CardContent>
 			</a>
