@@ -272,7 +272,7 @@ export default function EditGamePage() {
 														<Input placeholder="Release date" {...field} />
 													</FormControl>
 													<FormDescription>
-														Format: YYYY-MM-DD or text like "Q4 2023"
+														Format: MM-DD-YYYY or text like "Q4 2023"
 													</FormDescription>
 													<FormMessage />
 												</FormItem>
