@@ -1,5 +1,5 @@
 import { games } from "@/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
@@ -157,7 +157,7 @@ export const gameRouter = createTRPCRouter({
 					media: true,
 					conference: true,
 				},
-				orderBy: games.title,
+				orderBy: desc(games.createdAt),
 			});
 
 			return allGames;
