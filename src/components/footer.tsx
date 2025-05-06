@@ -1,75 +1,112 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { FaTwitter, FaEnvelope } from "react-icons/fa";
+import { SiBluesky } from "react-icons/si";
 
-// ShadCN UI imports
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+const SOCIAL_LINKS = [
+	{
+		href: "https://twitter.com/gamesrecapped",
+		label: "Twitter",
+		icon: FaTwitter,
+	},
+	{
+		href: "https://bsky.app/profile/gamesrecapped.bsky.social",
+		label: "Bluesky",
+		icon: SiBluesky,
+	},
+];
 
-// Lucide icons
-import { Twitter } from "lucide-react";
+const QUICK_LINKS = [
+	{ href: "/faq", label: "FAQ" },
+	{ href: "/privacy-policy", label: "Privacy Policy" },
+];
 
 export default function Footer() {
+	const pathname = usePathname().toLowerCase();
+
+	if (pathname.startsWith("/admin")) return null;
+
+	const year = new Date().getFullYear();
+
 	return (
-		<footer className="bg-gray-900 py-10 text-gray-300">
+		<footer
+			className="mt-10 border-t bg-muted/40 py-10"
+			aria-labelledby="footer-heading"
+		>
+			<h2 id="footer-heading" className="sr-only">
+				Site Footer
+			</h2>
+
 			<div className="container mx-auto grid grid-cols-1 gap-8 px-4 md:grid-cols-3">
 				{/* Logo & Description */}
-				<div className="flex flex-col items-start space-y-4">
+				<div className="flex flex-col space-y-4">
 					<Link href="/" className="inline-flex items-center">
 						<Image
 							src="/icon.png"
-							alt="Logo"
+							alt="Recap Games logo"
 							width={40}
 							height={40}
 							className="mr-2"
 						/>
-						<span className="font-bold text-white text-xl tracking-tight">
-							YourCompany
+						<span className="font-bold text-xl tracking-tight">
+							Recap Games
 						</span>
 					</Link>
-					<p className="text-sm">
-						Building modern experiences with the best tools.
+					<p className="text-muted-foreground text-sm">
+						Your all-in-one hub for game announcements, trailers &
+						reveals—curated, concise, no filler.
 					</p>
-				</div>
-
-				{/* Navigation Links */}
-				<div className="flex flex-col space-y-2">
-					<h3 className="mb-2 font-semibold text-white">Quick Links</h3>
-					<Link href="/about" className="hover:text-white">
-						About Us
-					</Link>
-					<Link href="/blog" className="hover:text-white">
-						Blog
-					</Link>
-					<Link href="/contact" className="hover:text-white">
-						Contact
-					</Link>
-					<Link href="/privacy" className="hover:text-white">
-						Privacy Policy
-					</Link>
-				</div>
-
-				{/* Newsletter & Social */}
-				<div className="flex flex-col space-y-4">
-					<h3 className="font-semibold text-white">Stay Updated</h3>
-					<form className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-						<input
-							type="email"
-							placeholder="Enter your email"
-							className="flex-1 rounded-md bg-gray-800 px-4 py-2 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-						/>
-						<Button type="submit">Subscribe</Button>
-					</form>
-					<Separator />
-					<div className="flex space-x-4">
-						<Link href="https://twitter.com/yourprofile" aria-label="Twitter">
-							<Twitter className="h-6 w-6 transition-colors hover:text-white" />
-						</Link>
-						{/* Add more social icons from Lucide as needed */}
+					<div className="flex space-x-4" aria-label="Social links">
+						{SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
+							<Link
+								key={label}
+								href={href}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-muted-foreground transition-colors hover:text-primary"
+								aria-label={label}
+							>
+								<Icon className="h-5 w-5" />
+							</Link>
+						))}
 					</div>
 				</div>
+
+				{/* Quick Links */}
+				<nav className="flex flex-col space-y-2" aria-label="Quick links">
+					<h3 className="mb-2 font-semibold">Quick Links</h3>
+					{QUICK_LINKS.map(({ href, label }) => (
+						<Link
+							key={label}
+							href={href}
+							className="text-muted-foreground transition-colors hover:text-primary"
+						>
+							{label}
+						</Link>
+					))}
+				</nav>
+
+				{/* Contact */}
+				<div className="flex flex-col space-y-2">
+					<h3 className="mb-2 font-semibold">Contact Us</h3>
+					<Link
+						href="mailto:contact@recap.games"
+						className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-primary"
+					>
+						<FaEnvelope className="h-4 w-4" />
+						<span>contact@recap.games</span>
+					</Link>
+					<p className="text-muted-foreground text-sm">
+						Have questions or feedback? We’d love to hear from you!
+					</p>
+				</div>
 			</div>
-			<div className="mt-10 border-gray-700 border-t pt-6 text-center text-sm">
-				© {new Date().getFullYear()} YourCompany. All rights reserved.
+
+			<div className="mt-10 border-border border-t pt-6 text-center text-muted-foreground text-sm">
+				&copy; {year} Recap.Games. All rights reserved.
 			</div>
 		</footer>
 	);
