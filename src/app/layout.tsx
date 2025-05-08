@@ -127,7 +127,7 @@ export default function RootLayout({
 					>
 						<TooltipProvider>
 							<NavigationBar />
-							{children}
+							<main className="min-h-svh">{children}</main>
 							<Footer />
 						</TooltipProvider>
 					</ThemeProvider>

@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { conferenceRouter, gameRouter, streamRouter } from "./routers";
+import { blogRouter } from "./routers/blog";
 import { combinedRouter } from "./routers/combined";
 
 /**
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
 	stream: streamRouter,
 	conference: conferenceRouter,
 	combined: combinedRouter,
+	blog: blogRouter,
 });
 
 // export type definition of API

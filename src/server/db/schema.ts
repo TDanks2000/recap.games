@@ -93,8 +93,6 @@ export const verificationTokens = createTable(
 	(t) => [primaryKey({ columns: [t.identifier, t.token] })],
 );
 
-// Enums as unions
-
 // Game Table
 export const games = createTable("game", (d) => ({
 	id: d.integer().primaryKey({ autoIncrement: true }),
@@ -211,5 +209,66 @@ export const streamsRelations = relations(streams, ({ one }) => ({
 	conference: one(conferences, {
 		fields: [streams.conferenceId],
 		references: [conferences.id],
+	}),
+}));
+
+/**
+ * Blog Posts Table
+ * Stores blog entries written in Markdown and links them to a user.
+ */
+export const blogPosts = createTable("blog_post", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	title: d.text().notNull(),
+	slug: d.text().notNull().unique(),
+	// Markdown content of the post
+	content: d.text().notNull(),
+	// Author relationship
+	authorId: d
+		.text({ length: 255 })
+		.notNull()
+		.references(() => users.id),
+	published: d.integer({ mode: "boolean" }).default(false),
+	createdAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
+}));
+
+// Relation: each blog post has one author
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+	author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
+}));
+
+/**
+ * Optional: Blog Comments Table
+ * Allows users to comment on posts, also using Markdown.
+ */
+export const blogComments = createTable("blog_comment", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	postId: d
+		.integer()
+		.notNull()
+		.references(() => blogPosts.id),
+	authorId: d
+		.text({ length: 255 })
+		.notNull()
+		.references(() => users.id),
+	content: d.text().notNull(),
+	createdAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+}));
+
+// Relations for comments
+export const blogCommentsRelations = relations(blogComments, ({ one }) => ({
+	post: one(blogPosts, {
+		fields: [blogComments.postId],
+		references: [blogPosts.id],
+	}),
+	author: one(users, {
+		fields: [blogComments.authorId],
+		references: [users.id],
 	}),
 }));
