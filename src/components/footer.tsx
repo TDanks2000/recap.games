@@ -20,6 +20,7 @@ const SOCIAL_LINKS = [
 ];
 
 const QUICK_LINKS = [
+	{ href: "/blog", label: "Blog" },
 	{ href: "/faq", label: "FAQ" },
 	{ href: "/privacy-policy", label: "Privacy Policy" },
 ];
