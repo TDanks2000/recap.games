@@ -11,14 +11,14 @@ interface EditorProps {
 	initialContent?: string;
 	onContentChange?: (content: string) => void;
 	className?: string;
-  textAreaClassName?: string
+	textAreaClassName?: string;
 }
 
 export function Editor({
 	initialContent = "",
 	onContentChange,
 	className,
-  textAreaClassName
+	textAreaClassName,
 }: EditorProps) {
 	const [content, setContent] = useState(initialContent);
 	const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -61,7 +61,7 @@ export function Editor({
 				value={activeTab}
 				onValueChange={(val) => setActiveTab(val as "write" | "preview")}
 			>
-				<div className="flex items-center justify-between mt-4">
+				<div className="mt-4 flex items-center justify-between">
 					<TabsList>
 						<TabsTrigger value="write">Write</TabsTrigger>
 						<TabsTrigger value="preview">Preview</TabsTrigger>
@@ -71,13 +71,16 @@ export function Editor({
 
 				<TabsContent value="write" className="mt-4">
 					<Textarea
-            id="editor"
-            name="editor"
-            ref={textareaRef}
+						id="editor"
+						name="editor"
+						ref={textareaRef}
 						value={content}
 						onChange={handleChange}
 						placeholder="Write your blog post in markdown..."
-						className={cn("min-h-[500px] font-mono field-sizing-content resize-non", textAreaClassName)}
+						className={cn(
+							"field-sizing-content resize-non min-h-[500px] font-mono",
+							textAreaClassName,
+						)}
 					/>
 				</TabsContent>
 

@@ -14,7 +14,7 @@ export function MarkdownPreview({ content, className }: MarkdownPreviewProps) {
 	return (
 		<div
 			className={cn(
-				"prose max-w-none rounded-md border p-4 dark:prose-invert",
+				"prose dark:prose-invert max-w-none rounded-md border p-4",
 				className,
 			)}
 		>

@@ -1,13 +1,19 @@
 "use client";
 
+import { Menu } from "lucide-react";
+import Link from "next/link"; // Import Link from next/link
+import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { ModeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { Suspense } from "react";
 import LogoLink from "./links/logo";
 import NavBarSearch from "./search";
+
+const navLinks = [
+	{ href: "/faq", label: "FAQ" },
+	{ href: "/blog", label: "Blog" },
+];
 
 const NavigationBar = () => {
 	const pathname = usePathname().toLowerCase();
@@ -19,9 +25,15 @@ const NavigationBar = () => {
 			<nav className="hidden flex-col gap-6 font-medium text-lg md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
 				<LogoLink />
 				<div className="flex gap-4 lg:gap-6">
-					<a href="/faq" className="transform-all hover:text-primary">
-						FAQ
-					</a>
+					{navLinks.map((link) => (
+						<Link
+							key={link.href}
+							href={link.href}
+							className="transform-all hover:text-primary"
+						>
+							{link.label}
+						</Link>
+					))}
 				</div>
 			</nav>
 
@@ -39,9 +51,15 @@ const NavigationBar = () => {
 				<SheetContent side="left" className="p-4">
 					<nav className="grid gap-6 font-medium text-lg">
 						<LogoLink />
-						<a href="/faq" className="transition-all hover:text-primary">
-							FAQ
-						</a>
+						{navLinks.map((link) => (
+							<Link
+								key={link.href}
+								href={link.href}
+								className="transition-all hover:text-primary"
+							>
+								{link.label}
+							</Link>
+						))}
 					</nav>
 				</SheetContent>
 			</Sheet>

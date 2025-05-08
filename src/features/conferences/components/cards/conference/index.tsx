@@ -1,5 +1,5 @@
-import type { conferences, games, streams } from "@/server/db/schema";
 import type { InferSelectModel } from "drizzle-orm";
+import type { conferences, games, streams } from "@/server/db/schema";
 import CardHeader from "./CardHeader";
 import DateTimeDetails from "./DateTimeDetails";
 

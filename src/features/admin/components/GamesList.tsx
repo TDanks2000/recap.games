@@ -1,5 +1,8 @@
 "use client";
 
+import { Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -14,9 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
-import { Edit, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
 
 export default function GamesList() {
 	const utils = api.useUtils();

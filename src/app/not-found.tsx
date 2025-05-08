@@ -1,7 +1,7 @@
-import { buttonVariants } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function NotFound() {
 	return (

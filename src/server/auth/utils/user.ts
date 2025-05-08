@@ -1,6 +1,6 @@
+import { eq, or } from "drizzle-orm";
 import { db } from "@/server/db";
 import { users } from "@/server/db/schema";
-import { eq, or } from "drizzle-orm";
 
 export async function findUser({
 	email,

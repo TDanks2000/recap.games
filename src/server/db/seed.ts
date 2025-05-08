@@ -13,6 +13,7 @@ import {
 	users,
 	verificationTokens,
 } from "./schema";
+
 // Import your table definitions /schema';
 
 const DATABASE_URL = process.env.DATABASE_URL;

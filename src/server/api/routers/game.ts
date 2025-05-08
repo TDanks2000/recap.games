@@ -1,6 +1,6 @@
-import { games } from "@/server/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { games } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const gameRouter = createTRPCRouter({

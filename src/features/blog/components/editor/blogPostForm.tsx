@@ -2,48 +2,50 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+	Form,
+	FormControl,
+	FormDescription,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
-import { useRouter } from "next/navigation";
 import { Editor } from "./editor";
 
 const blogPostSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  content: z.string().min(1, "Content is required"),
-  published: z.boolean().optional(), 
+	title: z.string().min(1, "Title is required"),
+	content: z.string().min(1, "Content is required"),
+	published: z.boolean().optional(),
 });
 
 type BlogPostData = z.infer<typeof blogPostSchema>;
 
-type BlogPostFormProps = ({
-	className?: string;
-	initialData?: Partial<BlogPostData>;
-  isEditing?: false | null;
-} | {
-  isEditing: true;
-  id: number;
-  className?: string;
-  initialData: Partial<BlogPostData>;
-})
+type BlogPostFormProps =
+	| {
+			className?: string;
+			initialData?: Partial<BlogPostData>;
+			isEditing?: false | null;
+	  }
+	| {
+			isEditing: true;
+			id: number;
+			className?: string;
+			initialData: Partial<BlogPostData>;
+	  };
 
 export const BlogPostForm = (props: BlogPostFormProps) => {
-	const { className, initialData, isEditing} = props;
-  
-  const router = useRouter();
+	const { className, initialData, isEditing } = props;
+
+	const router = useRouter();
 	const form = useForm<BlogPostData>({
 		resolver: zodResolver(blogPostSchema),
 		defaultValues: {
@@ -53,41 +55,43 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 		},
 	});
 
-	const { mutate: createPost, isPending: isPostCreating } = api.blog.createPost.useMutation({
-		onSuccess: () => {
-			toast.success("Blog post published!");
-			form.reset(); // Optional: reset form after submission
-		},
-		onError: (err) => {
-			toast.error(err.message || "Something went wrong.");
-		},
-	});
+	const { mutate: createPost, isPending: isPostCreating } =
+		api.blog.createPost.useMutation({
+			onSuccess: () => {
+				toast.success("Blog post published!");
+				form.reset(); // Optional: reset form after submission
+			},
+			onError: (err) => {
+				toast.error(err.message || "Something went wrong.");
+			},
+		});
 
-  const { mutate: updatePost, isPending: isPostUpdating } = api.blog.updatePost.useMutation({
-		onSuccess: (data) => {
-			toast.success("Blog updated successfully!");
-			router.push(`/blog/${data.slug}`);
-    },
-		onError: (err) => {
-			toast.error(err.message || "Something went wrong.");
-		},
-	});
+	const { mutate: updatePost, isPending: isPostUpdating } =
+		api.blog.updatePost.useMutation({
+			onSuccess: (data) => {
+				toast.success("Blog updated successfully!");
+				router.push(`/blog/${data.slug}`);
+			},
+			onError: (err) => {
+				toast.error(err.message || "Something went wrong.");
+			},
+		});
 
 	const handleSubmit = (data: BlogPostData) => {
 		const slug = data.title
 			.toLowerCase()
 			.replace(/ /g, "-")
 			.replace(/[^\w-]+/g, "");
-		
-      if (isEditing && 'id' in props) {
-        updatePost({ id: props.id, ...data });
-      } else {
-        createPost({ 
-          ...data,
-          slug,
-          published: data.published?? false,
-        });
-      }
+
+		if (isEditing && "id" in props) {
+			updatePost({ id: props.id, ...data });
+		} else {
+			createPost({
+				...data,
+				slug,
+				published: data.published ?? false,
+			});
+		}
 	};
 
 	return (
@@ -101,7 +105,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 					name="title"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel htmlFor="title" className="text-lg font-semibold">
+							<FormLabel htmlFor="title" className="font-semibold text-lg">
 								Title
 							</FormLabel>
 							<FormDescription>
@@ -111,7 +115,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 								<Input
 									id="title"
 									placeholder="Enter your blog post title"
-									className="text-xl font-medium"
+									className="font-medium text-xl"
 									{...field}
 								/>
 							</FormControl>
@@ -125,7 +129,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 					name="content"
 					render={({ field, fieldState }) => (
 						<FormItem>
-							<FormLabel htmlFor="editor" className="text-lg font-semibold">
+							<FormLabel htmlFor="editor" className="font-semibold text-lg">
 								Content
 							</FormLabel>
 							<FormDescription>
@@ -168,16 +172,22 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 				/>
 
 				<div className="flex justify-end pt-4">
-					<Button 
-						type="submit" 
-						size="lg" 
-						className="px-8" 
+					<Button
+						type="submit"
+						size="lg"
+						className="px-8"
 						disabled={isEditing ? isPostUpdating : isPostCreating}
 					>
 						{isEditing ? (
-							isPostUpdating ? <Loader2 className="animate-spin" /> : <Upload />
+							isPostUpdating ? (
+								<Loader2 className="animate-spin" />
+							) : (
+								<Upload />
+							)
+						) : isPostCreating ? (
+							<Loader2 className="animate-spin" />
 						) : (
-							isPostCreating ? <Loader2 className="animate-spin" /> : <Upload />
+							<Upload />
 						)}
 						{isEditing ? "Update Post" : "Publish Post"}
 					</Button>

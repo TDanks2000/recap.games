@@ -1,6 +1,6 @@
-import { streams } from "@/server/db/schema";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { streams } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const streamRouter = createTRPCRouter({

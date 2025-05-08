@@ -1,7 +1,7 @@
-import { MediaType } from "@/@types/db";
-import { conferences, games, media, streams } from "@/server/db/schema";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
+import { MediaType } from "@/@types/db";
+import { conferences, games, media, streams } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter } from "../trpc";
 
 export const combinedRouter = createTRPCRouter({

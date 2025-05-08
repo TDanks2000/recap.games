@@ -1,8 +1,8 @@
 "use client";
 
+import type { InferSelectModel } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import type { conferences } from "@/server/db/schema";
-import type { InferSelectModel } from "drizzle-orm";
 
 interface CardHeaderProps extends InferSelectModel<typeof conferences> {}
 

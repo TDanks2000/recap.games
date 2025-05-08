@@ -1,6 +1,6 @@
+import { Gamepad2 } from "lucide-react";
 import type { PaginationOptions } from "@/@types";
 import { api } from "@/trpc/server";
-import { Gamepad2 } from "lucide-react";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
 

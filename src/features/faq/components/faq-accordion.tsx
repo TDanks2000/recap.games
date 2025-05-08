@@ -1,10 +1,10 @@
+import type { ReactNode } from "react";
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
-import type { ReactNode } from "react";
 
 export interface FaqItem {
 	question: string;

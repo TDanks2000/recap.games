@@ -1,9 +1,9 @@
 "use client";
 
-import type { conferences } from "@/server/db/schema";
 import { format } from "date-fns";
 import type { InferSelectModel } from "drizzle-orm";
 import { CalendarIcon } from "lucide-react";
+import type { conferences } from "@/server/db/schema";
 
 interface CardHeaderProps extends InferSelectModel<typeof conferences> {}
 

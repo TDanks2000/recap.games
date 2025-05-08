@@ -2,13 +2,12 @@ import "@/styles/globals.css";
 
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-
+import Script from "next/script";
+import Footer from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
 import { TRPCReactProvider } from "@/trpc/react";
-import Script from "next/script";
-import Footer from "@/components/footer";
 
 const BASE_URL = new URL("https://recap.games");
 

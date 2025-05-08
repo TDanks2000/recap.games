@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FaTwitter, FaEnvelope } from "react-icons/fa";
+import { FaEnvelope, FaTwitter } from "react-icons/fa";
 import { SiBluesky } from "react-icons/si";
 
 const SOCIAL_LINKS = [

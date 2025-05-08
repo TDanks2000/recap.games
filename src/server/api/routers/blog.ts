@@ -2,10 +2,10 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { blogComments, blogPosts, users } from "@/server/db/schema";
 import {
-  adminProcedure,
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
+	adminProcedure,
+	createTRPCRouter,
+	protectedProcedure,
+	publicProcedure,
 } from "../trpc";
 
 export const blogRouter = createTRPCRouter({
@@ -30,29 +30,26 @@ export const blogRouter = createTRPCRouter({
 	}),
 
 	// Fetch a single post by slug (includes markdown content and author)
-  getPostBySlug: publicProcedure
-  .input(z.object({ slug: z.string() }))
-  .query(async ({ ctx, input }) => {
-    const [post] = await ctx.db
-      .select({
-        id: blogPosts.id,
-        title: blogPosts.title,
-        slug: blogPosts.slug,
-        content: blogPosts.content,
-        published: blogPosts.published,
-        createdAt: blogPosts.createdAt,
-        updatedAt: blogPosts.updatedAt,
-        authorId: blogPosts.authorId,
-        authorName: users.name,
-      })
-      .from(blogPosts)
-      .leftJoin(users, eq(blogPosts.authorId, users.id))
-      .where(
-        and(
-          eq(blogPosts.published, true),
-          eq(blogPosts.slug, input.slug)
-        )
-      );
+	getPostBySlug: publicProcedure
+		.input(z.object({ slug: z.string() }))
+		.query(async ({ ctx, input }) => {
+			const [post] = await ctx.db
+				.select({
+					id: blogPosts.id,
+					title: blogPosts.title,
+					slug: blogPosts.slug,
+					content: blogPosts.content,
+					published: blogPosts.published,
+					createdAt: blogPosts.createdAt,
+					updatedAt: blogPosts.updatedAt,
+					authorId: blogPosts.authorId,
+					authorName: users.name,
+				})
+				.from(blogPosts)
+				.leftJoin(users, eq(blogPosts.authorId, users.id))
+				.where(
+					and(eq(blogPosts.published, true), eq(blogPosts.slug, input.slug)),
+				);
 
 			if (!post) {
 				throw new Error("Post not found");

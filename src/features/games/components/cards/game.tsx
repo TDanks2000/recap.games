@@ -1,5 +1,10 @@
 "use client";
 
+import { format, isValid } from "date-fns";
+import type { InferSelectModel } from "drizzle-orm";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { MediaType } from "@/@types";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -9,12 +14,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { cn, getImageFromURL } from "@/lib/utils";
-import type { InferSelectModel } from "drizzle-orm";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { format, isValid } from "date-fns";
-
-import { MediaType } from "@/@types";
 import type { conferences, games, media } from "@/server/db/schema";
 
 interface GameCardProps extends InferSelectModel<typeof games> {

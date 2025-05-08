@@ -1,5 +1,5 @@
-import type { games } from "@/server/db/schema";
 import type { InferSelectModel } from "drizzle-orm";
+import type { games } from "@/server/db/schema";
 import type { Conference } from "./conferences";
 import type { Media } from "./media";
 

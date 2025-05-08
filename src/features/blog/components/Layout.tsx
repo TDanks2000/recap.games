@@ -1,9 +1,9 @@
-import { type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 interface LayoutProps {
-  children: ReactNode;
+	children: ReactNode;
 }
 
 export function BlogLayout({ children }: LayoutProps) {
-  return <main className="w-full">{children}</main>;
+	return <main className="w-full">{children}</main>;
 }
