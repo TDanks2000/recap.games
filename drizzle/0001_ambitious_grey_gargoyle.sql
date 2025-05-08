@@ -1,0 +1,1 @@
+ALTER TABLE `recap.games_blog_post` ADD `scheduledAt` integer;

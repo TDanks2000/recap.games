@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { blogComments, blogPosts, users } from "@/server/db/schema";
 import {
@@ -9,21 +9,32 @@ import {
 } from "../trpc";
 
 export const blogRouter = createTRPCRouter({
-	// Fetch all published blog posts with author info
+	// Fetch all published or due-scheduled blog posts with author info
 	listPosts: publicProcedure.query(async ({ ctx }) => {
+		const now = Math.floor(Date.now() / 1000);
+
 		const posts = await ctx.db
 			.select({
 				id: blogPosts.id,
 				title: blogPosts.title,
 				slug: blogPosts.slug,
 				published: blogPosts.published,
+				scheduledAt: blogPosts.scheduledAt,
 				createdAt: blogPosts.createdAt,
 				authorName: users.name,
 				content: blogPosts.content,
 			})
 			.from(blogPosts)
 			.leftJoin(users, eq(blogPosts.authorId, users.id))
-			.where(eq(blogPosts.published, true))
+			.where(
+				and(
+					eq(blogPosts.published, true),
+					or(
+						isNull(blogPosts.scheduledAt),
+						sql`${blogPosts.scheduledAt} <= ${now}`,
+					),
+				),
+			)
 			.orderBy(desc(blogPosts.createdAt));
 
 		return posts;
@@ -33,6 +44,8 @@ export const blogRouter = createTRPCRouter({
 	getPostBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
+			const now = Math.floor(Date.now() / 1000);
+
 			const [post] = await ctx.db
 				.select({
 					id: blogPosts.id,
@@ -40,6 +53,7 @@ export const blogRouter = createTRPCRouter({
 					slug: blogPosts.slug,
 					content: blogPosts.content,
 					published: blogPosts.published,
+					scheduledAt: blogPosts.scheduledAt,
 					createdAt: blogPosts.createdAt,
 					updatedAt: blogPosts.updatedAt,
 					authorId: blogPosts.authorId,
@@ -48,7 +62,14 @@ export const blogRouter = createTRPCRouter({
 				.from(blogPosts)
 				.leftJoin(users, eq(blogPosts.authorId, users.id))
 				.where(
-					and(eq(blogPosts.published, true), eq(blogPosts.slug, input.slug)),
+					and(
+						eq(blogPosts.published, true),
+						eq(blogPosts.slug, input.slug),
+						or(
+							isNull(blogPosts.scheduledAt),
+							sql`${blogPosts.scheduledAt} <= ${now}`,
+						),
+					),
 				);
 
 			if (!post) {
@@ -66,6 +87,7 @@ export const blogRouter = createTRPCRouter({
 				slug: z.string().min(1),
 				content: z.string().min(1),
 				published: z.boolean().optional(),
+				scheduledAt: z.number().optional(), // allow setting schedule
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -77,6 +99,12 @@ export const blogRouter = createTRPCRouter({
 					content: input.content,
 					authorId: ctx.session.user.id,
 					published: input.published ?? false,
+					scheduledAt:
+						input.scheduledAt !== undefined
+							? input.scheduledAt === null
+								? null
+								: new Date(input.scheduledAt * 1000)
+							: null,
 				})
 				.returning();
 
@@ -91,6 +119,7 @@ export const blogRouter = createTRPCRouter({
 				title: z.string().min(1).optional(),
 				content: z.string().optional(),
 				published: z.boolean().optional(),
+				scheduledAt: z.number().nullable().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -100,6 +129,12 @@ export const blogRouter = createTRPCRouter({
 					title: input.title,
 					content: input.content,
 					published: input.published,
+					scheduledAt:
+						input.scheduledAt === undefined
+							? undefined
+							: input.scheduledAt === null
+								? null
+								: new Date(input.scheduledAt * 1000),
 					updatedAt: sql`(unixepoch())`,
 				})
 				.where(eq(blogPosts.id, input.id))
@@ -119,14 +154,9 @@ export const blogRouter = createTRPCRouter({
 			return { success: true };
 		}),
 
-	// Optional: add a comment to a post
+	// Protected: add a comment to a post
 	addComment: protectedProcedure
-		.input(
-			z.object({
-				postId: z.number(),
-				content: z.string().min(1),
-			}),
-		)
+		.input(z.object({ postId: z.number(), content: z.string().min(1) }))
 		.mutation(async ({ ctx, input }) => {
 			const [comment] = await ctx.db
 				.insert(blogComments)
@@ -136,6 +166,7 @@ export const blogRouter = createTRPCRouter({
 					content: input.content,
 				})
 				.returning();
+
 			return comment;
 		}),
 });

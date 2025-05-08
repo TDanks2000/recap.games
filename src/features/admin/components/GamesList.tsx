@@ -50,7 +50,7 @@ export default function GamesList() {
 		return (
 			<div className="space-y-4">
 				{Array.from({ length: 3 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+					// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a list of skeletons
 					<div key={`game-skeleton-${i}`} className="space-y-2">
 						<Skeleton className="h-6 w-3/4" />
 						<Skeleton className="h-4 w-1/2" />

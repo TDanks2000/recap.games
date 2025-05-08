@@ -3,9 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { DateTimePicker } from "@/components/DateTimePicker";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -25,6 +26,7 @@ const blogPostSchema = z.object({
 	title: z.string().min(1, "Title is required"),
 	content: z.string().min(1, "Content is required"),
 	published: z.boolean().optional(),
+	scheduleAt: z.date().nullable().optional(),
 });
 
 type BlogPostData = z.infer<typeof blogPostSchema>;
@@ -44,22 +46,28 @@ type BlogPostFormProps =
 
 export const BlogPostForm = (props: BlogPostFormProps) => {
 	const { className, initialData, isEditing } = props;
-
 	const router = useRouter();
+
 	const form = useForm<BlogPostData>({
 		resolver: zodResolver(blogPostSchema),
 		defaultValues: {
 			title: initialData?.title ?? "",
 			content: initialData?.content ?? "",
 			published: initialData?.published ?? false,
+			scheduleAt: initialData?.scheduleAt ?? null,
 		},
+	});
+
+	const publishedValue = useWatch({
+		control: form.control,
+		name: "published",
 	});
 
 	const { mutate: createPost, isPending: isPostCreating } =
 		api.blog.createPost.useMutation({
 			onSuccess: () => {
 				toast.success("Blog post published!");
-				form.reset(); // Optional: reset form after submission
+				form.reset();
 			},
 			onError: (err) => {
 				toast.error(err.message || "Something went wrong.");
@@ -83,14 +91,19 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 			.replace(/ /g, "-")
 			.replace(/[^\w-]+/g, "");
 
+		const payload = {
+			...data,
+			slug,
+			published: data.published ?? false,
+			scheduledAt: data.scheduleAt
+				? Math.floor(data.scheduleAt.getTime() / 1000)
+				: undefined,
+		};
+
 		if (isEditing && "id" in props) {
-			updatePost({ id: props.id, ...data });
+			updatePost({ id: props.id, ...payload });
 		} else {
-			createPost({
-				...data,
-				slug,
-				published: data.published ?? false,
-			});
+			createPost(payload);
 		}
 	};
 
@@ -167,6 +180,29 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 									Make this post visible to the public.
 								</FormDescription>
 							</div>
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="scheduleAt"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel htmlFor="scheduleAt" className="font-semibold">
+								Schedule publish date
+							</FormLabel>
+							<FormDescription>
+								Choose a date and time for automatic publishing.
+							</FormDescription>
+							<FormControl>
+								<DateTimePicker
+									value={field.value ?? undefined}
+									onValueChange={(date) => field.onChange(date)}
+									disabled={publishedValue ?? false}
+								/>
+							</FormControl>
+							<FormMessage />
 						</FormItem>
 					)}
 				/>

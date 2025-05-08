@@ -220,14 +220,13 @@ export const blogPosts = createTable("blog_post", (d) => ({
 	id: d.integer().primaryKey({ autoIncrement: true }),
 	title: d.text().notNull(),
 	slug: d.text().notNull().unique(),
-	// Markdown content of the post
 	content: d.text().notNull(),
-	// Author relationship
 	authorId: d
 		.text({ length: 255 })
 		.notNull()
 		.references(() => users.id),
 	published: d.integer({ mode: "boolean" }).default(false),
+	scheduledAt: d.integer({ mode: "timestamp" }),
 	createdAt: d
 		.integer({ mode: "timestamp" })
 		.default(sql`(unixepoch())`)
