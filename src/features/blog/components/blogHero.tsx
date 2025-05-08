@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode } from "react";
 import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import Image from "next/image";
 
 interface BlogHeroProps {
 	title: string;
@@ -33,10 +34,18 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 	const combinedBreadcrumb = breadcrumb || pathSegments;
 
 	return (
-		<header className="w-full bg-gradient-to-br from-primary to-primary/5 px-8 py-10 text-white">
-			<div className="mx-auto max-w-7xl px-8 sm:px-16">
+		<header className="relative w-full px-8 py-14 drop-shadow-xl overflow-hidden">
+			<div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
+      <Image
+        src="/tiled-bg.png"
+        alt="Tiled background"
+        className="absolute inset-0 object-cover opacity-50 overflow-hidden"
+        width={1920}
+        height={1080}
+      />
+			<div className="relative mx-auto max-w-7xl px-8 sm:px-16">
 				{combinedBreadcrumb.length > 0 && (
-					<nav className="mb-4">
+					<nav className="mb-6">
 						<Breadcrumb>
 							<BreadcrumbList>
 								{combinedBreadcrumb.map((item, i) => (
@@ -60,7 +69,9 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 						</Breadcrumb>
 					</nav>
 				)}
-				<h1 className="mb-4 font-extrabold text-4xl leading-tight">{title}</h1>
+				<h1 className="mb-4 font-extrabold text-4xl leading-tight drop-shadow-lg">
+					{title}
+				</h1>
 				{render && <div className="mt-8">{render}</div>}
 			</div>
 		</header>

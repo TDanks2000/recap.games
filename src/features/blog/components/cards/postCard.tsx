@@ -4,11 +4,11 @@ import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import { DateComponent } from "@/components/date";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import type { RouterOutputs } from "@/trpc/react";
 
@@ -49,9 +49,9 @@ export function PostCard({
 						>
 							{content ?? "No content available"}
 						</ReactMarkdown>
-						<div className="absolute right-0 bottom-0 left-0 h-6 bg-gradient-to-t from-background to-transparent" />
 					</div>
 				</CardContent>
+          <div className="absolute right-0 bottom-0 left-0 h-20 z-10 bg-gradient-to-t from-background to-transparent" />
 			</Card>
 		</Link>
 	);
