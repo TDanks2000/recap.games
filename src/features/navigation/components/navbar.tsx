@@ -7,18 +7,19 @@ import { Suspense } from "react";
 import { ModeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 import LogoLink from "./links/logo";
 import NavBarSearch from "./search";
-
-const navLinks = [
-	{ href: "/faq", label: "FAQ" },
-	{ href: "/blog", label: "Blog" },
-];
 
 const NavigationBar = () => {
 	const pathname = usePathname().toLowerCase();
 
 	if (pathname.startsWith("/admin")) return null;
+
+	const navLinks = [
+		{ href: "/faq", label: "FAQ" },
+		{ href: "/blog", label: "Blog" },
+	];
 
 	return (
 		<header className="flex h-16 items-center gap-4 border-b bg-muted/40 px-4 md:px-6">
@@ -29,7 +30,9 @@ const NavigationBar = () => {
 						<Link
 							key={link.href}
 							href={link.href}
-							className="transform-all hover:text-primary"
+							className={cn("transform-all hover:text-primary", {
+								"text-primary": pathname === link.href.toLowerCase(),
+							})}
 						>
 							{link.label}
 						</Link>
@@ -55,7 +58,9 @@ const NavigationBar = () => {
 							<Link
 								key={link.href}
 								href={link.href}
-								className="transition-all hover:text-primary"
+								className={cn("transition-all hover:text-primary", {
+									"text-primary": pathname === link.href.toLowerCase(),
+								})}
 							>
 								{link.label}
 							</Link>
