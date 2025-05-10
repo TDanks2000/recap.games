@@ -53,7 +53,7 @@ export default function GamesAdminPage() {
 					</CardHeader>
 					<CardContent className="max-h-[75vh] space-y-6 overflow-y-auto pr-2">
 						{Array.from({ length: formCount }).map((_, index) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+							// biome-ignore lint/suspicious/noArrayIndexKey:  this is fine
 							<div key={index} className="space-y-4">
 								{index > 0 && <Separator />}
 								<GameForm formIndex={index} />

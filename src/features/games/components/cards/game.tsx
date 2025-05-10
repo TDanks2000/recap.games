@@ -13,7 +13,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card";
-import { cn, getImageFromURL } from "@/lib/utils";
+import { cn, combineFeatures, getImageFromURL } from "@/lib/utils";
 import type { conferences, games, media } from "@/server/db/schema";
 
 interface GameCardProps extends InferSelectModel<typeof games> {
@@ -73,7 +73,7 @@ export default function GameCard({
 								variant="secondary"
 								className="max-w-full truncate bg-black/50 capitalize backdrop-blur-sm transition-all duration-300 group-hover:bg-black/70 group-hover:shadow-lg"
 							>
-								{features[0]}
+								{combineFeatures(features)}
 							</Badge>
 						</div>
 					)}

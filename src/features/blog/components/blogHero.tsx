@@ -1,17 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode } from "react";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import Image from "next/image";
 
 interface BlogHeroProps {
 	title: string;
@@ -34,15 +34,15 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 	const combinedBreadcrumb = breadcrumb || pathSegments;
 
 	return (
-		<header className="relative w-full px-8 py-14 drop-shadow-xl overflow-hidden">
+		<header className="relative w-full overflow-hidden px-8 py-14 drop-shadow-xl">
 			<div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
-      <Image
-        src="/tiled-bg.png"
-        alt="Tiled background"
-        className="absolute inset-0 object-cover opacity-50 overflow-hidden"
-        width={1920}
-        height={1080}
-      />
+			<Image
+				src="/tiled-bg.png"
+				alt="Tiled background"
+				className="absolute inset-0 overflow-hidden object-cover opacity-50"
+				width={1920}
+				height={1080}
+			/>
 			<div className="relative mx-auto max-w-7xl px-8 sm:px-16">
 				{combinedBreadcrumb.length > 0 && (
 					<nav className="mb-6">

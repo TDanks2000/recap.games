@@ -12,9 +12,9 @@ export default async function GamesDisplay({
 	searchParams,
 }: GamesDisplayProps) {
 	// fetch games & conferences on the server
-	const [games, conferences] = await Promise.all([
+	const [games] = await Promise.all([
 		api.game.getAll(),
-		api.conference.getAll(),
+		// api.conference.getAll(),
 	]);
 
 	// parse selected conference IDs from searchParams

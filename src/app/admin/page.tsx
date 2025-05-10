@@ -1,14 +1,7 @@
-import Link from "next/link";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Dashboard } from "@/features/admin/components/Dashboard";
 
-export default function AdminDashboard() {
-	const adminSections = [
+export default function AdminDashboardPage() {
+	const contentSections = [
 		{
 			title: "Games",
 			description: "Add, edit, or remove games with media attachments",
@@ -24,32 +17,33 @@ export default function AdminDashboard() {
 			description: "Add or edit streams associated with conferences",
 			href: "/admin/streams",
 		},
+		{
+			title: "Blog Posts",
+			description: "Manage blog content, drafts, and publications",
+			href: "/admin/blog",
+		},
+	];
+
+	const quickActions = [
+		{
+			title: "Add New Game",
+			href: "/admin/games?action=new",
+		},
+		{
+			title: "Create Blog Post",
+			href: "/blog/create",
+		},
+		{
+			title: "Update Featured Content",
+			href: "/admin/featured",
+		},
+		{
+			title: "Moderate Comments",
+			href: "/admin/comments",
+		},
 	];
 
 	return (
-		<div className="space-y-6">
-			<h2 className="font-semibold text-xl">Welcome to the Admin Dashboard</h2>
-			<p className="text-muted-foreground">
-				Use this dashboard to manage content for the recap.games website.
-			</p>
-
-			<div className="grid gap-4 md:grid-cols-3">
-				{adminSections.map((section) => (
-					<Link key={section.href} href={section.href}>
-						<Card className="h-full cursor-pointer transition-all hover:shadow-md">
-							<CardHeader>
-								<CardTitle>{section.title}</CardTitle>
-								<CardDescription>{section.description}</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<p className="text-blue-500 text-sm">
-									Manage {section.title} →
-								</p>
-							</CardContent>
-						</Card>
-					</Link>
-				))}
-			</div>
-		</div>
+		<Dashboard contentSections={contentSections} quickActions={quickActions} />
 	);
 }

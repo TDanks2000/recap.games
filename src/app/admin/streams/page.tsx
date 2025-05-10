@@ -61,7 +61,7 @@ export default function StreamsAdminPage() {
 					<CardContent>
 						<div className="space-y-6">
 							{Array.from({ length: formCount }).map((_, index) => (
-								// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+								// biome-ignore lint/suspicious/noArrayIndexKey: this is intentional
 								<div key={index} className="space-y-4">
 									{index > 0 && <Separator />}
 									<StreamForm formIndex={index} />

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Feature } from "@/@types";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -64,3 +65,38 @@ export const getImageFromURL = (
 		return link;
 	}
 };
+
+/**
+ * Normalizes and combines features for better UI/UX display.
+ * @param features Array of feature strings (any casing)
+ * @returns Array of user-friendly feature strings
+ */
+export function combineFeatures(features: string[]): string[] {
+	// Normalize input to lowercase and filter valid features
+	const normalized = features
+		.map((f) => f.toLowerCase())
+		.filter((f) => Object.values(Feature).includes(f as Feature)) as Feature[];
+
+	const set = new Set(normalized);
+	const result: string[] = [];
+
+	// Play mode grouping
+	if (set.has(Feature.Singleplayer) && set.has(Feature.Multiplayer)) {
+		result.push("Single & Multiplayer");
+	} else if (set.has(Feature.Singleplayer)) {
+		result.push("Singleplayer");
+	} else if (set.has(Feature.Multiplayer)) {
+		result.push("Multiplayer");
+	}
+
+	// Content grouping
+	if (set.has(Feature.Update) && set.has(Feature.DLC)) {
+		result.push("Updates & DLC");
+	} else if (set.has(Feature.Update)) {
+		result.push("Updates");
+	} else if (set.has(Feature.DLC)) {
+		result.push("DLC");
+	}
+
+	return result;
+}
