@@ -62,6 +62,7 @@ export default async function EditPage(props: EditPageProps) {
 					initialData={{
 						...post,
 						published: post.published ?? false,
+						description: post.description ?? undefined,
 					}}
 					isEditing={true}
 					id={post.id}
