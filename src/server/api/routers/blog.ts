@@ -17,6 +17,7 @@ export const blogRouter = createTRPCRouter({
 			.select({
 				id: blogPosts.id,
 				title: blogPosts.title,
+				description: blogPosts.description,
 				slug: blogPosts.slug,
 				published: blogPosts.published,
 				scheduledAt: blogPosts.scheduledAt,
@@ -58,6 +59,7 @@ export const blogRouter = createTRPCRouter({
 					updatedAt: blogPosts.updatedAt,
 					authorId: blogPosts.authorId,
 					authorName: users.name,
+					description: blogPosts.description,
 				})
 				.from(blogPosts)
 				.leftJoin(users, eq(blogPosts.authorId, users.id))
@@ -85,9 +87,10 @@ export const blogRouter = createTRPCRouter({
 			z.object({
 				title: z.string().min(1),
 				slug: z.string().min(1),
+				description: z.string().min(1),
 				content: z.string().min(1),
 				published: z.boolean().optional(),
-				scheduledAt: z.number().optional(), // allow setting schedule
+				scheduledAt: z.number().optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -96,6 +99,7 @@ export const blogRouter = createTRPCRouter({
 				.values({
 					title: input.title,
 					slug: input.slug,
+					description: input.description,
 					content: input.content,
 					authorId: ctx.session.user.id,
 					published: input.published ?? false,
@@ -117,6 +121,7 @@ export const blogRouter = createTRPCRouter({
 			z.object({
 				id: z.number(),
 				title: z.string().min(1).optional(),
+				description: z.string().min(1).optional(),
 				content: z.string().optional(),
 				published: z.boolean().optional(),
 				scheduledAt: z.number().nullable().optional(),
@@ -127,6 +132,7 @@ export const blogRouter = createTRPCRouter({
 				.update(blogPosts)
 				.set({
 					title: input.title,
+					description: input.description,
 					content: input.content,
 					published: input.published,
 					scheduledAt:
@@ -143,6 +149,7 @@ export const blogRouter = createTRPCRouter({
 			if (!updated) {
 				throw new Error("Failed to update post");
 			}
+
 			return updated;
 		}),
 

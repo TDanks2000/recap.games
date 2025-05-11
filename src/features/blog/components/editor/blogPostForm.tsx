@@ -24,6 +24,7 @@ import { Editor } from "./editor";
 
 const blogPostSchema = z.object({
 	title: z.string().min(1, "Title is required"),
+	description: z.string().min(1, "Description is required"),
 	content: z.string().min(1, "Content is required"),
 	published: z.boolean().optional(),
 	scheduleAt: z.date().nullable().optional(),
@@ -52,6 +53,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 		resolver: zodResolver(blogPostSchema),
 		defaultValues: {
 			title: initialData?.title ?? "",
+			description: initialData?.description ?? "",
 			content: initialData?.content ?? "",
 			published: initialData?.published ?? false,
 			scheduleAt: initialData?.scheduleAt ?? null,
@@ -129,6 +131,33 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 									id="title"
 									placeholder="Enter your blog post title"
 									className="font-medium text-xl"
+									{...field}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="description"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel
+								htmlFor="description"
+								className="font-semibold text-lg"
+							>
+								Description
+							</FormLabel>
+							<FormDescription>
+								Provide a brief summary of your blog post.
+							</FormDescription>
+							<FormControl>
+								<Input
+									id="description"
+									placeholder="Enter a brief description of your blog post"
+									className="font-medium"
 									{...field}
 								/>
 							</FormControl>

@@ -219,6 +219,7 @@ export const streamsRelations = relations(streams, ({ one }) => ({
 export const blogPosts = createTable("blog_post", (d) => ({
 	id: d.integer().primaryKey({ autoIncrement: true }),
 	title: d.text().notNull(),
+	description: d.text(),
 	slug: d.text().notNull().unique(),
 	content: d.text().notNull(),
 	authorId: d
