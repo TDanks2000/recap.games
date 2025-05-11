@@ -11,17 +11,17 @@ import { MarkdownPreview } from "@/features/blog/components/MarkdownPreview";
 import { auth } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
 
-type Params = { slug: string };
+type Params = Promise<{ slug: string }>;
 
 interface ViewBlogProps {
-	params: Promise<Params>;
+	params: Params;
 }
 
 export async function generateMetadata({
-	params: { slug },
-}: {
-	params: { slug: string };
-}): Promise<Metadata> {
+	params,
+}: ViewBlogProps): Promise<Metadata> {
+	const { slug } = await params;
+
 	const post = await api.blog.getPostBySlug({ slug }).catch(() => null);
 	if (!post) return {};
 
