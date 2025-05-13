@@ -235,15 +235,14 @@ export const blogPosts = createTable("blog_post", (d) => ({
 	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
 }));
 
-// Relation: each blog post has one author
 export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
 	author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
+	analytics: one(blogPostAnalytics, {
+		fields: [blogPosts.id],
+		references: [blogPostAnalytics.postId],
+	}),
 }));
 
-/**
- * Optional: Blog Comments Table
- * Allows users to comment on posts, also using Markdown.
- */
 export const blogComments = createTable("blog_comment", (d) => ({
 	id: d.integer().primaryKey({ autoIncrement: true }),
 	postId: d
@@ -261,7 +260,6 @@ export const blogComments = createTable("blog_comment", (d) => ({
 		.notNull(),
 }));
 
-// Relations for comments
 export const blogCommentsRelations = relations(blogComments, ({ one }) => ({
 	post: one(blogPosts, {
 		fields: [blogComments.postId],
@@ -272,3 +270,31 @@ export const blogCommentsRelations = relations(blogComments, ({ one }) => ({
 		references: [users.id],
 	}),
 }));
+
+export const blogPostAnalytics = createTable("blog_post_analytics", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	postId: d
+		.integer()
+		.notNull()
+		.references(() => blogPosts.id)
+		.unique(),
+	viewCount: d.integer().default(0),
+	likeCount: d.integer().default(0),
+	commentCount: d.integer().default(0),
+	lastViewedAt: d.integer({ mode: "timestamp" }),
+	createdAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
+}));
+
+export const blogPostAnalyticsRelations = relations(
+	blogPostAnalytics,
+	({ one }) => ({
+		post: one(blogPosts, {
+			fields: [blogPostAnalytics.postId],
+			references: [blogPosts.id],
+		}),
+	}),
+);

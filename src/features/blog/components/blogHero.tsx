@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode } from "react";
+import { ShareButton } from "@/components/share-button";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -34,7 +35,7 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 	const combinedBreadcrumb = breadcrumb || pathSegments;
 
 	return (
-		<header className="relative w-full overflow-hidden px-8 py-14 drop-shadow-xl">
+		<div className="relative w-full overflow-hidden px-8 py-14 drop-shadow-xl">
 			<div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
 			<Image
 				src="/tiled-bg.png"
@@ -43,37 +44,44 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 				width={1920}
 				height={1080}
 			/>
+
 			<div className="relative mx-auto max-w-7xl px-8 sm:px-16">
-				{combinedBreadcrumb.length > 0 && (
-					<nav className="mb-6">
-						<Breadcrumb>
-							<BreadcrumbList>
-								{combinedBreadcrumb.map((item, i) => (
+				<div className="mb-3 flex flex-row items-center gap-3">
+					<ShareButton title={title} />
+					{combinedBreadcrumb.length > 0 && (
+						<Breadcrumb className="overflow-x-auto">
+							<BreadcrumbList className="flex items-center whitespace-nowrap">
+								{combinedBreadcrumb.map((item) => (
 									<React.Fragment key={item.label}>
-										<BreadcrumbItem>
+										<BreadcrumbItem className="max-w-xs flex-shrink-0">
 											{item.href === pathname ? (
-												<BreadcrumbPage>{item.label}</BreadcrumbPage>
+												<BreadcrumbPage className="truncate">
+													{item.label}
+												</BreadcrumbPage>
 											) : (
 												<BreadcrumbLink asChild>
 													<Link href={item.href}>{item.label}</Link>
 												</BreadcrumbLink>
 											)}
 										</BreadcrumbItem>
-										<BreadcrumbSeparator />
+										<BreadcrumbSeparator className="flex-shrink-0" />
 									</React.Fragment>
 								))}
-								<BreadcrumbItem>
-									<BreadcrumbPage>{title}</BreadcrumbPage>
+								<BreadcrumbItem className="w-full max-w-xs shrink-0 overflow-hidden truncate sm:max-w-fit">
+									<BreadcrumbPage className="w-full truncate">
+										{title}
+									</BreadcrumbPage>
 								</BreadcrumbItem>
 							</BreadcrumbList>
 						</Breadcrumb>
-					</nav>
-				)}
+					)}
+				</div>
 				<h1 className="mb-4 font-extrabold text-4xl leading-tight drop-shadow-lg">
 					{title}
 				</h1>
+
 				{render && <div className="mt-8">{render}</div>}
 			</div>
-		</header>
+		</div>
 	);
 }

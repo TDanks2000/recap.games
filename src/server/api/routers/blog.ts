@@ -1,6 +1,11 @@
 import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
-import { blogComments, blogPosts, users } from "@/server/db/schema";
+import {
+	blogComments,
+	blogPostAnalytics,
+	blogPosts,
+	users,
+} from "@/server/db/schema";
 import {
 	adminProcedure,
 	createTRPCRouter,
@@ -9,7 +14,7 @@ import {
 } from "../trpc";
 
 export const blogRouter = createTRPCRouter({
-	// Fetch all published or due-scheduled blog posts with author info
+	// Fetch all published or due-scheduled blog posts with author info and analytics
 	listPosts: publicProcedure.query(async ({ ctx }) => {
 		const now = Math.floor(Date.now() / 1000);
 
@@ -24,9 +29,13 @@ export const blogRouter = createTRPCRouter({
 				createdAt: blogPosts.createdAt,
 				authorName: users.name,
 				content: blogPosts.content,
+				viewCount: blogPostAnalytics.viewCount,
+				likeCount: blogPostAnalytics.likeCount,
+				commentCount: blogPostAnalytics.commentCount,
 			})
 			.from(blogPosts)
 			.leftJoin(users, eq(blogPosts.authorId, users.id))
+			.leftJoin(blogPostAnalytics, eq(blogPosts.id, blogPostAnalytics.postId))
 			.where(
 				and(
 					eq(blogPosts.published, true),
@@ -41,7 +50,7 @@ export const blogRouter = createTRPCRouter({
 		return posts;
 	}),
 
-	// Fetch a single post by slug (includes markdown content and author)
+	// Fetch a single post by slug (includes markdown content, author, and analytics)
 	getPostBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
@@ -60,9 +69,13 @@ export const blogRouter = createTRPCRouter({
 					authorId: blogPosts.authorId,
 					authorName: users.name,
 					description: blogPosts.description,
+					viewCount: blogPostAnalytics.viewCount,
+					likeCount: blogPostAnalytics.likeCount,
+					commentCount: blogPostAnalytics.commentCount,
 				})
 				.from(blogPosts)
 				.leftJoin(users, eq(blogPosts.authorId, users.id))
+				.leftJoin(blogPostAnalytics, eq(blogPosts.id, blogPostAnalytics.postId))
 				.where(
 					and(
 						eq(blogPosts.published, true),
@@ -81,7 +94,7 @@ export const blogRouter = createTRPCRouter({
 			return post;
 		}),
 
-	// Admin-only: create a new blog post
+	// Admin-only: create a new blog post and initialize analytics
 	createPost: adminProcedure
 		.input(
 			z.object({
@@ -111,6 +124,9 @@ export const blogRouter = createTRPCRouter({
 							: null,
 				})
 				.returning();
+
+			if (newPost?.id)
+				await ctx.db.insert(blogPostAnalytics).values({ postId: newPost.id });
 
 			return newPost;
 		}),
@@ -153,10 +169,13 @@ export const blogRouter = createTRPCRouter({
 			return updated;
 		}),
 
-	// Admin-only: delete a post
+	// Admin-only: delete a post and its analytics
 	deletePost: adminProcedure
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.delete(blogPostAnalytics)
+				.where(eq(blogPostAnalytics.postId, input.id));
 			await ctx.db.delete(blogPosts).where(eq(blogPosts.id, input.id));
 			return { success: true };
 		}),
@@ -174,6 +193,30 @@ export const blogRouter = createTRPCRouter({
 				})
 				.returning();
 
+			// increment commentCount in analytics
+			await ctx.db
+				.update(blogPostAnalytics)
+				.set({
+					commentCount: sql`${blogPostAnalytics.commentCount} + 1`,
+					updatedAt: sql`(unixepoch())`,
+				})
+				.where(eq(blogPostAnalytics.postId, input.postId));
+
 			return comment;
+		}),
+
+	// Public: record a view for analytics
+	recordView: publicProcedure
+		.input(z.object({ postId: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db
+				.update(blogPostAnalytics)
+				.set({
+					viewCount: sql`${blogPostAnalytics.viewCount} + 1`,
+					lastViewedAt: sql`(unixepoch())`,
+					updatedAt: sql`(unixepoch())`,
+				})
+				.where(eq(blogPostAnalytics.postId, input.postId));
+			return { success: true };
 		}),
 });
