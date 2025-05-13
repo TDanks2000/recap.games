@@ -6,7 +6,12 @@ import { api } from "@/trpc/react";
 
 export default function ConferenceFilterClient() {
 	const { selectedConferences, onConferenceChange } = useConferenceFilter();
-	const { data: conferences, isError } = api.conference.getAll.useQuery();
+	const { data: conferences, isError } = api.conference.getAll.useQuery(
+		undefined,
+		{
+			suspense: true,
+		},
+	);
 
 	if (isError || !conferences?.length) return null;
 

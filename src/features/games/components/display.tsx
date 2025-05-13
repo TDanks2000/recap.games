@@ -1,5 +1,7 @@
 import { Gamepad2 } from "lucide-react";
+import { Suspense } from "react";
 import type { PaginationOptions } from "@/@types";
+import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
 import { api } from "@/trpc/server";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
@@ -40,7 +42,9 @@ export default async function GamesDisplay({
 						Games
 					</h3>
 				</div>
-				<ConferenceFilterClient />
+				<Suspense fallback={<ConferenceFilterSkeleton />}>
+					<ConferenceFilterClient />
+				</Suspense>
 			</div>
 
 			{/* Games Grid */}

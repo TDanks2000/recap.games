@@ -13,7 +13,7 @@ const SOCIAL_LINKS = [
 		icon: FaTwitter,
 	},
 	{
-		href: "https://bsky.app/profile/gamesrecapped.bsky.social",
+		href: "https://bsky.app/profile/recap.games",
 		label: "Bluesky",
 		icon: SiBluesky,
 	},
