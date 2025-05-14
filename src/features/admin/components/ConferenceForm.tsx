@@ -32,7 +32,11 @@ const conferenceFormSchema = z.object({
 
 type ConferenceFormValues = z.infer<typeof conferenceFormSchema>;
 
-export default function ConferenceForm() {
+interface ConferenceFormProps {
+	formIndex: number;
+}
+
+export default function ConferenceForm({ formIndex }: ConferenceFormProps) {
 	const utils = api.useUtils();
 
 	const createConferenceMutation =
