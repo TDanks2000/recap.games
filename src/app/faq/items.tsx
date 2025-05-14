@@ -13,7 +13,7 @@ export const faqItems: FaqItem[] = [
 				</p>
 				<p>
 					You’ll find a curated, no-nonsense collection of new game
-					announcements, trailers, and reveals — all organized in one place so
+					announcements, trailers, and reveals, all organized in one place so
 					you don’t have to chase news across social media and random press
 					sites.
 				</p>
@@ -56,7 +56,7 @@ export const faqItems: FaqItem[] = [
 		answer: (
 			<p>
 				Every announcement on recap.games includes a label indicating which
-				event it was revealed at—like Ubisoft Forward, Xbox Games Showcase, and
+				event it was revealed at, like Ubisoft Forward, Xbox Games Showcase, and
 				more. You can also click on the event name to go directly to the stream,
 				with the start time and an estimate of the end time based on previous
 				years' events.

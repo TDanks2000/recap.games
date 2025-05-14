@@ -57,8 +57,8 @@ export default function Footer() {
 						</span>
 					</Link>
 					<p className="text-muted-foreground text-sm">
-						Your all-in-one hub for game announcements, trailers &
-						reveals—curated, concise, no filler.
+						Your go-to source for game announcements, trailers, and reveals: all
+						handpicked, straight to the point, and no fluff.
 					</p>
 					<div className="flex space-x-4" aria-label="Social links">
 						{SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
