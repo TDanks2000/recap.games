@@ -10,7 +10,7 @@ export function ConferenceFilterSkeleton() {
 					buttonVariants({
 						variant: "outline",
 					}),
-					"w-full",
+					"w-full cursor-default",
 				)}
 			/>
 		</div>

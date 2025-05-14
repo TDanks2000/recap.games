@@ -16,12 +16,17 @@ import {
 
 interface BlogHeroProps {
 	title: string;
-	/** e.g. [{ href: "/blog", label: "Blog" }, …] */
 	breadcrumb?: { href: string; label: string }[];
 	render?: ReactNode;
+	showShareButton?: boolean;
 }
 
-export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
+export function BlogHero({
+	title,
+	breadcrumb,
+	render,
+	showShareButton,
+}: BlogHeroProps) {
 	const pathname = usePathname();
 
 	const pathSegments = pathname
@@ -47,7 +52,7 @@ export function BlogHero({ title, breadcrumb, render }: BlogHeroProps) {
 
 			<div className="relative mx-auto max-w-7xl px-8 sm:px-16">
 				<div className="mb-3 flex flex-row items-center gap-3">
-					<ShareButton title={title} />
+					{!!showShareButton && <ShareButton title={title} />}
 					{combinedBreadcrumb.length > 0 && (
 						<Breadcrumb className="overflow-x-auto">
 							<BreadcrumbList className="flex items-center whitespace-nowrap">

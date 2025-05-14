@@ -33,10 +33,7 @@ export default function Footer() {
 	const year = new Date().getFullYear();
 
 	return (
-		<footer
-			className="mt-10 border-t bg-muted/40 py-10"
-			aria-labelledby="footer-heading"
-		>
+		<footer className="mt-10 border-t bg-muted/40 py-10">
 			<h2 id="footer-heading" className="sr-only">
 				Site Footer
 			</h2>
@@ -60,7 +57,7 @@ export default function Footer() {
 						Your go-to source for game announcements, trailers, and reveals: all
 						handpicked, straight to the point, and no fluff.
 					</p>
-					<div className="flex space-x-4" aria-label="Social links">
+					<div className="flex space-x-4">
 						{SOCIAL_LINKS.map(({ href, label, icon: Icon }) => (
 							<Link
 								key={label}

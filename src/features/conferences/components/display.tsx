@@ -4,12 +4,6 @@ import { api } from "@/trpc/server";
 import { sortConferences } from "../utils/sortConferences";
 import ConferenceCard from "./cards/conference";
 
-type Conference = Awaited<
-	ReturnType<typeof api.conference.getAll>
-> extends (infer U)[]
-	? U
-	: never;
-
 const ConferencesDisplay = async () => {
 	const data = (await api.conference.getAll({ withStreams: true })) ?? [];
 	const sorted = sortConferences(data);

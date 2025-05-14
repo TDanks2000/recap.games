@@ -49,11 +49,7 @@ const gameFormSchema = z.object({
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
 
-interface GameFormProps {
-	formIndex: number;
-}
-
-export default function GameForm({ formIndex }: GameFormProps) {
+export default function GameForm() {
 	const utils = api.useUtils();
 	const conferences = api.conference.getAll.useQuery();
 

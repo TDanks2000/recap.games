@@ -110,6 +110,7 @@ export default async function ViewBlog(props: ViewBlogProps) {
 				<BlogHero
 					title={data.title}
 					breadcrumb={[{ href: "/blog", label: "Blog" }]}
+					showShareButton={false}
 					render={
 						isAuthor && (
 							<div className="mx-auto mt-6 flex space-x-4">
