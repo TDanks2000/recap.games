@@ -28,15 +28,12 @@ export async function generateMetadata({
 	const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://recap.games";
 	const url = `${siteUrl}/blog/${post.slug}`;
 
-	// Use scheduledAt as publication date when scheduled, otherwise createdAt
 	const publishedDate = post.scheduledAt ?? post.createdAt;
 	const publishedTime = formatISO(publishedDate);
 	const modifiedTime = post.updatedAt ? formatISO(post.updatedAt) : undefined;
 
-	// Default social image for posts
 	const defaultImage = `${siteUrl}/social-large.webp`;
 
-	// JSON-LD structured data for a BlogPosting
 	const jsonLd = {
 		"@context": "https://schema.org",
 		"@type": "BlogPosting",

@@ -11,28 +11,34 @@ import { TRPCReactProvider } from "@/trpc/react";
 
 const BASE_URL = new URL("https://recap.games");
 
+const currentYear = new Date().getFullYear();
+
 export const metadata: Metadata = {
 	metadataBase: BASE_URL,
+
 	title: {
-		default: "Games Recapped",
-		template: "%s | Games Recapped",
+		default: `Game Trailers Recapped - Latest ${currentYear} Trailers`,
+		template: "%s | Game Trailers Recapped",
 	},
-	description:
-		"Explore the latest game trailers, gameplay demos, and exclusive reveals from Summer Game Fest and other major events. Stay updated with all the exciting video content from the gaming world in one place.",
+
+	description: `Watch the hottest ${currentYear} game trailers, exclusive reveals, and gameplay demos from Summer Game Fest and beyond, your one stop hub for gaming video content.`,
+
 	keywords: [
-		"game trailers",
-		"gaming trailers",
-		"game announcements",
-		"gameplay",
-		"game reveals",
-		"Summer Game Fest trailers",
-		"gaming events",
-		"new game trailers",
-		"gaming industry",
-		"trailers roundup",
+		`${currentYear} game trailers`,
+		`Summer Game Fest ${currentYear}`,
+		"new gaming trailers",
+		"exclusive game reveals",
+		"gameplay demos",
+		"video game announcements",
+		"gaming events coverage",
+		"indie game trailers",
+		"AAA game trailers",
+		"latest game news",
 	],
-	authors: [{ name: "Tommy Danks" }],
+
+	authors: [{ name: "Tommy Danks", url: "https://example.com/about" }],
 	creator: "Tommy Danks",
+
 	robots: {
 		index: true,
 		follow: true,
@@ -44,34 +50,40 @@ export const metadata: Metadata = {
 			"max-snippet": -1,
 		},
 	},
+
 	icons: {
 		icon: favicon(),
 		shortcut: "/favicon.ico",
 		apple: "/apple-touch-icon.png",
 	},
+
 	manifest: "/site.webmanifest",
+
+	alternates: {
+		canonical: BASE_URL.toString(),
+	},
+
 	openGraph: {
 		type: "website",
 		locale: "en_US",
 		url: BASE_URL.toString(),
-		title: "Game Trailers Recapped",
-		description:
-			"Explore the latest trailers, gameplay demos, and exclusive announcements from Summer Game Fest and beyond.",
+		title: `Game Trailers Recapped – Latest ${currentYear} Trailers`,
+		description: `Stream ${currentYear}’s top game trailers, gameplay demos, and exclusive reveals from Summer Game Fest and other premier events.`,
 		siteName: "Game Trailers Recapped",
 		images: [
 			{
 				url: "/social-large.webp",
 				width: 1200,
 				height: 630,
-				alt: "Game Trailers Recapped Social Image",
+				alt: "Game Trailers Recapped Social Preview",
 			},
 		],
 	},
+
 	twitter: {
 		card: "summary_large_image",
-		title: "Game Trailers Recapped - Your Source for Gaming Trailers",
-		description:
-			"Stay updated with the latest trailers, gameplay demos, and gaming news. Discover the hottest new game trailers from major events.",
+		title: `Game Trailers Recapped – Your ${currentYear} Trailer Hub`,
+		description: `Stay ahead with ${currentYear}’s biggest game trailers, demos, and exclusive announcements from Summer Game Fest and beyond.`,
 		creator: "@gamesrecapped",
 		images: ["/social-large.webp"],
 	},
