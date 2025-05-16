@@ -16,7 +16,7 @@ export default async function CreatePage() {
 
 	return (
 		<HydrateClient>
-			<div className="mx-auto max-w-4xl px-4 py-8">
+			<div className="mx-auto max-w-6xl px-4 py-8">
 				<div className="mb-8">
 					<nav className="mb-4 flex items-center gap-2 text-sm">
 						<Link href="/blog" className="transition-colors hover:text-primary">
