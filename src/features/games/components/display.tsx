@@ -3,33 +3,15 @@ import { Suspense } from "react";
 import type { HomeSearchParams, PaginationOptions } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
 import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
-import type { RouterOutputs } from "@/trpc/react";
+import { sortGames } from "@/lib";
 import { api } from "@/trpc/server";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
-import GamesSortClient from "./GamesSortClient"; // <-- Import here
+import GamesSortClient from "./GamesSortClient";
 
 type GamesDisplayProps = PaginationOptions & {
 	searchParams: HomeSearchParams;
 };
-
-function sortGames(
-	games: RouterOutputs["game"]["getAll"],
-	sort = "releaseDate",
-	direction = "desc",
-) {
-	return [...games].sort((a, b) => {
-		let cmp = 0;
-		if (sort === "title") {
-			cmp = a.title.localeCompare(b.title);
-		} else if (sort === "releaseDate") {
-			if (a.releaseDate === null || b.releaseDate === null) return 0;
-			cmp =
-				new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime();
-		}
-		return direction === "asc" ? cmp : -cmp;
-	});
-}
 
 export default async function GamesDisplay({
 	searchParams,
