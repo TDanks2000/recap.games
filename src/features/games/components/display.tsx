@@ -67,7 +67,7 @@ export default async function GamesDisplay({
 						Games
 					</h3>
 				</div>
-				<div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
+				<div className="flex w-full flex-col items-end justify-end gap-4 sm:w-auto sm:flex-row sm:items-center">
 					<Suspense fallback={<GamesSortSkeleton />}>
 						<GamesSortClient directionOnLeft />
 					</Suspense>

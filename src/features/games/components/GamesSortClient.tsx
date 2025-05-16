@@ -26,7 +26,7 @@ export default function GamesSortClient({ directionOnLeft }: Props) {
 		useGamesSort();
 
 	return (
-		<div className="flex w-[260px] items-center gap-2">
+		<div className="flex w-full items-center gap-2 sm:w-[260px]">
 			<div
 				className={cn("flex-1", {
 					"order-2": directionOnLeft,

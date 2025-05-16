@@ -21,7 +21,7 @@ export default function ConferenceFilterClient() {
 	}));
 
 	return (
-		<div className="w-[260px]">
+		<div className="w-full sm:w-[260px]">
 			<MultiSelect
 				options={options}
 				selected={selectedConferences.map(String)}
