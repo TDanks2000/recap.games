@@ -1,14 +1,35 @@
 import { Gamepad2 } from "lucide-react";
 import { Suspense } from "react";
-import type { PaginationOptions } from "@/@types";
+import type { HomeSearchParams, PaginationOptions } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
+import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
+import type { RouterOutputs } from "@/trpc/react";
 import { api } from "@/trpc/server";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
+import GamesSortClient from "./GamesSortClient"; // <-- Import here
 
 type GamesDisplayProps = PaginationOptions & {
-	searchParams: { conferences?: string };
+	searchParams: HomeSearchParams;
 };
+
+function sortGames(
+	games: RouterOutputs["game"]["getAll"],
+	sort = "releaseDate",
+	direction = "desc",
+) {
+	return [...games].sort((a, b) => {
+		let cmp = 0;
+		if (sort === "title") {
+			cmp = a.title.localeCompare(b.title);
+		} else if (sort === "releaseDate") {
+			if (a.releaseDate === null || b.releaseDate === null) return 0;
+			cmp =
+				new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime();
+		}
+		return direction === "asc" ? cmp : -cmp;
+	});
+}
 
 export default async function GamesDisplay({
 	searchParams,
@@ -26,11 +47,15 @@ export default async function GamesDisplay({
 		.filter((n) => !Number.isNaN(n) && n > 0);
 
 	// filter server-side as well (for SEO’d list)
-	const filteredGames = games.filter(
+	let filteredGames = games.filter(
 		(g) =>
 			selectedConferences.length === 0 ||
 			(g.conferenceId && selectedConferences.includes(g.conferenceId)),
 	);
+
+	const sort = searchParams.sort ?? "releaseDate";
+	const direction = searchParams.direction ?? "desc";
+	filteredGames = sortGames(filteredGames, sort, direction);
 
 	return (
 		<div className="flex size-full flex-col gap-6">
@@ -42,9 +67,15 @@ export default async function GamesDisplay({
 						Games
 					</h3>
 				</div>
-				<Suspense fallback={<ConferenceFilterSkeleton />}>
-					<ConferenceFilterClient />
-				</Suspense>
+				<div className="flex w-full flex-col gap-4 sm:w-auto sm:flex-row sm:items-center">
+					<Suspense fallback={<GamesSortSkeleton />}>
+						<GamesSortClient directionOnLeft />
+					</Suspense>
+
+					<Suspense fallback={<ConferenceFilterSkeleton />}>
+						<ConferenceFilterClient />
+					</Suspense>
+				</div>
 			</div>
 
 			{/* Games Grid */}

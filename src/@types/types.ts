@@ -3,3 +3,9 @@ export interface PaginationOptions {
 	page?: number | undefined;
 	limit?: number | undefined;
 }
+
+export type HomeSearchParams = {
+	conferences?: string;
+	sort?: string;
+	direction?: string;
+};

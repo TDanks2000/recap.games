@@ -1,10 +1,11 @@
+import type { HomeSearchParams } from "@/@types";
 import ConferencesDisplay from "@/features/conferences/components/display";
 import GamesDisplay from "@/features/games/components/display";
 import { auth } from "@/server/auth";
 import { HydrateClient } from "@/trpc/server";
 
 interface HomeProps {
-	searchParams: Promise<{ conferences?: string }>;
+	searchParams: Promise<HomeSearchParams>;
 }
 
 export default async function Home({ searchParams }: HomeProps) {
