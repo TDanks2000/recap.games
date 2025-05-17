@@ -32,6 +32,7 @@ export const blogRouter = createTRPCRouter({
 				viewCount: blogPostAnalytics.viewCount,
 				likeCount: blogPostAnalytics.likeCount,
 				commentCount: blogPostAnalytics.commentCount,
+				updatedAt: blogPosts.updatedAt,
 			})
 			.from(blogPosts)
 			.leftJoin(users, eq(blogPosts.authorId, users.id))

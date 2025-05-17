@@ -2,10 +2,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BlogHero } from "@/features/blog/components/blogHero";
 import { PostCard } from "@/features/blog/components/cards/postCard";
 import { BlogLayout } from "@/features/blog/components/Layout";
-import { api, HydrateClient } from "@/trpc/server";
+import { HydrateClient } from "@/trpc/server";
+import { getBlogPosts } from "../actions/blog";
 
 export default async function BlogsPage() {
-	const posts = await api.blog.listPosts();
+	const posts = await getBlogPosts();
 
 	return (
 		<HydrateClient>
@@ -32,7 +33,7 @@ export default async function BlogsPage() {
 							</Card>
 						) : (
 							<div className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2 lg:grid-cols-3">
-								{posts.map((post, index) => (
+								{posts.map((post) => (
 									<div key={post.id}>
 										<PostCard {...post} />
 									</div>
