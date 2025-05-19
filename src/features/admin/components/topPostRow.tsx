@@ -30,7 +30,7 @@ export function TopPostRow({ post }: { post: Post }) {
 			</div>
 			<div className="text-right">
 				<p className="font-medium">
-					{!!post.viewCount && numberFormatter.format(post.viewCount)} views
+					{post.viewCount ? numberFormatter.format(post.viewCount) : 0} views
 				</p>
 			</div>
 		</div>
