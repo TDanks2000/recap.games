@@ -1,7 +1,6 @@
 import type { HomeSearchParams } from "@/@types";
 import ConferencesDisplay from "@/features/conferences/components/display";
 import GamesDisplay from "@/features/games/components/display";
-import { auth } from "@/server/auth";
 import { HydrateClient } from "@/trpc/server";
 
 interface HomeProps {
@@ -9,7 +8,6 @@ interface HomeProps {
 }
 
 export default async function Home({ searchParams }: HomeProps) {
-	const session = await auth();
 	const params = await searchParams;
 
 	return (
