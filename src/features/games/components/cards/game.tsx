@@ -105,7 +105,7 @@ export default function GameCard({
 					<CardFooter className="flex flex-col items-start gap-2 p-4">
 						<Badge
 							variant="secondary"
-							className="max-w-full truncate bg-primary/10 text-primary transition-all duration-300 hover:bg-primary/20 hover:shadow-md"
+							className="max-w-full truncate transition-all duration-300 hover:shadow-md"
 						>
 							{conference?.name ?? "Upcoming"}
 						</Badge>

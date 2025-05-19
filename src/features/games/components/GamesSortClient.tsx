@@ -38,7 +38,12 @@ export default function GamesSortClient({ directionOnLeft }: Props) {
 						onSortChange(val as SortOption, currentDirection)
 					}
 				>
-					<SelectTrigger id="games-sort-select" className="w-full">
+					<SelectTrigger
+						id="games-sort-select"
+						className="w-full"
+						name="sort games"
+						aria-label="Sort games"
+					>
 						<SelectValue placeholder="Sort by" />
 					</SelectTrigger>
 					<SelectContent>

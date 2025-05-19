@@ -24,8 +24,8 @@ const ConferenceCard = (conference: ConferenceCardProps) => {
 			<DateTimeDetails {...conference} />
 
 			{stream?.link && (
-				<div className="mt-2 flex items-center gap-2 font-medium text-primary text-sm transition-colors duration-200 group-focus-within:underline group-hover:underline">
-					<ExternalLinkIcon className="size-4" aria-hidden="true" />
+				<div className="mt-2 flex items-center gap-2 text-accent-foreground text-xs transition-colors duration-200 group-focus-within:underline group-hover:underline">
+					<ExternalLinkIcon className="size-3" aria-hidden="true" />
 					<span>Watch stream</span>
 				</div>
 			)}
