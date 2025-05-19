@@ -18,13 +18,13 @@ export function ViewTracker({ postId }: ViewTrackerProps) {
 	// Get or create a session ID for anonymous users
 	const getSessionId = useCallback(() => {
 		// Check if we already have a session ID in localStorage
-		let sessionId = localStorage.getItem("blog_session_id");
+		let sessionId = localStorage.getItem("session_id");
 
 		// If not, create a new one
 		if (!sessionId) {
 			// Generate a simple random ID with timestamp for uniqueness
 			sessionId = uuid();
-			localStorage.setItem("blog_session_id", sessionId);
+			localStorage.setItem("session_id", sessionId);
 		}
 
 		return sessionId;
