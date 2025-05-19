@@ -14,4 +14,5 @@ export type HomeSearchParams = {
 	conferences?: string;
 	sort?: SortOption;
 	direction?: SortDirection;
+	conferenceOpen?: "true" | "false";
 };

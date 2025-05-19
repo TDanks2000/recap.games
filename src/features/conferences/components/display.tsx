@@ -18,12 +18,18 @@ const ConferencesDisplay = async () => {
 				<CardHeader className="flex items-center justify-center">
 					<CardTitle>Conferences</CardTitle>
 				</CardHeader>
-				<div className="flex flex-col gap-3 px-4 pb-6">
-					{sorted.length > 0
-						? sorted.map((conference) => (
-								<ConferenceCard key={conference.id} {...conference} />
-							))
-						: "No conferences found."}
+
+				{/* Default overflow with hidden scrollbars */}
+				<div className="scrollbar-hide flex flex-col gap-3 overflow-y-scroll px-4 pt-1 pb-6">
+					{sorted.length > 0 ? (
+						sorted.map((conference) => (
+							<ConferenceCard key={conference.id} {...conference} />
+						))
+					) : (
+						<p className="text-center text-muted-foreground text-sm">
+							No conferences found.
+						</p>
+					)}
 				</div>
 			</Card>
 		</div>

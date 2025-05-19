@@ -28,7 +28,6 @@ export default async function GamesDisplay({
 		.map((s) => Number(s))
 		.filter((n) => !Number.isNaN(n) && n > 0);
 
-	// filter server-side as well (for SEO’d list)
 	let filteredGames = games.filter(
 		(g) =>
 			selectedConferences.length === 0 ||
@@ -40,7 +39,7 @@ export default async function GamesDisplay({
 	filteredGames = sortGames(filteredGames, sort, direction);
 
 	return (
-		<div className="flex size-full flex-col gap-6">
+		<div className="flex size-full flex-col gap-6 px-2 sm:px-0">
 			{/* Header */}
 			<div className="flex flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
 				<div className="flex items-center gap-2">
@@ -49,11 +48,10 @@ export default async function GamesDisplay({
 						Games
 					</h3>
 				</div>
-				<div className="flex w-full flex-col items-end justify-end gap-4 sm:w-auto sm:flex-row sm:items-center">
+				<div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
 					<Suspense fallback={<GamesSortSkeleton />}>
 						<GamesSortClient directionOnLeft />
 					</Suspense>
-
 					<Suspense fallback={<ConferenceFilterSkeleton />}>
 						<ConferenceFilterClient />
 					</Suspense>
