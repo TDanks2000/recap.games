@@ -8,6 +8,7 @@ import { BlogHero } from "@/features/blog/components/blogHero";
 import { DeletePost } from "@/features/blog/components/editor/deletePost";
 import { BlogLayout } from "@/features/blog/components/Layout";
 import { MarkdownPreview } from "@/features/blog/components/MarkdownPreview";
+import { ViewTracker } from "@/features/blog/components/viewTracker";
 import { auth } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
 
@@ -104,6 +105,9 @@ export default async function ViewBlog(props: ViewBlogProps) {
 	return (
 		<HydrateClient>
 			<BlogLayout>
+				{/* Add view tracker component */}
+				<ViewTracker postId={data.id} />
+
 				<BlogHero
 					title={data.title}
 					breadcrumb={[{ href: "/blog", label: "Blog" }]}

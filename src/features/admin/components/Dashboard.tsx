@@ -9,6 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { BlogAnalytics } from "./blogAnalytics";
 
 interface DashboardProps {
 	contentSections: {
@@ -83,6 +84,9 @@ export function Dashboard({ contentSections, quickActions }: DashboardProps) {
 					))}
 				</div>
 			</div>
+
+			{/* Blog Analytics */}
+			<BlogAnalytics />
 		</div>
 	);
 }

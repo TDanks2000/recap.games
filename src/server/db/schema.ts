@@ -34,6 +34,9 @@ export const users = createTable("user", (d) => ({
 
 export const usersRelations = relations(users, ({ many }) => ({
 	accounts: many(accounts),
+	blogPosts: many(blogPosts),
+	blogComments: many(blogComments),
+	blogPostViews: many(blogPostViews),
 }));
 
 export const accounts = createTable(
@@ -235,12 +238,14 @@ export const blogPosts = createTable("blog_post", (d) => ({
 	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
 }));
 
-export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
 	author: one(users, { fields: [blogPosts.authorId], references: [users.id] }),
 	analytics: one(blogPostAnalytics, {
 		fields: [blogPosts.id],
 		references: [blogPostAnalytics.postId],
 	}),
+	comments: many(blogComments),
+	views: many(blogPostViews),
 }));
 
 export const blogComments = createTable("blog_comment", (d) => ({
@@ -279,9 +284,11 @@ export const blogPostAnalytics = createTable("blog_post_analytics", (d) => ({
 		.references(() => blogPosts.id)
 		.unique(),
 	viewCount: d.integer().default(0),
-	likeCount: d.integer().default(0),
-	commentCount: d.integer().default(0),
+	uniqueViewCount: d.integer().default(0), // Count of unique visitors
+	registeredViewCount: d.integer().default(0), // Count of logged-in user views
+	anonViewCount: d.integer().default(0), // Count of anonymous views
 	lastViewedAt: d.integer({ mode: "timestamp" }),
+	averageReadTime: d.integer().default(0), // Average time spent on post in seconds
 	createdAt: d
 		.integer({ mode: "timestamp" })
 		.default(sql`(unixepoch())`)
@@ -298,3 +305,31 @@ export const blogPostAnalyticsRelations = relations(
 		}),
 	}),
 );
+
+// Blog Post Views Table for debounced view tracking
+export const blogPostViews = createTable("blog_post_view", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	postId: d
+		.integer()
+		.notNull()
+		.references(() => blogPosts.id),
+	userId: d.text({ length: 255 }).references(() => users.id), // nullable for guests
+	sessionId: d.text({ length: 255 }), // for anonymous session tracking
+	referrer: d.text(), // track where the visitor came from
+	readTime: d.integer(), // track how long the user spent on the page
+	viewedAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+}));
+
+export const blogPostViewsRelations = relations(blogPostViews, ({ one }) => ({
+	post: one(blogPosts, {
+		fields: [blogPostViews.postId],
+		references: [blogPosts.id],
+	}),
+	user: one(users, {
+		fields: [blogPostViews.userId],
+		references: [users.id],
+	}),
+}));

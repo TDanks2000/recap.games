@@ -1,9 +1,10 @@
-import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
 	blogComments,
 	blogPostAnalytics,
 	blogPosts,
+	blogPostViews,
 	users,
 } from "@/server/db/schema";
 import {
@@ -13,7 +14,133 @@ import {
 	publicProcedure,
 } from "../trpc";
 
+const DEBOUNCE_SECONDS = 60 * 60; // 1 hour
+
 export const blogRouter = createTRPCRouter({
+	// Admin-only: get aggregated analytics for all blog posts
+	getAllPostsAnalytics: adminProcedure.query(async ({ ctx }) => {
+		// Get analytics for all posts with post title
+		const postsWithAnalytics = await ctx.db
+			.select({
+				// Post details
+				postId: blogPostAnalytics.postId,
+				title: blogPosts.title,
+				slug: blogPosts.slug,
+				scheduledAt: blogPosts.scheduledAt,
+				createdAt: blogPosts.createdAt,
+				updatedAt: blogPosts.updatedAt,
+
+				// Analytics
+				viewCount: blogPostAnalytics.viewCount,
+				uniqueViewCount: blogPostAnalytics.uniqueViewCount,
+				registeredViewCount: blogPostAnalytics.registeredViewCount,
+				anonViewCount: blogPostAnalytics.anonViewCount,
+				averageReadTime: blogPostAnalytics.averageReadTime,
+				lastViewedAt: blogPostAnalytics.lastViewedAt,
+			})
+			.from(blogPostAnalytics)
+			.innerJoin(blogPosts, eq(blogPostAnalytics.postId, blogPosts.id))
+			.orderBy(desc(blogPostAnalytics.viewCount));
+
+		// Calculate total views across all posts
+		const totalStats = {
+			totalViews: postsWithAnalytics.reduce(
+				(sum, post) => sum + (post.viewCount || 0),
+				0,
+			),
+			totalUniqueViews: postsWithAnalytics.reduce(
+				(sum, post) => sum + (post.uniqueViewCount || 0),
+				0,
+			),
+			totalRegisteredViews: postsWithAnalytics.reduce(
+				(sum, post) => sum + (post.registeredViewCount || 0),
+				0,
+			),
+			totalAnonViews: postsWithAnalytics.reduce(
+				(sum, post) => sum + (post.anonViewCount || 0),
+				0,
+			),
+			averageReadTimeAcrossAllPosts:
+				postsWithAnalytics.length > 0
+					? Math.round(
+							postsWithAnalytics.reduce(
+								(sum, post) => sum + (post.averageReadTime || 0),
+								0,
+							) / postsWithAnalytics.length,
+						)
+					: 0,
+		};
+
+		// Get top 5 posts by viewCount
+		const topPosts = postsWithAnalytics.slice(0, 5);
+
+		return {
+			postsWithAnalytics,
+			totalStats,
+			topPosts,
+		};
+	}),
+
+	// Admin-only: get detailed analytics for a post
+	getPostAnalytics: adminProcedure
+		.input(z.object({ postId: z.number() }))
+		.query(async ({ ctx, input }) => {
+			// Get the basic analytics data
+			const analytics = await ctx.db
+				.select()
+				.from(blogPostAnalytics)
+				.where(eq(blogPostAnalytics.postId, input.postId))
+				.get();
+
+			if (!analytics) {
+				throw new Error("Analytics not found for this post");
+			}
+
+			// Get recent views for time-based analysis
+			const recentViews = await ctx.db
+				.select()
+				.from(blogPostViews)
+				.where(eq(blogPostViews.postId, input.postId))
+				.orderBy(desc(blogPostViews.viewedAt))
+				.limit(100);
+
+			// Get referrer statistics
+			const referrerStats = await ctx.db
+				.select({
+					referrer: blogPostViews.referrer,
+					count: sql`count(*)`,
+				})
+				.from(blogPostViews)
+				.where(eq(blogPostViews.postId, input.postId))
+				.groupBy(blogPostViews.referrer)
+				.orderBy(sql`count(*) desc`)
+				.limit(10);
+
+			return {
+				analytics,
+				recentViews,
+				referrerStats,
+				// Calculate additional metrics
+				metrics: {
+					registeredToAnonymousRatio:
+						(analytics.anonViewCount ?? 0) > 0
+							? (analytics.registeredViewCount ?? 0) /
+								(analytics.anonViewCount ?? 0)
+							: (analytics.registeredViewCount ?? 0) > 0
+								? 1
+								: 0,
+					averageReadTimeMinutes:
+						Math.round(((analytics.averageReadTime ?? 0) / 60) * 10) / 10,
+					engagementRate:
+						(analytics.viewCount ?? 0) > 0
+							? (recentViews.filter((v) => v.readTime && v.readTime > 30)
+									.length /
+									recentViews.length) *
+								100
+							: 0,
+				},
+			};
+		}),
 	// Fetch all published or due-scheduled blog posts with author info and analytics
 	listPosts: publicProcedure.query(async ({ ctx }) => {
 		const now = Math.floor(Date.now() / 1000);
@@ -30,8 +157,6 @@ export const blogRouter = createTRPCRouter({
 				authorName: users.name,
 				content: blogPosts.content,
 				viewCount: blogPostAnalytics.viewCount,
-				likeCount: blogPostAnalytics.likeCount,
-				commentCount: blogPostAnalytics.commentCount,
 				updatedAt: blogPosts.updatedAt,
 			})
 			.from(blogPosts)
@@ -71,8 +196,6 @@ export const blogRouter = createTRPCRouter({
 					authorName: users.name,
 					description: blogPosts.description,
 					viewCount: blogPostAnalytics.viewCount,
-					likeCount: blogPostAnalytics.likeCount,
-					commentCount: blogPostAnalytics.commentCount,
 				})
 				.from(blogPosts)
 				.leftJoin(users, eq(blogPosts.authorId, users.id))
@@ -194,30 +317,148 @@ export const blogRouter = createTRPCRouter({
 				})
 				.returning();
 
-			// increment commentCount in analytics
-			await ctx.db
-				.update(blogPostAnalytics)
-				.set({
-					commentCount: sql`${blogPostAnalytics.commentCount} + 1`,
-					updatedAt: sql`(unixepoch())`,
-				})
-				.where(eq(blogPostAnalytics.postId, input.postId));
-
 			return comment;
 		}),
 
-	// Public: record a view for analytics
 	recordView: publicProcedure
-		.input(z.object({ postId: z.number() }))
+		.input(
+			z.object({
+				postId: z.number(),
+				sessionId: z.string().optional(),
+				readTime: z.number().optional(), // Time spent reading in seconds
+				referrer: z.string().optional(), // Where the user came from
+			}),
+		)
 		.mutation(async ({ ctx, input }) => {
-			await ctx.db
-				.update(blogPostAnalytics)
-				.set({
-					viewCount: sql`${blogPostAnalytics.viewCount} + 1`,
-					lastViewedAt: sql`(unixepoch())`,
-					updatedAt: sql`(unixepoch())`,
-				})
-				.where(eq(blogPostAnalytics.postId, input.postId));
-			return { success: true };
+			const now = new Date();
+			const userId = ctx.session?.user?.id ?? null;
+			const sessionId = userId ? null : (input.sessionId ?? null);
+			const isRegisteredUser = !!userId;
+
+			// Build the where clause for this user/session
+			const userOrSessionClause = userId
+				? eq(blogPostViews.userId, userId)
+				: and(
+						isNull(blogPostViews.userId),
+						sessionId === null
+							? isNull(blogPostViews.sessionId)
+							: eq(blogPostViews.sessionId, sessionId),
+					);
+
+			// Check for any previous view (for unique visitor logic)
+			const anyPreviousView = await ctx.db
+				.select()
+				.from(blogPostViews)
+				.where(and(eq(blogPostViews.postId, input.postId), userOrSessionClause))
+				.get();
+
+			// Check for recent view (for debouncing)
+			const recentView = await ctx.db
+				.select()
+				.from(blogPostViews)
+				.where(
+					and(
+						eq(blogPostViews.postId, input.postId),
+						gte(
+							blogPostViews.viewedAt,
+							new Date(Date.now() - DEBOUNCE_SECONDS * 1000),
+						),
+						userOrSessionClause,
+					),
+				)
+				.get();
+
+			// Always record the view for analytics purposes
+			await ctx.db.insert(blogPostViews).values({
+				postId: input.postId,
+				userId,
+				sessionId,
+				referrer: input.referrer ?? null,
+				readTime: input.readTime ?? null,
+				viewedAt: now,
+			});
+
+			// Only update analytics if this view isn't debounced
+			if (!recentView) {
+				// Prepare analytics update
+				const analyticsUpdate: Record<string, unknown> = {
+					viewCount: sql`COALESCE(${blogPostAnalytics.viewCount}, 0) + 1`,
+					lastViewedAt: now,
+					updatedAt: now,
+				};
+
+				// Registered/anon view counts
+				if (isRegisteredUser) {
+					analyticsUpdate.registeredViewCount = sql`COALESCE(${blogPostAnalytics.registeredViewCount}, 0) + 1`;
+				} else {
+					analyticsUpdate.anonViewCount = sql`COALESCE(${blogPostAnalytics.anonViewCount}, 0) + 1`;
+				}
+
+				// Unique view count
+				if (!anyPreviousView) {
+					analyticsUpdate.uniqueViewCount = sql`COALESCE(${blogPostAnalytics.uniqueViewCount}, 0) + 1`;
+				}
+
+				// Average read time
+				if (input.readTime && input.readTime > 0) {
+					analyticsUpdate.averageReadTime = sql`
+            (COALESCE(${blogPostAnalytics.averageReadTime}, 0) * COALESCE(${blogPostAnalytics.viewCount}, 0) + ${input.readTime}) /
+            (COALESCE(${blogPostAnalytics.viewCount}, 0) + 1)
+          `;
+				}
+
+				// Try to update analytics
+				const updated = await ctx.db
+					.update(blogPostAnalytics)
+					.set(analyticsUpdate)
+					.where(eq(blogPostAnalytics.postId, input.postId))
+					.returning({
+						viewCount: blogPostAnalytics.viewCount,
+						uniqueViewCount: blogPostAnalytics.uniqueViewCount,
+						averageReadTime: blogPostAnalytics.averageReadTime,
+					})
+					.get();
+
+				// If analytics record doesn't exist, create it
+				if (!updated) {
+					const initialAnalytics = {
+						postId: input.postId,
+						viewCount: 1,
+						uniqueViewCount: 1,
+						registeredViewCount: isRegisteredUser ? 1 : 0,
+						anonViewCount: isRegisteredUser ? 0 : 1,
+						averageReadTime: input.readTime ?? 0,
+						lastViewedAt: now,
+						updatedAt: now,
+						createdAt: now,
+					};
+					await ctx.db.insert(blogPostAnalytics).values(initialAnalytics);
+
+					return {
+						success: true,
+						viewCount: 1,
+						uniqueViewCount: 1,
+						averageReadTime: input.readTime ?? 0,
+						debounced: false,
+						isNewVisitor: true,
+					};
+				}
+
+				return {
+					success: true,
+					viewCount: updated.viewCount,
+					uniqueViewCount: updated.uniqueViewCount,
+					averageReadTime: updated.averageReadTime,
+					debounced: false,
+					isNewVisitor: !anyPreviousView,
+				};
+			}
+
+			// Recent view exists: do not increment analytics counters
+			return {
+				success: true,
+				debounced: true,
+				isNewVisitor: !anyPreviousView,
+			};
 		}),
 });
