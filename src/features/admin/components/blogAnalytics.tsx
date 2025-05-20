@@ -3,6 +3,11 @@
 import { BarChart3, TrendingUp } from "lucide-react";
 import { BlogAnalyticsSkeleton } from "@/components/skeletons/blogAnalyticsSkeleton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { api } from "@/trpc/react";
 import { TopPostRow } from "./topPostRow";
 
@@ -50,12 +55,21 @@ export function BlogAnalytics() {
 						<BarChart3 className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl">
+						<div className="font-bold text-2xl flex items-baseline gap-1 w-fit">
 							{numberFormatter.format(data.totalStats.totalViews)}
+							<span className="text-base text-muted-foreground">views</span>
 						</div>
-						<p className="text-muted-foreground text-xs">
-							All-time blog post views
-						</p>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<p className="text-muted-foreground text-xs cursor-help underline decoration-dotted w-fit">
+									All-time blog post views
+								</p>
+							</TooltipTrigger>
+							<TooltipContent>
+								This is the total number of times all your blog posts have been
+								viewed, including repeat views by the same visitor.
+							</TooltipContent>
+						</Tooltip>
 					</CardContent>
 				</Card>
 
@@ -66,13 +80,25 @@ export function BlogAnalytics() {
 						</CardTitle>
 						<TrendingUp className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
+
 					<CardContent>
-						<div className="font-bold text-2xl">
+						<div className="font-bold text-2xl flex items-baseline gap-1">
 							{numberFormatter.format(
 								data.totalStats.averageReadTimeAcrossAllPosts,
 							)}
+							<span className="text-base text-muted-foreground">min</span>
 						</div>
-						<p className="text-muted-foreground text-xs">Average read time</p>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<p className="text-muted-foreground text-xs cursor-help underline decoration-dotted w-fit">
+									Average read time
+								</p>
+							</TooltipTrigger>
+							<TooltipContent align="start">
+								This is the average estimated time (in minutes) readers spend on
+								your posts, calculated across all your published content.
+							</TooltipContent>
+						</Tooltip>
 					</CardContent>
 				</Card>
 			</div>
