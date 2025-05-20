@@ -1,5 +1,6 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { MediaType } from "@/@types";
 import { games } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
@@ -83,6 +84,14 @@ export const gameRouter = createTRPCRouter({
 				publisher: z.array(z.string()).optional(),
 				hidden: z.boolean().optional(),
 				conferenceId: z.number().optional(),
+				media: z
+					.array(
+						z.object({
+							type: z.nativeEnum(MediaType),
+							link: z.string().url(),
+						}),
+					)
+					.optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -104,6 +113,7 @@ export const gameRouter = createTRPCRouter({
 				publisher: data.publisher
 					? sql`${JSON.stringify(data.publisher)}`
 					: undefined,
+				media: data.media,
 			};
 
 			const game = await ctx.db

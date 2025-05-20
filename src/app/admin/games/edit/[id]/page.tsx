@@ -7,9 +7,11 @@ import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
 import { MediaType } from "@/@types/db";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Form,
 	FormControl,
@@ -59,11 +61,9 @@ export default function EditGamePage() {
 
 	const utils = api.useUtils();
 
-	// Fetch conferences for the dropdown
 	const { data: conferences, isLoading: isLoadingConferences } =
 		api.conference.getAll.useQuery();
 
-	// Fetch the game data
 	const {
 		data: game,
 		isLoading,
@@ -76,11 +76,11 @@ export default function EditGamePage() {
 		},
 	);
 
-	// Update game mutation
 	const updateGameMutation = api.game.update.useMutation({
 		onSuccess: () => {
 			toast.success("Game updated successfully");
-			utils.game.getAll.invalidate();
+			utils.game.getAll.invalidate(); // Invalidate to refetch list
+			utils.game.getById.invalidate({ id: gameId }); // Invalidate specific game
 			router.push("/admin/games");
 		},
 		onError: (error) => {
@@ -99,12 +99,7 @@ export default function EditGamePage() {
 			developer: [],
 			publisher: [],
 			hidden: false,
-			media: [
-				{
-					type: MediaType.Video,
-					link: "",
-				},
-			],
+			media: [{ type: MediaType.Video, link: "" }],
 		},
 	});
 
@@ -113,7 +108,6 @@ export default function EditGamePage() {
 		name: "media",
 	});
 
-	// Update form values when game data is loaded
 	useEffect(() => {
 		if (game) {
 			form.reset({
@@ -131,18 +125,12 @@ export default function EditGamePage() {
 							type: m.type as MediaType,
 							link: m.link,
 						}))
-					: [
-							{
-								type: MediaType.Video,
-								link: "",
-							},
-						],
+					: [{ type: MediaType.Video, link: "" }],
 			});
 		}
-	}, [game, form]);
+	}, [game, form.reset]);
 
 	function onSubmit(data: GameFormValues) {
-		// First update the game
 		updateGameMutation.mutate({
 			id: gameId,
 			title: data.title,
@@ -154,17 +142,15 @@ export default function EditGamePage() {
 			publisher: data.publisher,
 			hidden: data.hidden,
 			conferenceId: data.conferenceId,
+			media: data.media,
 		});
-
-		// TODO: Add media update functionality if needed
 	}
 
-	// Convert comma-separated string inputs to arrays
 	const handleArrayInput = (
 		value: string,
 		field: { onChange: (value: string[]) => void },
 	) => {
-		if (!value) {
+		if (!value.trim()) {
 			field.onChange([]);
 			return;
 		}
@@ -172,9 +158,8 @@ export default function EditGamePage() {
 		field.onChange(array);
 	};
 
-	// Convert arrays back to comma-separated strings for display
 	const arrayToString = (array: string[] | undefined) => {
-		if (!array || array?.length === 0) return "";
+		if (!array || array.length === 0) return "";
 		return array.join(", ");
 	};
 
@@ -240,13 +225,11 @@ export default function EditGamePage() {
 					<Form {...form}>
 						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 							<div className="space-y-8">
-								{/* Basic Details */}
 								<div className="space-y-4">
 									<h3 className="font-semibold text-xl tracking-tight">
 										Basic Details
 									</h3>
 									<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-										{/* Title */}
 										<FormField
 											control={form.control}
 											name="title"
@@ -260,8 +243,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Release Date */}
 										<FormField
 											control={form.control}
 											name="releaseDate"
@@ -281,13 +262,11 @@ export default function EditGamePage() {
 									</div>
 								</div>
 
-								{/* Game Details */}
 								<div className="space-y-4">
 									<h3 className="font-semibold text-xl tracking-tight">
 										Game Details
 									</h3>
 									<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-										{/* Genres */}
 										<FormField
 											control={form.control}
 											name="genres"
@@ -310,8 +289,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Exclusive */}
 										<FormField
 											control={form.control}
 											name="exclusive"
@@ -336,8 +313,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Features */}
 										<FormField
 											control={form.control}
 											name="features"
@@ -360,8 +335,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Developer */}
 										<FormField
 											control={form.control}
 											name="developer"
@@ -384,8 +357,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Publisher */}
 										<FormField
 											control={form.control}
 											name="publisher"
@@ -408,8 +379,6 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Conference */}
 										<FormField
 											control={form.control}
 											name="conferenceId"
@@ -417,8 +386,14 @@ export default function EditGamePage() {
 												<FormItem>
 													<FormLabel className="mb-2">Conference</FormLabel>
 													<Select
+														// Add key here
+														key={
+															isLoadingConferences
+																? "loading"
+																: field.value?.toString() || "loaded-empty"
+														}
 														onValueChange={(value) =>
-															field.onChange(Number(value))
+															field.onChange(value ? Number(value) : undefined)
 														}
 														value={field.value?.toString() || ""}
 														disabled={isLoadingConferences}
@@ -446,19 +421,15 @@ export default function EditGamePage() {
 												</FormItem>
 											)}
 										/>
-
-										{/* Hidden */}
 										<FormField
 											control={form.control}
 											name="hidden"
 											render={({ field }) => (
-												<FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+												<FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-md border p-4">
 													<FormControl>
-														<input
-															type="checkbox"
+														<Checkbox
 															checked={field.value}
-															onChange={field.onChange}
-															className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+															onCheckedChange={field.onChange}
 														/>
 													</FormControl>
 													<div className="space-y-1 leading-none">
@@ -467,13 +438,13 @@ export default function EditGamePage() {
 															Hide this game from the public site
 														</FormDescription>
 													</div>
+													<FormMessage />
 												</FormItem>
 											)}
 										/>
 									</div>
 								</div>
 
-								{/* Media Section */}
 								<div className="space-y-4">
 									<div className="flex items-center justify-between">
 										<h3 className="font-semibold text-xl tracking-tight">
@@ -491,10 +462,9 @@ export default function EditGamePage() {
 											Add Media
 										</Button>
 									</div>
-
-									{fields.map((field, index) => (
+									{fields.map((item, index) => (
 										<div
-											key={field.id}
+											key={item.id}
 											className="flex items-end gap-4 rounded-lg border p-4"
 										>
 											<FormField
@@ -507,7 +477,7 @@ export default function EditGamePage() {
 															onValueChange={(value) =>
 																field.onChange(value as MediaType)
 															}
-															defaultValue={field.value}
+															defaultValue={field.value} // Use defaultValue for type as it's part of an array
 														>
 															<FormControl>
 																<SelectTrigger>
@@ -527,7 +497,6 @@ export default function EditGamePage() {
 													</FormItem>
 												)}
 											/>
-
 											<FormField
 												control={form.control}
 												name={`media.${index}.link`}
@@ -541,18 +510,27 @@ export default function EditGamePage() {
 													</FormItem>
 												)}
 											/>
-
 											<Button
 												type="button"
 												variant="ghost"
 												size="icon"
 												onClick={() => remove(index)}
-												disabled={fields?.length === 1}
+												disabled={fields.length <= 1} // Ensure at least one media item remains if schema requires it
 											>
 												<Trash2 className="h-4 w-4" />
 											</Button>
 										</div>
 									))}
+									{form.formState.errors.media && !fields.length && (
+										<p className="font-medium text-destructive text-sm">
+											{form.formState.errors.media.message}
+										</p>
+									)}
+									{form.formState.errors.media?.root && (
+										<p className="font-medium text-destructive text-sm">
+											{form.formState.errors.media.root.message}
+										</p>
+									)}
 								</div>
 							</div>
 
