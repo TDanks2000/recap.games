@@ -18,7 +18,11 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 
-export default function StreamsList() {
+interface Props {
+	searchQuery: string;
+}
+
+export default function StreamsList({ searchQuery }: Props) {
 	const utils = api.useUtils();
 	const { data: streams, isLoading } = api.stream.getAll.useQuery();
 	const [streamToDelete, setStreamToDelete] = useState<number | null>(null);
@@ -48,7 +52,6 @@ export default function StreamsList() {
 		return (
 			<div className="space-y-4">
 				{Array.from({ length: 3 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a list of skeletons
 					<div key={`stream-skeleton-${i}`} className="space-y-2">
 						<Skeleton className="h-6 w-3/4" />
 						<Skeleton className="h-4 w-1/2" />
@@ -59,14 +62,27 @@ export default function StreamsList() {
 		);
 	}
 
-	if (!streams || streams?.length === 0) {
+	if (!streams || streams.length === 0) {
 		return <p className="text-muted-foreground">No streams found.</p>;
+	}
+
+	// --- FILTERING LOGIC ---
+	const filteredStreams = streams.filter((stream) =>
+		stream.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+	);
+
+	if (filteredStreams.length === 0) {
+		return (
+			<p className="text-muted-foreground">
+				No streams found{searchQuery ? " for this search." : "."}
+			</p>
+		);
 	}
 
 	return (
 		<>
 			<div className="max-h-[600px] space-y-4 overflow-y-auto pr-2">
-				{streams.map((stream) => (
+				{filteredStreams.map((stream) => (
 					<div key={stream.id} className="space-y-2">
 						<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 							<div className="space-y-1">

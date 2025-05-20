@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -26,6 +26,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
 
 const streamFormSchema = z.object({
@@ -46,6 +47,7 @@ export default function EditStreamPage() {
 	const params = useParams();
 	const router = useRouter();
 	const streamId = Number(params.id);
+	const [activeTab, setActiveTab] = useState("details");
 
 	const utils = api.useUtils();
 
@@ -167,114 +169,159 @@ export default function EditStreamPage() {
 			</div>
 			<Separator />
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Edit {stream.title}</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-							<div className="space-y-6">
-								{/* Stream Title */}
-								<FormField
-									control={form.control}
-									name="title"
-									render={({ field }) => (
-										<FormItem className="flex min-h-20 flex-col justify-start">
-											<FormLabel className="mb-2">Stream Title</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Official Stream"
-													className="w-full"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage className="text-xs" />
-										</FormItem>
-									)}
-								/>
+			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+				<TabsList className="grid w-full max-w-md grid-cols-2">
+					<TabsTrigger value="details">Stream Details</TabsTrigger>
+					<TabsTrigger value="related-games">Related Games</TabsTrigger>
+				</TabsList>
 
-								{/* Stream Link */}
-								<FormField
-									control={form.control}
-									name="link"
-									render={({ field }) => (
-										<FormItem className="flex min-h-20 flex-col justify-start">
-											<FormLabel className="mb-2">Stream URL</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="https://youtube.com/watch?v=..."
-													className="w-full"
-													{...field}
-												/>
-											</FormControl>
-											<FormDescription className="text-xs">
-												YouTube, Twitch, or other streaming platform URL
-											</FormDescription>
-											<FormMessage className="text-xs" />
-										</FormItem>
-									)}
-								/>
-
-								{/* Conference */}
-								<FormField
-									control={form.control}
-									name="conferenceId"
-									render={({ field }) => (
-										<FormItem>
-											<FormLabel className="mb-2">Conference</FormLabel>
-											<Select
-												onValueChange={(value) => field.onChange(Number(value))}
-												value={field.value?.toString() || ""}
-												disabled={isLoadingConferences}
-											>
-												<FormControl>
-													<SelectTrigger className="w-full">
-														<SelectValue placeholder="Select a conference" />
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													{conferences?.map((conference) => (
-														<SelectItem
-															key={conference.id}
-															value={conference.id.toString()}
-														>
-															{conference.name}
-														</SelectItem>
-													))}
-												</SelectContent>
-											</Select>
-											<FormDescription className="text-xs">
-												Associate with a conference
-											</FormDescription>
-											<FormMessage className="text-xs" />
-										</FormItem>
-									)}
-								/>
-							</div>
-
-							<div className="flex justify-end pt-6">
-								<Button
-									type="submit"
-									disabled={updateStreamMutation.isPending}
-									className="relative min-w-[120px]"
+				<TabsContent value="details" className="mt-6">
+					<Card>
+						<CardHeader>
+							<CardTitle>Edit {stream.title}</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<Form {...form}>
+								<form
+									onSubmit={form.handleSubmit(onSubmit)}
+									className="space-y-8"
 								>
-									{updateStreamMutation.isPending ? (
-										<>
-											<span className="opacity-0">Update Stream</span>
-											<span className="absolute inset-0 flex items-center justify-center">
-												Updating...
-											</span>
-										</>
-									) : (
-										"Update Stream"
-									)}
-								</Button>
+									<div className="space-y-6">
+										<div className="space-y-4">
+											<h3 className="font-semibold text-xl tracking-tight">
+												Stream Information
+											</h3>
+											<div className="grid gap-6 md:grid-cols-2">
+												{/* Stream Title */}
+												<FormField
+													control={form.control}
+													name="title"
+													render={({ field }) => (
+														<FormItem className="flex min-h-20 flex-col justify-start">
+															<FormLabel className="mb-2">
+																Stream Title
+															</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Official Stream"
+																	className="w-full"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage className="text-xs" />
+														</FormItem>
+													)}
+												/>
+
+												{/* Stream Link */}
+												<FormField
+													control={form.control}
+													name="link"
+													render={({ field }) => (
+														<FormItem className="flex min-h-20 flex-col justify-start">
+															<FormLabel className="mb-2">Stream URL</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="https://youtube.com/watch?v=..."
+																	className="w-full"
+																	{...field}
+																/>
+															</FormControl>
+															<FormDescription className="text-xs">
+																YouTube, Twitch, or other streaming platform URL
+															</FormDescription>
+															<FormMessage className="text-xs" />
+														</FormItem>
+													)}
+												/>
+											</div>
+
+											{/* Conference */}
+											<FormField
+												control={form.control}
+												name="conferenceId"
+												render={({ field }) => (
+													<FormItem className="flex min-h-20 flex-col justify-start">
+														<FormLabel className="mb-2">Conference</FormLabel>
+														<Select
+															onValueChange={(value) =>
+																field.onChange(Number(value))
+															}
+															value={field.value?.toString() || ""}
+															disabled={isLoadingConferences}
+														>
+															<FormControl>
+																<SelectTrigger className="w-full">
+																	<SelectValue placeholder="Select a conference" />
+																</SelectTrigger>
+															</FormControl>
+															<SelectContent>
+																{conferences?.map((conference) => (
+																	<SelectItem
+																		key={conference.id}
+																		value={conference.id.toString()}
+																	>
+																		{conference.name}
+																	</SelectItem>
+																))}
+															</SelectContent>
+														</Select>
+														<FormDescription className="text-xs">
+															Associate with a conference
+														</FormDescription>
+														<FormMessage className="text-xs" />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+
+									<div className="flex justify-end pt-6">
+										<Button
+											type="submit"
+											disabled={updateStreamMutation.isPending}
+											className="relative min-w-[120px]"
+										>
+											{updateStreamMutation.isPending ? (
+												<>
+													<span className="opacity-0">Update Stream</span>
+													<span className="absolute inset-0 flex items-center justify-center">
+														Updating...
+													</span>
+												</>
+											) : (
+												"Update Stream"
+											)}
+										</Button>
+									</div>
+								</form>
+							</Form>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="related-games" className="mt-6">
+					<Card>
+						<CardHeader>
+							<CardTitle>Related Games</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-4">
+								<p className="text-sm text-muted-foreground">
+									Games that were announced or showcased during this stream.
+								</p>
+								{/* This section will be implemented in the future when the API is available */}
+								<div className="rounded-md bg-muted p-4 text-sm">
+									<p>
+										No related games found. Game association feature coming
+										soon.
+									</p>
+								</div>
 							</div>
-						</form>
-					</Form>
-				</CardContent>
-			</Card>
+						</CardContent>
+					</Card>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }

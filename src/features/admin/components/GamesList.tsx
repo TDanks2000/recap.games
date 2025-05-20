@@ -18,7 +18,11 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 
-export default function GamesList() {
+interface Props {
+	searchQuery: string;
+}
+
+export default function GamesList({ searchQuery }: Props) {
 	const utils = api.useUtils();
 	const { data: games, isLoading } = api.game.getAll.useQuery({
 		includeHidden: true,
@@ -50,7 +54,6 @@ export default function GamesList() {
 		return (
 			<div className="space-y-4">
 				{Array.from({ length: 3 }).map((_, i) => (
-					// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a list of skeletons
 					<div key={`game-skeleton-${i}`} className="space-y-2">
 						<Skeleton className="h-6 w-3/4" />
 						<Skeleton className="h-4 w-1/2" />
@@ -61,14 +64,27 @@ export default function GamesList() {
 		);
 	}
 
-	if (!games || games?.length === 0) {
+	if (!games || games.length === 0) {
 		return <p className="text-muted-foreground">No games found.</p>;
+	}
+
+	// --- FILTERING LOGIC ---
+	const filteredGames = games.filter((game) =>
+		game.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+	);
+
+	if (filteredGames.length === 0) {
+		return (
+			<p className="text-muted-foreground">
+				No games found{searchQuery ? " for this search." : "."}
+			</p>
+		);
 	}
 
 	return (
 		<>
 			<div className="max-h-[600px] space-y-4 overflow-y-auto pr-2">
-				{games.map((game) => (
+				{filteredGames.map((game) => (
 					<div key={game.id} className="space-y-2">
 						<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 							<div className="space-y-1">

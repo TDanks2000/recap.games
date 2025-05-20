@@ -1,5 +1,3 @@
-"use client";
-
 import { format } from "date-fns";
 import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -19,7 +17,11 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/trpc/react";
 
-export default function ConferencesList() {
+interface Props {
+	searchQuery?: string;
+}
+
+export default function ConferencesList({ searchQuery = "" }: Props) {
 	const utils = api.useUtils();
 	const { data: conferences, isLoading } = api.conference.getAll.useQuery();
 	const [conferenceToDelete, setConferenceToDelete] = useState<number | null>(
@@ -67,14 +69,27 @@ export default function ConferencesList() {
 		);
 	}
 
-	if (!conferences || conferences?.length === 0) {
+	if (!conferences || conferences.length === 0) {
 		return <p className="text-muted-foreground">No conferences found.</p>;
+	}
+
+	// --- FILTERING LOGIC ---
+	const filteredConferences = conferences.filter((conference) =>
+		conference.name.toLowerCase().includes(searchQuery.trim().toLowerCase()),
+	);
+
+	if (filteredConferences.length === 0) {
+		return (
+			<p className="text-muted-foreground">
+				No conferences found{searchQuery ? " for this search." : "."}
+			</p>
+		);
 	}
 
 	return (
 		<>
 			<div className="max-h-[600px] space-y-4 overflow-y-auto pr-2">
-				{conferences.map((conference) => (
+				{filteredConferences.map((conference) => (
 					<div key={conference.id} className="space-y-2">
 						<div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
 							<div className="space-y-1">

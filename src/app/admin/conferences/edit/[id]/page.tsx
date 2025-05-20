@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api } from "@/trpc/react";
 
 const conferenceFormSchema = z.object({
@@ -33,6 +34,7 @@ export default function EditConferencePage() {
 	const params = useParams();
 	const router = useRouter();
 	const conferenceId = Number(params.id);
+	const [activeTab, setActiveTab] = useState("details");
 
 	const utils = api.useUtils();
 
@@ -162,134 +164,214 @@ export default function EditConferencePage() {
 			</div>
 			<Separator />
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Edit {conference.name}</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Form {...form}>
-						<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-							<div className="space-y-6">
-								{/* Conference Name */}
-								<FormField
-									control={form.control}
-									name="name"
-									render={({ field }) => (
-										<FormItem className="flex min-h-20 flex-col justify-start">
-											<FormLabel className="mb-2">Conference Name</FormLabel>
-											<FormControl>
-												<Input
-													placeholder="Nintendo, Ubisoft, Xbox, etc."
-													className="w-full"
-													{...field}
-												/>
-											</FormControl>
-											<FormMessage className="text-xs" />
-										</FormItem>
-									)}
-								/>
+			<Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+				<TabsList className="grid w-full max-w-md grid-cols-2">
+					<TabsTrigger value="details">Conference Details</TabsTrigger>
+					<TabsTrigger value="streams">
+						Streams
+						{conference?.streams?.length > 0 && (
+							<span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+								{conference.streams.length}
+							</span>
+						)}
+					</TabsTrigger>
+				</TabsList>
 
-								<div className="grid gap-6 md:grid-cols-2">
-									{/* Start Time */}
-									<FormField
-										control={form.control}
-										name="startTime"
-										render={({ field }) => (
-											<FormItem className="flex min-h-20 flex-col justify-start">
-												<FormLabel className="mb-2">Start Time</FormLabel>
-												<FormControl>
-													<Input
-														type="datetime-local"
-														className="w-full"
-														{...field}
-													/>
-												</FormControl>
-												<FormDescription className="text-xs">
-													When the conference begins
-												</FormDescription>
-												<FormMessage className="text-xs" />
-											</FormItem>
-										)}
-									/>
-
-									{/* End Time */}
-									<FormField
-										control={form.control}
-										name="endTime"
-										render={({ field }) => (
-											<FormItem className="flex min-h-20 flex-col justify-start">
-												<FormLabel className="mb-2">End Time</FormLabel>
-												<FormControl>
-													<Input
-														type="datetime-local"
-														className="w-full"
-														{...field}
-													/>
-												</FormControl>
-												<FormDescription className="text-xs">
-													When the conference ends
-												</FormDescription>
-												<FormMessage className="text-xs" />
-											</FormItem>
-										)}
-									/>
-								</div>
-							</div>
-
-							<div className="flex justify-end pt-6">
-								<Button
-									type="submit"
-									disabled={updateConferenceMutation.isPending}
-									className="relative min-w-[120px]"
+				<TabsContent value="details" className="mt-6">
+					<Card>
+						<CardHeader>
+							<CardTitle>Edit {conference.name}</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<Form {...form}>
+								<form
+									onSubmit={form.handleSubmit(onSubmit)}
+									className="space-y-8"
 								>
-									{updateConferenceMutation.isPending ? (
-										<>
-											<span className="opacity-0">Update Conference</span>
-											<span className="absolute inset-0 flex items-center justify-center">
-												Updating...
-											</span>
-										</>
-									) : (
-										"Update Conference"
-									)}
-								</Button>
-							</div>
-						</form>
-					</Form>
-				</CardContent>
-			</Card>
+									<div className="space-y-6">
+										{/* Conference Name */}
+										<FormField
+											control={form.control}
+											name="name"
+											render={({ field }) => (
+												<FormItem className="flex min-h-20 flex-col justify-start">
+													<FormLabel className="mb-2">
+														Conference Name
+													</FormLabel>
+													<FormControl>
+														<Input
+															placeholder="Nintendo, Ubisoft, Xbox, etc."
+															className="w-full"
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage className="text-xs" />
+												</FormItem>
+											)}
+										/>
 
-			{/* Streams Section */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Associated Streams</CardTitle>
-				</CardHeader>
-				<CardContent>
-					{conference?.streams?.length > 0 ? (
-						<div className="space-y-4">
-							{conference.streams.map((stream) => (
-								<div key={stream.id} className="rounded-md border p-4">
-									<h3 className="font-medium">{stream.title}</h3>
-									<p className="text-muted-foreground text-sm">
-										<a
-											href={stream.link}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="text-blue-500 hover:underline"
+										<div className="grid gap-6 md:grid-cols-2">
+											{/* Start Time */}
+											<FormField
+												control={form.control}
+												name="startTime"
+												render={({ field }) => (
+													<FormItem className="flex min-h-20 flex-col justify-start">
+														<FormLabel className="mb-2">Start Time</FormLabel>
+														<FormControl>
+															<Input
+																type="datetime-local"
+																className="w-full"
+																{...field}
+															/>
+														</FormControl>
+														<FormDescription className="text-xs">
+															When the conference begins
+														</FormDescription>
+														<FormMessage className="text-xs" />
+													</FormItem>
+												)}
+											/>
+
+											{/* End Time */}
+											<FormField
+												control={form.control}
+												name="endTime"
+												render={({ field }) => (
+													<FormItem className="flex min-h-20 flex-col justify-start">
+														<FormLabel className="mb-2">End Time</FormLabel>
+														<FormControl>
+															<Input
+																type="datetime-local"
+																className="w-full"
+																{...field}
+															/>
+														</FormControl>
+														<FormDescription className="text-xs">
+															When the conference ends
+														</FormDescription>
+														<FormMessage className="text-xs" />
+													</FormItem>
+												)}
+											/>
+										</div>
+									</div>
+
+									<div className="flex justify-end pt-6">
+										<Button
+											type="submit"
+											disabled={updateConferenceMutation.isPending}
+											className="relative min-w-[120px]"
 										>
-											{stream.link}
-										</a>
-									</p>
+											{updateConferenceMutation.isPending ? (
+												<>
+													<span className="opacity-0">Update Conference</span>
+													<span className="absolute inset-0 flex items-center justify-center">
+														Updating...
+													</span>
+												</>
+											) : (
+												"Update Conference"
+											)}
+										</Button>
+									</div>
+								</form>
+							</Form>
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="streams" className="mt-6">
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between">
+							<CardTitle>Associated Streams</CardTitle>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={() =>
+									router.push(
+										`/admin/streams/create?conferenceId=${conferenceId}`,
+									)
+								}
+							>
+								Add Stream
+							</Button>
+						</CardHeader>
+						<CardContent>
+							{conference?.streams?.length > 0 ? (
+								<div className="space-y-4">
+									{conference.streams.map((stream) => (
+										<div
+											key={stream.id}
+											className="flex flex-col md:flex-row md:items-center justify-between rounded-md border p-4 hover:bg-accent/50 transition-colors"
+										>
+											<div className="space-y-1">
+												<h3 className="font-medium">{stream.title}</h3>
+												<p className="text-muted-foreground text-sm">
+													<a
+														href={stream.link}
+														target="_blank"
+														rel="noopener noreferrer"
+														className="text-blue-500 hover:underline"
+													>
+														{stream.link}
+													</a>
+												</p>
+											</div>
+											<div className="flex space-x-2 mt-2 md:mt-0">
+												<Button
+													variant="outline"
+													size="sm"
+													onClick={() =>
+														router.push(`/admin/streams/edit/${stream.id}`)
+													}
+												>
+													Edit
+												</Button>
+												<Button
+													variant="ghost"
+													size="sm"
+													className="text-red-500 hover:text-red-700 hover:bg-red-100"
+													onClick={() => {
+														if (
+															confirm(
+																`Are you sure you want to delete ${stream.title}?`,
+															)
+														) {
+															// Add delete functionality here
+															toast.info(
+																"Delete functionality to be implemented",
+															);
+														}
+													}}
+												>
+													Delete
+												</Button>
+											</div>
+										</div>
+									))}
 								</div>
-							))}
-						</div>
-					) : (
-						<p className="text-muted-foreground">
-							No streams associated with this conference.
-						</p>
-					)}
-				</CardContent>
-			</Card>
+							) : (
+								<div className="flex flex-col items-center justify-center py-8 text-center">
+									<p className="text-muted-foreground mb-4">
+										No streams associated with this conference.
+									</p>
+									<Button
+										variant="outline"
+										onClick={() =>
+											router.push(
+												`/admin/streams/create?conferenceId=${conferenceId}`,
+											)
+										}
+									>
+										Add Your First Stream
+									</Button>
+								</div>
+							)}
+						</CardContent>
+					</Card>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }

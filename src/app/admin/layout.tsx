@@ -18,7 +18,7 @@ export default async function AdminLayout({
 
 	return (
 		<div className="flex h-screen w-full overflow-hidden">
-			<AdminSidebar>{children}</AdminSidebar>
+			<AdminSidebar session={session}>{children}</AdminSidebar>
 		</div>
 	);
 }

@@ -89,7 +89,7 @@ export default function ConferenceForm({ formIndex }: ConferenceFormProps) {
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className="mx-auto max-w-2xl space-y-8 rounded-lg bg-card p-6 shadow-sm"
+				className="mx-auto space-y-8 rounded-lg"
 			>
 				<div className="space-y-6">
 					<div className="space-y-4">
