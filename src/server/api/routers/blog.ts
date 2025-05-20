@@ -141,6 +141,7 @@ export const blogRouter = createTRPCRouter({
 				},
 			};
 		}),
+
 	// Fetch all published or due-scheduled blog posts with author info and analytics
 	listPosts: publicProcedure.query(async ({ ctx }) => {
 		const now = Math.floor(Date.now() / 1000);
@@ -367,16 +368,24 @@ export const blogRouter = createTRPCRouter({
 					),
 				)
 				.get();
-
 			// Always record the view for analytics purposes
-			await ctx.db.insert(blogPostViews).values({
-				postId: input.postId,
-				userId,
-				sessionId,
-				referrer: input.referrer ?? null,
-				readTime: input.readTime ?? null,
-				viewedAt: now,
-			});
+			await ctx.db
+				.insert(blogPostViews)
+				.values({
+					postId: input.postId,
+					userId,
+					sessionId,
+					referrer: input.referrer ?? null,
+					readTime: input.readTime ?? null,
+					viewedAt: now,
+				})
+				.catch((error) => {
+					if (error.code === "SQLITE_CONSTRAINT_FOREIGNKEY") {
+						console.error("Row already exists");
+					} else {
+						console.error("Error recording view:", error);
+					}
+				});
 
 			// Only update analytics if this view isn't debounced
 			if (!recentView) {

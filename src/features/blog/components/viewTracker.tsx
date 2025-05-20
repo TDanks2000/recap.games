@@ -1,78 +1,101 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
-import { api } from "@/trpc/react";
+import { api, type RouterInputs } from "@/trpc/react";
+
+type RecordViewPayload = RouterInputs["blog"]["recordView"];
 
 interface ViewTrackerProps {
 	postId: number;
 }
 
-/**
- * Client-side component that records a view when a blog post is visited
- * Uses debouncing to prevent multiple counts during a single visit
- */
 export function ViewTracker({ postId }: ViewTrackerProps) {
-	const [hasRecorded, setHasRecorded] = useState(false);
+	const [hasRecordedInitialView, setHasRecordedInitialView] = useState(false);
+	const startTimeRef = useRef<number | null>(null);
+	const hasSentReadTimeRef = useRef(false); // Prevents sending read time multiple times
 
-	// Get or create a session ID for anonymous users
-	const getSessionId = useCallback(() => {
-		// Check if we already have a session ID in localStorage
+	const getSessionId = useCallback((): string => {
+		if (typeof window === "undefined") {
+			return "ssr-placeholder-session-id";
+		}
 		let sessionId = localStorage.getItem("session_id");
-
-		// If not, create a new one
 		if (!sessionId) {
-			// Generate a simple random ID with timestamp for uniqueness
 			sessionId = uuid();
 			localStorage.setItem("session_id", sessionId);
 		}
-
 		return sessionId;
 	}, []);
 
-	const recordView = api.blog.recordView.useMutation();
+	const recordViewMutation = api.blog.recordView.useMutation();
+
+	const sendReadTimeData = useCallback(() => {
+		if (
+			!startTimeRef.current ||
+			hasSentReadTimeRef.current ||
+			typeof window === "undefined"
+		) {
+			return;
+		}
+
+		const readTime = Math.floor((Date.now() - startTimeRef.current) / 1000);
+
+		if (readTime > 5) {
+			const sessionId = getSessionId();
+			const payload: RecordViewPayload = {
+				postId,
+				sessionId,
+				readTime,
+			};
+			recordViewMutation.mutate(payload);
+			hasSentReadTimeRef.current = true; // Mark as sent
+		}
+	}, [postId, getSessionId, recordViewMutation]);
 
 	useEffect(() => {
-		// Only run on client-side
-		if (typeof window === "undefined") return;
+		if (typeof window === "undefined" || !postId) {
+			return;
+		}
 
-		// Only record the view once per component mount
-		if (!hasRecorded && postId) {
+		if (!hasRecordedInitialView) {
 			const sessionId = getSessionId();
 			const referrer = document.referrer || undefined;
-
-			// Record the view
-			recordView.mutate({
+			const payload: RecordViewPayload = {
 				postId,
 				sessionId,
 				referrer,
-			});
-
-			setHasRecorded(true);
+			};
+			recordViewMutation.mutate(payload);
+			setHasRecordedInitialView(true);
+			startTimeRef.current = Date.now();
+			hasSentReadTimeRef.current = false; // Reset for new tracking session
 		}
 
-		// Start tracking read time
-		const startTime = Date.now();
-
-		return () => {
-			// When component unmounts, calculate read time
-			if (hasRecorded) {
-				const readTime = Math.floor((Date.now() - startTime) / 1000); // in seconds
-
-				// Only record read time if it's reasonable (more than 5 seconds)
-				if (readTime > 5) {
-					const sessionId = getSessionId();
-
-					recordView.mutate({
-						postId,
-						sessionId,
-						readTime,
-					});
-				}
+		const handleVisibilityChange = () => {
+			if (document.visibilityState === "hidden") {
+				sendReadTimeData();
 			}
 		};
-	}, [getSessionId, hasRecorded, postId, recordView]);
 
-	// This component doesn't render anything
+		const handlePageHide = () => {
+			sendReadTimeData();
+		};
+
+		document.addEventListener("visibilitychange", handleVisibilityChange);
+		window.addEventListener("pagehide", handlePageHide);
+
+		return () => {
+			sendReadTimeData(); // Attempt to send on unmount
+			document.removeEventListener("visibilitychange", handleVisibilityChange);
+			window.removeEventListener("pagehide", handlePageHide);
+		};
+	}, [
+		postId,
+		hasRecordedInitialView,
+		getSessionId,
+		recordViewMutation,
+		sendReadTimeData,
+	]);
+
 	return null;
 }

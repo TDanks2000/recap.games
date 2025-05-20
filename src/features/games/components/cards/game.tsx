@@ -90,8 +90,8 @@ export default function GameCard({
 						<Image
 							src={src}
 							alt={title || "Game"}
-							width={300}
-							height={160}
+							width={260}
+							height={130}
 							onError={() => setSrc("/icon.png")}
 							onLoad={() => setIsLoading(false)}
 							className={cn(
