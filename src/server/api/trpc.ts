@@ -141,14 +141,29 @@ export const protectedProcedure = t.procedure
  */
 export const adminProcedure = t.procedure
 	.use(timingMiddleware)
-	.use(({ ctx, next }) => {
-		if (!ctx.session?.user || ctx.session.user.role !== "ADMIN") {
-			throw new TRPCError({ code: "UNAUTHORIZED" });
+	.use(async ({ ctx, next }) => {
+		const { session } = ctx;
+
+		if (!session?.user || session.user.role !== "ADMIN") {
+			if (!session?.user) {
+				throw new TRPCError({
+					code: "UNAUTHORIZED",
+					message: "Authentication required. Please log in.",
+				});
+			} else {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Access denied. You do not have administrative privileges.",
+				});
+			}
 		}
+
 		return next({
 			ctx: {
-				// infers the `session` as non-nullable
-				session: { ...ctx.session, user: ctx.session.user },
+				session: {
+					...session,
+					user: session.user,
+				},
 			},
 		});
 	});
