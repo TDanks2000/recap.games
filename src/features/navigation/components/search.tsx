@@ -1,84 +1,197 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const NavBarSearch = () => {
 	const [open, setOpen] = useState(false);
+	const [value, setValue] = useState("");
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const pathname = usePathname();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
 
-	const toggleOpen = () => {
-		setOpen((prev) => {
-			if (!prev) inputRef.current?.focus();
-			return !prev;
-		});
-	};
+	// Initialize value from search params
+	useEffect(() => {
+		setValue(searchParams.get("search") ?? "");
+	}, [searchParams]);
 
-	const handleBlur = () => {
-		setTimeout(() => {
-			if (!document.activeElement?.closest(".search-container")) {
+	// Handle escape key
+	useEffect(() => {
+		const handleEscape = (e: KeyboardEvent) => {
+			if (e.key === "Escape" && open) {
+				setOpen(false);
+				inputRef.current?.blur();
+			}
+		};
+
+		document.addEventListener("keydown", handleEscape);
+		return () => document.removeEventListener("keydown", handleEscape);
+	}, [open]);
+
+	// Handle click outside
+	useEffect(() => {
+		const handleClickOutside = (e: MouseEvent) => {
+			if (
+				open &&
+				containerRef.current &&
+				!containerRef.current.contains(e.target as Node)
+			) {
 				setOpen(false);
 			}
-		}, 150);
-	};
+		};
 
-	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const value = e.target.value;
-		if (!value?.length) {
-			if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-			const params = new URLSearchParams(searchParams.toString());
-			params.delete("search");
-			router.push(`${pathname}?${params.toString()}`);
-			return;
-		}
-		if (value === searchParams.get("search")) return;
+		document.addEventListener("mousedown", handleClickOutside);
+		return () => document.removeEventListener("mousedown", handleClickOutside);
+	}, [open]);
+
+	const toggleOpen = useCallback(() => {
+		setOpen((prev) => {
+			const newOpen = !prev;
+			if (newOpen) {
+				// Small delay to ensure the input is rendered
+				setTimeout(() => inputRef.current?.focus(), 50);
+			}
+			return newOpen;
+		});
+	}, []);
+
+	const closeSearch = useCallback(() => {
+		setOpen(false);
+		inputRef.current?.blur();
+	}, []);
+
+	const clearSearch = useCallback(() => {
+		setValue("");
 		if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
-		debounceTimeout.current = setTimeout(() => {
-			const params = new URLSearchParams(searchParams.toString());
-			params.set("search", value);
-			router.push(`${pathname}?${params.toString()}`);
-		}, 300);
-	};
+		const params = new URLSearchParams(searchParams.toString());
+		params.delete("search");
+		router.push(`${pathname}?${params.toString()}`);
+		inputRef.current?.focus();
+	}, [pathname, router, searchParams]);
+
+	const handleChange = useCallback(
+		(e: React.ChangeEvent<HTMLInputElement>) => {
+			const newValue = e.target.value;
+			setValue(newValue);
+
+			if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+
+			if (!newValue?.length) {
+				const params = new URLSearchParams(searchParams.toString());
+				params.delete("search");
+				router.push(`${pathname}?${params.toString()}`);
+				return;
+			}
+
+			if (newValue === searchParams.get("search")) return;
+
+			debounceTimeout.current = setTimeout(() => {
+				const params = new URLSearchParams(searchParams.toString());
+				params.set("search", newValue);
+				router.push(`${pathname}?${params.toString()}`);
+			}, 300);
+		},
+		[pathname, router, searchParams],
+	);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLInputElement>) => {
+			if (e.key === "Enter") {
+				e.preventDefault();
+				if (debounceTimeout.current) {
+					clearTimeout(debounceTimeout.current);
+					const params = new URLSearchParams(searchParams.toString());
+					if (value) {
+						params.set("search", value);
+					} else {
+						params.delete("search");
+					}
+					router.push(`${pathname}?${params.toString()}`);
+				}
+			}
+		},
+		[pathname, router, searchParams, value],
+	);
 
 	return (
 		<div className="flex flex-1 items-center justify-end sm:justify-start">
-			<div className="search-container relative flex items-center gap-2">
-				{/* Search Button (Fixed on Right) */}
-				<Button
-					variant="secondary"
-					size="icon"
-					onClick={toggleOpen}
-					aria-label={open ? "Close search input" : "Open search input"}
-					className="relative z-10 flex-shrink-0"
-				>
-					<Search />
-				</Button>
-
-				{/* Search Input (Expands to the left) */}
+			<div
+				ref={containerRef}
+				className="search-container relative flex items-center"
+			>
+				{/* Search Input (Expands from the right) */}
 				<Suspense fallback={null}>
-					<Input
-						ref={inputRef}
-						defaultValue={searchParams.get("search") ?? ""}
-						onChange={handleChange}
-						type="text"
-						placeholder="Search Games or Conferences"
-						aria-label="Search Games or Conferences"
-						onBlur={handleBlur}
-						onFocus={() => setOpen(true)}
+					<div
 						className={cn(
-							"absolute right-0 rounded-md border border-border py-2 pr-[3.25rem] pl-4 transition-all duration-300 ease-in-out",
-							open ? "w-72 opacity-100" : "pointer-events-none w-0 opacity-0",
+							"relative overflow-hidden transition-all duration-300 ease-out",
+							open
+								? "w-44 sm:w-72 md:w-80 opacity-100"
+								: "w-0 opacity-0 pointer-events-none",
+						)}
+					>
+						<Input
+							ref={inputRef}
+							value={value}
+							onChange={handleChange}
+							onKeyDown={handleKeyDown}
+							type="text"
+							placeholder="Search games or conferences..."
+							aria-label="Search games or conferences"
+							className={cn(
+								"w-full pr-20 pl-4 py-2.5 text-sm",
+								"border-border/50 bg-background/95 backdrop-blur-sm",
+								"focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
+								"transition-all duration-200",
+								"placeholder:text-muted-foreground/70",
+							)}
+						/>
+						{/* Clear button */}
+						{value && (
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={clearSearch}
+								aria-label="Clear search"
+								className={cn(
+									"absolute right-12 top-1/2 -translate-y-1/2",
+									"h-6 w-6 p-0 hover:bg-muted/80",
+									"text-muted-foreground hover:text-foreground",
+									"transition-colors duration-200",
+								)}
+							>
+								<X className="h-3.5 w-3.5" />
+							</Button>
+						)}
+					</div>
+				</Suspense>
+
+				{/* Search Button */}
+				<Button
+					variant={open ? "default" : "secondary"}
+					size="icon"
+					onClick={open ? closeSearch : toggleOpen}
+					aria-label={open ? "Close search" : "Open search"}
+					className={cn(
+						"relative z-10 flex-shrink-0 ml-2",
+						"transition-all duration-200 ease-out",
+						"hover:scale-105 active:scale-95",
+						open && "shadow-md",
+					)}
+				>
+					<Search
+						className={cn(
+							"h-4 w-4 transition-transform duration-200",
+							open && "scale-110",
 						)}
 					/>
-				</Suspense>
+				</Button>
 			</div>
 		</div>
 	);
