@@ -1,3 +1,4 @@
+import type { HomeSearchParams } from "@/@types";
 import type { RouterOutputs } from "@/trpc/react";
 
 export type Conference = RouterOutputs["conference"]["getAll"][number];
@@ -35,4 +36,21 @@ export function sortConferences(conferences: Conference[]): Conference[] {
 		if (aCat !== bCat) return aCat - bCat;
 		return aTime - bTime;
 	});
+}
+
+export function filterAndSortConferences(
+	conferences: Conference[],
+	searchParams: HomeSearchParams,
+): Conference[] {
+	const search = searchParams.search?.toLowerCase() ?? "";
+
+	let filtered = conferences;
+
+	if (search.length > 0) {
+		filtered = filtered.filter((conf) =>
+			conf.name?.toLowerCase().includes(search),
+		);
+	}
+
+	return sortConferences(filtered);
 }

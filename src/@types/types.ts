@@ -15,4 +15,5 @@ export type HomeSearchParams = {
 	sort?: SortOption;
 	direction?: SortDirection;
 	conferenceOpen?: "true" | "false";
+	search?: string;
 };

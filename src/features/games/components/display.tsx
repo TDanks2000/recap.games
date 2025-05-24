@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import type { HomeSearchParams, PaginationOptions } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
 import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
-import { sortGames } from "@/lib";
 import { api } from "@/trpc/server";
+import { filterAndSortGames } from "../utils/filterAndSortGames";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
 import GamesSortClient from "./GamesSortClient";
@@ -22,21 +22,13 @@ export default async function GamesDisplay({
 		// api.conference.getAll(),
 	]);
 
-	// parse selected conference IDs from searchParams
+	const filteredGames = filterAndSortGames(games, searchParams);
+
+	// parse selected conference IDs from searchParams (for empty state message)
 	const selectedConferences = (searchParams.conferences ?? "")
 		.split(",")
 		.map((s) => Number(s))
 		.filter((n) => !Number.isNaN(n) && n > 0);
-
-	let filteredGames = games.filter(
-		(g) =>
-			selectedConferences.length === 0 ||
-			(g.conferenceId && selectedConferences.includes(g.conferenceId)),
-	);
-
-	const sort = searchParams.sort ?? "releaseDate";
-	const direction = searchParams.direction ?? "desc";
-	filteredGames = sortGames(filteredGames, sort, direction);
 
 	return (
 		<div className="flex size-full flex-col gap-6 px-2 sm:px-0">

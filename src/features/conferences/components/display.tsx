@@ -1,12 +1,17 @@
+import type { HomeSearchParams } from "@/@types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/server";
-import { sortConferences } from "../utils/sortConferences";
+import { filterAndSortConferences } from "../utils/filterAndSortConferences";
 import ConferenceCard from "./cards/conference";
 
-const ConferencesDisplay = async () => {
+interface Props {
+	searchParams: HomeSearchParams;
+}
+
+const ConferencesDisplay = async ({ searchParams }: Props) => {
 	const data = (await api.conference.getAll({ withStreams: true })) ?? [];
-	const sorted = sortConferences(data);
+	const sorted = filterAndSortConferences(data, searchParams);
 
 	return (
 		<div className="flex w-full flex-col items-center gap-2">
