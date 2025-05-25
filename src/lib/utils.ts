@@ -74,27 +74,43 @@ export const getImageFromURL = (
 export function combineFeatures(features: string[]): string[] {
 	// Normalize input to lowercase and filter valid features
 	const normalized = features
-		.map((f) => f.toLowerCase())
+		.map((f) => f.trim().toLowerCase())
+		.map((f) => (f === "coop" ? "co-op" : f)) // handle "coop" as "co-op"
 		.filter((f) => Object.values(Feature).includes(f as Feature)) as Feature[];
 
 	const set = new Set(normalized);
 	const result: string[] = [];
 
 	// Play mode grouping
-	if (set.has(Feature.Singleplayer) && set.has(Feature.Multiplayer)) {
+	const hasSingle = set.has(Feature.Singleplayer);
+	const hasMulti = set.has(Feature.Multiplayer);
+	const hasCoop = set.has(Feature.Coop);
+
+	if (hasSingle && hasMulti && hasCoop) {
+		result.push("Single, Multi & Co-op");
+	} else if (hasSingle && hasMulti) {
 		result.push("Single & Multiplayer");
-	} else if (set.has(Feature.Singleplayer)) {
+	} else if (hasSingle && hasCoop) {
+		result.push("Singleplayer & Co-op");
+	} else if (hasMulti && hasCoop) {
+		result.push("Multiplayer & Co-op");
+	} else if (hasSingle) {
 		result.push("Singleplayer");
-	} else if (set.has(Feature.Multiplayer)) {
+	} else if (hasMulti) {
 		result.push("Multiplayer");
+	} else if (hasCoop) {
+		result.push("Co-op");
 	}
 
 	// Content grouping
-	if (set.has(Feature.Update) && set.has(Feature.DLC)) {
+	const hasUpdate = set.has(Feature.Update);
+	const hasDLC = set.has(Feature.DLC);
+
+	if (hasUpdate && hasDLC) {
 		result.push("Updates & DLC");
-	} else if (set.has(Feature.Update)) {
+	} else if (hasUpdate) {
 		result.push("Updates");
-	} else if (set.has(Feature.DLC)) {
+	} else if (hasDLC) {
 		result.push("DLC");
 	}
 

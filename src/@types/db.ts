@@ -3,6 +3,7 @@ export enum Feature {
 	DLC = "dlc",
 	Multiplayer = "multiplayer",
 	Singleplayer = "singleplayer",
+	Coop = "co-op",
 }
 
 export enum Platform {
