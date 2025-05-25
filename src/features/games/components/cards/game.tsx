@@ -54,7 +54,7 @@ export default function GameCard({
 	return (
 		<Card
 			className={cn(
-				"group hover:-translate-y-1 relative w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg sm:max-w-[280px] sm:flex-1 md:max-w-[300px]",
+				"group hover:-translate-y-1 relative w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-all duration-300 hover:bg-card hover:shadow-lg",
 				{ "pointer-events-none opacity-60": !trailerLink },
 			)}
 			aria-label={`Game card for ${title ?? "Untitled Game"}`}

@@ -31,9 +31,9 @@ export default async function GamesDisplay({
 		.filter((n) => !Number.isNaN(n) && n > 0);
 
 	return (
-		<div className="flex size-full flex-col gap-6 px-2 sm:px-0">
+		<div className="flex flex-col gap-6 w-full ">
 			{/* Header */}
-			<div className="flex flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
+			<div className="flex flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center w-full">
 				<div className="flex items-center gap-2">
 					<Gamepad2 className="h-6 w-6 text-primary" />
 					<h3 className="font-semibold text-xl tracking-tight sm:text-2xl">
@@ -52,7 +52,7 @@ export default async function GamesDisplay({
 
 			{/* Games Grid */}
 			{filteredGames.length === 0 ? (
-				<div className="col-span-full flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
+				<div className="col-span-full flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center w-full">
 					<Gamepad2 className="h-12 w-12 text-muted-foreground" />
 					<h3 className="font-semibold text-xl">No Games Found</h3>
 					<p className="text-muted-foreground text-sm">
@@ -73,7 +73,12 @@ export default async function GamesDisplay({
 					</p>
 				</div>
 			) : (
-				<div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+				<div
+					className="grid w-full gap-6"
+					style={{
+						gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+					}}
+				>
 					{filteredGames.map((game) => (
 						<GameCard key={game.id} {...game} />
 					))}
