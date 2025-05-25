@@ -39,12 +39,12 @@ export const faqItems: FaqItem[] = [
 				Absolutely! If you spot a game announcement or trailer that isn’t on the
 				site, just tag me on{" "}
 				<a
-					href="https://x.com/gamesrecapped"
+					href="https://bsky.app/profile/recap.games"
 					target="_blank"
 					rel="noopener noreferrer"
 					className="font-medium underline"
 				>
-					Twitter (@gamesrecapped)
+					Bluesky (@recap.games)
 				</a>{" "}
 				and I’ll do my best to get it added.
 			</p>

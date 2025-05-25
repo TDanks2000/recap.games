@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaEnvelope, FaTwitter } from "react-icons/fa";
-import { SiBluesky } from "react-icons/si";
+import { SiBluesky, SiInstagram } from "react-icons/si";
 
 const SOCIAL_LINKS = [
 	{
@@ -16,6 +16,11 @@ const SOCIAL_LINKS = [
 		href: "https://bsky.app/profile/recap.games",
 		label: "Bluesky",
 		icon: SiBluesky,
+	},
+	{
+		href: "https://www.instagram.com/gamesrecapped/",
+		label: "Instagram",
+		icon: SiInstagram,
 	},
 ];
 
