@@ -1,6 +1,5 @@
 "use client";
 
-import { format, isValid } from "date-fns";
 import type { InferSelectModel } from "drizzle-orm";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -13,6 +12,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card";
+import { getFormattedDate } from "@/lib";
 import { cn, combineFeatures, getImageFromURL } from "@/lib/utils";
 import type { conferences, games, media } from "@/server/db/schema";
 
@@ -114,11 +114,7 @@ export default function GameCard({
 							className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm"
 							title={releaseDate?.toString()}
 						>
-							{releaseDate
-								? isValid(new Date(releaseDate))
-									? format(new Date(releaseDate), "MMMM do, yyyy")
-									: releaseDate.toString()
-								: "TBA"}
+							{getFormattedDate(releaseDate)}
 						</CardDescription>
 						<CardTitle
 							className="line-clamp-2 font-semibold text-sm leading-tight transition-all duration-300 group-hover:text-primary sm:text-base"
