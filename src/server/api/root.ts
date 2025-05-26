@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { conferenceRouter, gameRouter, streamRouter } from "./routers";
 import { blogRouter } from "./routers/blog";
 import { combinedRouter } from "./routers/combined";
+import { youtubeRouter } from "./routers/youtube";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
 	conference: conferenceRouter,
 	combined: combinedRouter,
 	blog: blogRouter,
+	youtube: youtubeRouter,
 });
 
 // export type definition of API

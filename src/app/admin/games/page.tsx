@@ -3,6 +3,7 @@
 import { ArrowLeft, ListFilter, Minus, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { SiYoutube } from "react-icons/si";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,7 +50,7 @@ export default function GamesAdminPage() {
 
 				{/* Existing Games Tab */}
 				<TabsContent value="existing">
-					<div className="flex justify-end mb-4">
+					<div className="flex justify-end mb-4 gap-2">
 						<div className="relative w-full max-w-xs">
 							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
@@ -59,6 +60,15 @@ export default function GamesAdminPage() {
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
+						</div>
+
+						<div>
+							<Button variant="outline" asChild>
+								<Link href="/admin/games/youtube-add">
+									<SiYoutube />
+									Add from YouTube
+								</Link>
+							</Button>
 						</div>
 					</div>
 					<Card className="overflow-hidden rounded-lg border-none bg-transparent">

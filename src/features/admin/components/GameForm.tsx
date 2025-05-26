@@ -2,9 +2,11 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, Trash2 } from "lucide-react";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
 import { MediaType } from "@/@types/db";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,40 +53,67 @@ type GameFormValues = z.infer<typeof gameFormSchema>;
 
 interface GameFormProps {
 	formIndex: number;
+	initialData?: Partial<GameFormValues>;
+	onFormSubmitSuccess?: () => void;
 }
 
-export default function GameForm({ formIndex }: GameFormProps) {
+const NONE_CONFERENCE_ID_PLACEHOLDER = "NONE_CONFERENCE_ID_PLACEHOLDER";
+
+const baseDefaultValues: GameFormValues = {
+	title: "",
+	releaseDate: "",
+	genres: [],
+	exclusive: [],
+	features: [],
+	developer: [],
+	publisher: [],
+	hidden: false,
+	media: [{ type: MediaType.Video, link: "" }],
+	conferenceId: undefined,
+};
+
+export default function GameForm({
+	formIndex,
+	initialData,
+	onFormSubmitSuccess,
+}: GameFormProps) {
 	const utils = api.useUtils();
 	const conferences = api.conference.getAll.useQuery();
 
-	const createGameMutation = api.combined.createGameWithMedia.useMutation({
-		onSuccess: () => {
-			toast.success("Game created successfully");
-			form.reset();
-			utils.game.getAll.invalidate();
-		},
-		onError: (error) => {
-			toast.error(`Error creating game: ${error.message}`);
-		},
-	});
-
 	const form = useForm<GameFormValues>({
 		resolver: zodResolver(gameFormSchema),
-		defaultValues: {
-			title: "",
-			releaseDate: "",
-			genres: [],
-			exclusive: [],
-			features: [],
-			developer: [],
-			publisher: [],
-			hidden: false,
-			media: [
-				{
-					type: MediaType.Video,
-					link: "",
-				},
-			],
+		defaultValues: baseDefaultValues,
+	});
+
+	useEffect(() => {
+		if (initialData) {
+			const populatedValues: GameFormValues = {
+				...baseDefaultValues,
+				...initialData,
+				media:
+					initialData.media && initialData.media.length > 0
+						? initialData.media
+						: baseDefaultValues.media,
+				conferenceId:
+					initialData.conferenceId === null
+						? undefined
+						: initialData.conferenceId,
+			};
+			form.reset(populatedValues);
+		} else {
+			form.reset(baseDefaultValues);
+		}
+	}, [initialData, form.reset]);
+
+	const createGameMutation = api.combined.createGameWithMedia.useMutation({
+		onSuccess: () => {
+			toast.success(`Game created successfully (Form ${formIndex})`); // Example usage of formIndex
+			form.reset(baseDefaultValues);
+			utils.game.getAll.invalidate();
+			if (onFormSubmitSuccess) onFormSubmitSuccess();
+		},
+		onError: (error) => {
+			toast.error(`Error creating game (Form ${formIndex}): ${error.message}`); // Example usage of formIndex
 		},
 	});
 
@@ -110,12 +139,11 @@ export default function GameForm({ formIndex }: GameFormProps) {
 		});
 	}
 
-	// Convert comma-separated string inputs to arrays
 	const handleArrayInput = (
 		value: string,
 		field: { onChange: (value: string[]) => void },
 	) => {
-		if (!value) {
+		if (!value.trim()) {
 			field.onChange([]);
 			return;
 		}
@@ -123,7 +151,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 		field.onChange(array);
 	};
 
-	// Convert arrays back to comma-separated strings for display
 	const arrayToString = (array: string[] | undefined) => {
 		if (!array || array?.length === 0) return "";
 		return array.join(", ");
@@ -133,13 +160,11 @@ export default function GameForm({ formIndex }: GameFormProps) {
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 				<div className="space-y-8">
-					{/* Basic Details */}
 					<div className="space-y-4">
 						<h3 className="font-semibold text-xl tracking-tight">
 							Basic Details
 						</h3>
 						<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-							{/* Title */}
 							<FormField
 								control={form.control}
 								name="title"
@@ -153,8 +178,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Release Date */}
 							<FormField
 								control={form.control}
 								name="releaseDate"
@@ -174,13 +197,11 @@ export default function GameForm({ formIndex }: GameFormProps) {
 						</div>
 					</div>
 
-					{/* Game Details */}
 					<div className="space-y-4">
 						<h3 className="font-semibold text-xl tracking-tight">
 							Game Details
 						</h3>
 						<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-							{/* Genres */}
 							<FormField
 								control={form.control}
 								name="genres"
@@ -203,8 +224,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Exclusive Platforms */}
 							<FormField
 								control={form.control}
 								name="exclusive"
@@ -227,8 +246,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Features */}
 							<FormField
 								control={form.control}
 								name="features"
@@ -251,8 +268,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Developer */}
 							<FormField
 								control={form.control}
 								name="developer"
@@ -275,8 +290,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Publisher */}
 							<FormField
 								control={form.control}
 								name="publisher"
@@ -299,8 +312,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									</FormItem>
 								)}
 							/>
-
-							{/* Conference */}
 							<FormField
 								control={form.control}
 								name="conferenceId"
@@ -308,8 +319,18 @@ export default function GameForm({ formIndex }: GameFormProps) {
 									<FormItem className="flex min-h-20 flex-col justify-start">
 										<FormLabel className="mb-2">Conference</FormLabel>
 										<Select
-											onValueChange={(value) => field.onChange(Number(value))}
-											defaultValue={field.value?.toString()}
+											onValueChange={(value) => {
+												if (value === NONE_CONFERENCE_ID_PLACEHOLDER) {
+													field.onChange(undefined);
+												} else {
+													field.onChange(Number(value));
+												}
+											}}
+											value={
+												field.value !== undefined
+													? field.value.toString()
+													: NONE_CONFERENCE_ID_PLACEHOLDER
+											}
 										>
 											<FormControl>
 												<SelectTrigger>
@@ -317,10 +338,12 @@ export default function GameForm({ formIndex }: GameFormProps) {
 												</SelectTrigger>
 											</FormControl>
 											<SelectContent>
-												<SelectItem value="None">None</SelectItem>
+												<SelectItem value={NONE_CONFERENCE_ID_PLACEHOLDER}>
+													None
+												</SelectItem>
 												{conferences.data?.map(
 													(conference) =>
-														!!conference?.id?.toString()?.length && (
+														conference.id != null && (
 															<SelectItem
 																key={conference.id}
 																value={conference.id.toString()}
@@ -343,7 +366,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 
 					<Separator className="my-8" />
 
-					{/* Media Section */}
 					<div className="space-y-4">
 						<div className="flex items-center justify-between">
 							<h3 className="font-semibold text-xl tracking-tight">Media</h3>
@@ -359,8 +381,8 @@ export default function GameForm({ formIndex }: GameFormProps) {
 							</Button>
 						</div>
 
-						{fields.map((field, index) => (
-							<div key={field.id} className="flex items-start gap-4">
+						{fields.map((item, index) => (
+							<div key={item.id} className="flex items-start gap-4">
 								<div className="grid flex-1 gap-x-6 gap-y-4 md:grid-cols-[auto_1fr]">
 									<FormField
 										control={form.control}
@@ -392,7 +414,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 											</FormItem>
 										)}
 									/>
-
 									<FormField
 										control={form.control}
 										name={`media.${index}.link`}
@@ -410,7 +431,6 @@ export default function GameForm({ formIndex }: GameFormProps) {
 										)}
 									/>
 								</div>
-
 								<Button
 									type="button"
 									variant="ghost"
@@ -423,6 +443,11 @@ export default function GameForm({ formIndex }: GameFormProps) {
 								</Button>
 							</div>
 						))}
+						<FormField
+							control={form.control}
+							name="media"
+							render={() => <FormMessage />}
+						/>
 					</div>
 				</div>
 

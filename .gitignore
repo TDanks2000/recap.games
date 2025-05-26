@@ -46,3 +46,6 @@ yarn-error.log*
 .idea
 
 /plan/**
+
+# Do not push the test page
+src/app/test/**
