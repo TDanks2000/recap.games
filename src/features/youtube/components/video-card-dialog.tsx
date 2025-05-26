@@ -11,6 +11,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import GameForm from "@/features/admin/components/GameForm";
+import { getPrimaryYouTubeTitleSegment } from "@/lib/title";
 import { YoutubeVideoCard } from "./video-card";
 
 interface Props {
@@ -18,11 +19,16 @@ interface Props {
 }
 
 export const VideoCardDialog = ({ video }: Props) => {
+	const title = getPrimaryYouTubeTitleSegment(video.title);
 	return (
 		<YoutubeVideoCard
 			key={video.id}
-			video={video}
+			video={{
+				...video,
+				title,
+			}}
 			renderActionButton={(currentVideo) => {
+				const currentTitle = getPrimaryYouTubeTitleSegment(currentVideo.title);
 				return (
 					<Dialog>
 						<DialogTrigger asChild>
@@ -30,14 +36,14 @@ export const VideoCardDialog = ({ video }: Props) => {
 						</DialogTrigger>
 						<DialogContent className="w-[90svw] min-w-[90svw] h-[90svh] min-h-[90svh] flex flex-col">
 							<DialogHeader className="flex-shrink-0">
-								<DialogTitle>Add Video: {currentVideo.title}</DialogTitle>
+								<DialogTitle>Add Video: {currentTitle}</DialogTitle>
 							</DialogHeader>
 
 							<div className="flex-grow overflow-y-auto p-1">
 								<GameForm
 									formIndex={0}
 									initialData={{
-										title: currentVideo.title,
+										title: currentTitle ?? currentVideo.title ?? "",
 										media: [
 											{
 												link: currentVideo.videoUrl,
