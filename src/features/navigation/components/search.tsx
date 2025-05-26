@@ -132,8 +132,8 @@ const NavBarSearch = () => {
 						className={cn(
 							"relative overflow-hidden transition-all duration-300 ease-out",
 							open
-								? "w-44 sm:w-72 md:w-80 opacity-100"
-								: "w-0 opacity-0 pointer-events-none",
+								? "w-44 opacity-100 sm:w-72 md:w-80"
+								: "pointer-events-none w-0 opacity-0",
 						)}
 					>
 						<Input
@@ -145,7 +145,7 @@ const NavBarSearch = () => {
 							placeholder="Search games or conferences..."
 							aria-label="Search games or conferences"
 							className={cn(
-								"w-full pr-8 pl-4 py-2.5 text-sm",
+								"w-full py-2.5 pr-8 pl-4 text-sm",
 								"border-border/50 bg-background/95 backdrop-blur-sm",
 								"focus:border-primary/50 focus:ring-2 focus:ring-primary/20",
 								"transition-all duration-200",
@@ -160,7 +160,7 @@ const NavBarSearch = () => {
 								onClick={clearSearch}
 								aria-label="Clear search"
 								className={cn(
-									"absolute right-1 top-1/2 -translate-y-1/2",
+									"-translate-y-1/2 absolute top-1/2 right-1",
 									"h-6 w-6 p-0 hover:bg-muted/80",
 									"text-muted-foreground hover:text-foreground",
 									"transition-colors duration-200",
@@ -179,7 +179,7 @@ const NavBarSearch = () => {
 					onClick={open ? closeSearch : toggleOpen}
 					aria-label={open ? "Close search" : "Open search"}
 					className={cn(
-						"relative z-10 flex-shrink-0 ml-2",
+						"relative z-10 ml-2 flex-shrink-0",
 						"transition-all duration-200 ease-out",
 						"hover:scale-105 active:scale-95",
 						open && "shadow-md",

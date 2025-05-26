@@ -22,7 +22,7 @@ const NavigationBar = () => {
 	];
 
 	return (
-		<header className="flex h-16 items-center gap-4 border-b bg-muted/40 px-4 md:px-6 relative overflow-hidden">
+		<header className="relative flex h-16 items-center gap-4 overflow-hidden border-b bg-muted/40 px-4 md:px-6">
 			<nav className="hidden flex-col gap-6 font-medium text-lg md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
 				<LogoLink />
 				<div className="flex gap-4 lg:gap-6">
@@ -69,7 +69,7 @@ const NavigationBar = () => {
 				</SheetContent>
 			</Sheet>
 
-			<div className="flex w-full items-center justify-end gap-4 md:ml-auto md:gap-2 lg:gap-4 relative overflow-hidden">
+			<div className="relative flex w-full items-center justify-end gap-4 overflow-hidden md:ml-auto md:gap-2 lg:gap-4">
 				<div className="shrink">
 					<Suspense fallback={null}>
 						<NavBarSearch />

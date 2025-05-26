@@ -150,12 +150,11 @@ export const adminProcedure = t.procedure
 					code: "UNAUTHORIZED",
 					message: "Authentication required. Please log in.",
 				});
-			} else {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Access denied. You do not have administrative privileges.",
-				});
 			}
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message: "Access denied. You do not have administrative privileges.",
+			});
 		}
 
 		return next({

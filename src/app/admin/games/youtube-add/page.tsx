@@ -14,12 +14,14 @@ export default async function YoutubeTestPage({ searchParams }: Props) {
 	const { channel_id, page_token, max_results, channel_search } =
 		await searchParams;
 
-	const maxResultsParam = max_results ? parseInt(max_results, 10) : 25;
-	const maxResultsForVideos = isNaN(maxResultsParam) ? 25 : maxResultsParam;
+	const maxResultsParam = max_results ? Number.parseInt(max_results, 10) : 25;
+	const maxResultsForVideos = Number.isNaN(maxResultsParam)
+		? 25
+		: maxResultsParam;
 
 	return (
 		<main className="container mx-auto flex min-h-screen flex-col items-center gap-8 p-4">
-			<div className="w-full flex flex-col items-center">
+			<div className="flex w-full flex-col items-center">
 				<SearchChannels search={channel_search} id={channel_id} />
 			</div>
 
@@ -31,7 +33,7 @@ export default async function YoutubeTestPage({ searchParams }: Props) {
 						maxResults={maxResultsForVideos}
 					/>
 				) : (
-					<div className="text-center text-muted-foreground opacity-60 mt-8">
+					<div className="mt-8 text-center text-muted-foreground opacity-60">
 						<span>Search for a channel and select it to view its videos.</span>
 					</div>
 				)}

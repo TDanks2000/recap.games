@@ -36,6 +36,7 @@ interface ConferenceFormProps {
 	formIndex: number;
 }
 
+// biome-ignore lint/correctness/noUnusedFunctionParameters: add back formindex later
 export default function ConferenceForm({ formIndex }: ConferenceFormProps) {
 	const utils = api.useUtils();
 

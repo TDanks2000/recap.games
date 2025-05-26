@@ -26,13 +26,13 @@ interface DashboardProps {
 function StatCard({ section }: { section: StatSection }) {
 	return (
 		<Link key={section.href} href={section.href}>
-			<Card className="h-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20">
+			<Card className="h-full overflow-hidden transition-all hover:border-primary/20 hover:shadow-md">
 				<CardHeader>
 					<div className="flex items-center justify-between">
-						<CardTitle className="text-base font-medium">
+						<CardTitle className="font-medium text-base">
 							{section.title}
 						</CardTitle>
-						<div className="p-1.5 rounded-md bg-muted/50">{section.icon}</div>
+						<div className="rounded-md bg-muted/50 p-1.5">{section.icon}</div>
 					</div>
 					<CardDescription className="line-clamp-2 h-10">
 						{section.description}
@@ -46,7 +46,7 @@ function StatCard({ section }: { section: StatSection }) {
 function ContentCard({ section }: { section: ContentSection }) {
 	return (
 		<Link key={section.href} href={section.href}>
-			<Card className="h-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20">
+			<Card className="h-full overflow-hidden transition-all hover:border-primary/20 hover:shadow-md">
 				<CardHeader className="pb-2">
 					<div className="flex items-center justify-between">
 						<CardTitle>{section.title}</CardTitle>
@@ -62,7 +62,7 @@ function ContentCard({ section }: { section: ContentSection }) {
 				</CardHeader>
 				<CardContent className="pt-0">
 					{section.icon && <div className="mb-4">{section.icon}</div>}
-					<div className="flex items-center text-primary text-sm font-medium">
+					<div className="flex items-center font-medium text-primary text-sm">
 						Manage {section.title}
 						<ArrowRight className="ml-1 h-4 w-4" />
 					</div>
@@ -98,12 +98,10 @@ export function Dashboard({
 	contentSections,
 	statsSections = [],
 	quickActions,
-
-	session,
 }: DashboardProps) {
 	return (
 		<div className="space-y-8">
-			<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+			<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 				<div>
 					<h2 className="font-bold text-3xl text-foreground/90">
 						Welcome Back
@@ -116,7 +114,7 @@ export function Dashboard({
 				<div className="flex items-center gap-2">
 					<Badge
 						variant="outline"
-						className="px-3 py-1 text-xs bg-primary/5 border-primary/20 text-primary"
+						className="border-primary/20 bg-primary/5 px-3 py-1 text-primary text-xs"
 					>
 						Admin Portal
 					</Badge>
@@ -133,7 +131,7 @@ export function Dashboard({
 						<Button
 							variant="ghost"
 							size="sm"
-							className="gap-1 text-sm text-muted-foreground"
+							className="gap-1 text-muted-foreground text-sm"
 							asChild
 						>
 							<Link href="/admin/analytics">

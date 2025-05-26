@@ -37,7 +37,7 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 	const steamLinks = findSpecificLinks(video.description || "", "steam");
 
 	return (
-		<Card className="group overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:border-primary/20 pt-0">
+		<Card className="group hover:-translate-y-1 overflow-hidden pt-0 transition-all duration-300 hover:border-primary/20 hover:shadow-md">
 			<div className="relative">
 				<div className="relative aspect-video w-full overflow-hidden">
 					<div
@@ -66,32 +66,32 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 				</div>
 			</div>
 
-			<CardHeader className="pb-2 pt-4">
+			<CardHeader className="pt-4 pb-2">
 				<div className="space-y-1">
 					<CardDescription className="flex items-center gap-1 text-xs">
 						<CalendarIcon className="size-3" />
 						<span>{formattedDate}</span>
 					</CardDescription>
-					<CardTitle className="line-clamp-2 text-base leading-tight min-h-[2.5rem]">
+					<CardTitle className="line-clamp-2 min-h-[2.5rem] text-base leading-tight">
 						{video.title}
 					</CardTitle>
 				</div>
 			</CardHeader>
 
 			<CardContent className="space-y-4">
-				<p className="text-muted-foreground text-sm line-clamp-5">
+				<p className="line-clamp-5 text-muted-foreground text-sm">
 					{video.description || "No description available"}
 				</p>
 			</CardContent>
 
 			<CardFooter className="flex items-center justify-between gap-4 pt-0">
-				<div className="flex flex-col gap-1 items-start justify-end h-full">
+				<div className="flex h-full flex-col items-start justify-end gap-1">
 					{steamLinks.length > 0 && (
 						<a
 							href={steamLinks[0]}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="flex items-center gap-1 text-xs text-accent-foreground transition-colors duration-200 hover:text-primary hover:underline"
+							className="flex items-center gap-1 text-accent-foreground text-xs transition-colors duration-200 hover:text-primary hover:underline"
 						>
 							<ExternalLinkIcon className="size-3" />
 							<span>View on Steam</span>
@@ -101,7 +101,7 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 						href={`https://youtube.com/watch?v=${video.id}`}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="flex items-center gap-1 text-xs text-accent-foreground transition-colors duration-200 hover:text-primary hover:underline"
+						className="flex items-center gap-1 text-accent-foreground text-xs transition-colors duration-200 hover:text-primary hover:underline"
 					>
 						<ExternalLinkIcon className="size-3" />
 						<span>Watch on YouTube</span>
@@ -110,7 +110,7 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 				{renderActionButton ? (
 					renderActionButton(video)
 				) : (
-					<Button variant="outline" size="sm" className="text-xs h-7 px-2">
+					<Button variant="outline" size="sm" className="h-7 px-2 text-xs">
 						View Details
 					</Button>
 				)}

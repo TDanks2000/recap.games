@@ -1,6 +1,7 @@
 "use client";
 
 import { Loader2Icon, Search } from "lucide-react";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { YouTubeChannel } from "@/@types/youtube";
@@ -58,7 +59,7 @@ export const SearchChannels = ({ search, id }: SearchChannelsProps) => {
 		}, 500);
 
 		return () => clearTimeout(handler);
-	}, [searchInput, id, updateUrlForSearch]);
+	}, [id, updateUrlForSearch]);
 
 	const handleSearchFormSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -84,7 +85,7 @@ export const SearchChannels = ({ search, id }: SearchChannelsProps) => {
 	const displayError = queryError || apiError;
 
 	return (
-		<div className="space-y-6 w-full max-w-xl mx-auto">
+		<div className="mx-auto w-full max-w-xl space-y-6">
 			<Card>
 				<CardHeader>
 					<CardTitle>Search YouTube Channels</CardTitle>
@@ -105,13 +106,13 @@ export const SearchChannels = ({ search, id }: SearchChannelsProps) => {
 						</Button>
 					</form>
 					{isLoading && (
-						<div className="flex items-center gap-2 mt-2">
+						<div className="mt-2 flex items-center gap-2">
 							<Loader2Icon size="sm" className="animate-spin" />
 							<span>Searching channels...</span>
 						</div>
 					)}
 					{displayError && (
-						<div className="text-red-500 mt-2 text-sm">
+						<div className="mt-2 text-red-500 text-sm">
 							Error: {displayError.message}
 						</div>
 					)}
@@ -126,10 +127,12 @@ export const SearchChannels = ({ search, id }: SearchChannelsProps) => {
 									className="flex items-center gap-2"
 								>
 									{ch.thumbnailUrl && (
-										<img
+										<Image
 											src={ch.thumbnailUrl}
 											alt={ch.title}
-											className="w-6 h-6 rounded-full"
+											className="h-6 w-6 rounded-full"
+											width={48}
+											height={48}
 										/>
 									)}
 									<span>{ch.title}</span>

@@ -53,9 +53,8 @@ export function getFormattedDate(
 		// It's a valid date that wasn't caught by the passthrough patterns,
 		// so it's likely a full date string like "2025-12-20" or "Dec 20, 2025".
 		return format(parsedDate, "MMMM do, yyyy");
-	} else {
-		// If it's not a recognized pattern and not a valid date, return the original string.
-		// This covers "Invalid Date String", "TDB 2025" (if TDB isn't in keywords), etc.
-		return dateStr;
 	}
+	// If it's not a recognized pattern and not a valid date, return the original string.
+	// This covers "Invalid Date String", "TDB 2025" (if TDB isn't in keywords), etc.
+	return dateStr;
 }

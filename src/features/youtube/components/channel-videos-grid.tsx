@@ -15,11 +15,7 @@ interface Props {
 	maxResults: number;
 }
 
-export function ChannelVideosGrid({
-	channelId,
-	initialPageToken,
-	maxResults,
-}: Props) {
+export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const currentSearchParams = useSearchParams();
@@ -99,12 +95,13 @@ export function ChannelVideosGrid({
 	if (isLoading || (isFetching && !videosPageData)) {
 		return (
 			<div className="flex flex-col gap-4">
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{Array.from({ length: maxResults }).map((_, index) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a skeleton
 						<VideoCardSkeleton key={index} />
 					))}
 				</div>
-				<div className="flex justify-center items-center gap-4 mt-4">
+				<div className="mt-4 flex items-center justify-center gap-4">
 					<Skeleton className="h-10 w-28" />
 					<Skeleton className="h-10 w-28" />
 				</div>
@@ -120,7 +117,7 @@ export function ChannelVideosGrid({
 
 	if (displayError) {
 		return (
-			<div className="text-red-500 text-center mt-4">
+			<div className="mt-4 text-center text-red-500">
 				{displayError || "An error occurred while fetching videos."}
 			</div>
 		);
@@ -135,7 +132,7 @@ export function ChannelVideosGrid({
 		!videosPageData?.prevPageToken
 	) {
 		return (
-			<div className="text-center text-muted-foreground mt-8">
+			<div className="mt-8 text-center text-muted-foreground">
 				No videos found for this channel.
 			</div>
 		);
@@ -144,7 +141,7 @@ export function ChannelVideosGrid({
 	return (
 		<div className="flex flex-col gap-6">
 			{videos.length > 0 && (
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{videos.map((video) => (
 						<VideoCardDialog key={video.id} video={video as YouTubeVideo} />
 					))}
@@ -155,7 +152,7 @@ export function ChannelVideosGrid({
 				!("error" in videosPageData) &&
 				(videosPageData.prevPageToken || videosPageData.nextPageToken)) ||
 				pageTokenFromUrl) && (
-				<div className="flex justify-center items-center gap-4 mt-4">
+				<div className="mt-4 flex items-center justify-center gap-4">
 					<Button
 						onClick={handlePrevPage}
 						disabled={

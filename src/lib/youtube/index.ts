@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: TODO: fix later */
 import type {
 	YouTubeChannel,
 	YouTubeChannelVideosPage,
@@ -72,15 +73,14 @@ export class Youtube {
 			response.items[0].id?.channelId
 		) {
 			return response.items[0].id.channelId;
-		} else {
-			return {
-				error: {
-					code: 404,
-					message: `Channel with handle '${identifier}' not found.`,
-					errors: [],
-				},
-			};
 		}
+		return {
+			error: {
+				code: 404,
+				message: `Channel with handle '${identifier}' not found.`,
+				errors: [],
+			},
+		};
 	}
 
 	async getChannelVideos(

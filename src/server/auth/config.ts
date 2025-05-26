@@ -47,7 +47,7 @@ const providers: Provider[] = [
 			email: { label: "Email", type: "email" },
 			password: { label: "Password", type: "password" },
 		},
-		async authorize(credentials, req) {
+		async authorize(credentials, _req) {
 			try {
 				const parsed = await LoginSchema.parseAsync(credentials);
 				const { email, password } = parsed;

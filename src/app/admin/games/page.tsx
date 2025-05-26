@@ -21,10 +21,10 @@ export default function GamesAdminPage() {
 		formCount > 1 && setFormCount((prev) => prev - 1);
 
 	return (
-		<main className="w-full max-w-screen-2xl mx-auto min-h-screen">
+		<main className="mx-auto min-h-screen w-full max-w-screen-2xl">
 			{/* Top bar */}
 			<div className="flex items-center justify-between py-6">
-				<h1 className="font-bold text-2xl sm:text-3xl text-white">
+				<h1 className="font-bold text-2xl text-white sm:text-3xl">
 					Games Management
 				</h1>
 				<Button variant="outline" asChild className="gap-2">
@@ -36,7 +36,7 @@ export default function GamesAdminPage() {
 			</div>
 
 			<Tabs defaultValue="existing" className="w-full">
-				<div className="flex items-center gap-4 mb-6">
+				<div className="mb-6 flex items-center gap-4">
 					<TabsList>
 						<TabsTrigger value="existing">Existing Games</TabsTrigger>
 						<TabsTrigger value="add" className="flex items-center">
@@ -50,13 +50,13 @@ export default function GamesAdminPage() {
 
 				{/* Existing Games Tab */}
 				<TabsContent value="existing">
-					<div className="flex justify-end mb-4 gap-2">
+					<div className="mb-4 flex justify-end gap-2">
 						<div className="relative w-full max-w-xs">
-							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+							<Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
 								type="search"
 								placeholder="Search games..."
-								className="w-full pl-9 text-white border-none"
+								className="w-full border-none pl-9 text-white"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
@@ -72,7 +72,7 @@ export default function GamesAdminPage() {
 						</div>
 					</div>
 					<Card className="overflow-hidden rounded-lg border-none bg-transparent">
-						<CardHeader className="p-5 rounded bg-card">
+						<CardHeader className="rounded bg-card p-5">
 							<div className="flex items-center justify-between">
 								<CardTitle>All Games</CardTitle>
 								<Button variant="outline">
@@ -81,7 +81,7 @@ export default function GamesAdminPage() {
 								</Button>
 							</div>
 						</CardHeader>
-						<CardContent className="p-0 max-h-[75vh] overflow-y-auto">
+						<CardContent className="max-h-[75vh] overflow-y-auto p-0">
 							<GamesList searchQuery={searchQuery} />
 						</CardContent>
 					</Card>
@@ -89,7 +89,7 @@ export default function GamesAdminPage() {
 
 				{/* Add New Game Tab */}
 				<TabsContent value="add">
-					<div className="flex gap-2 justify-end mb-4">
+					<div className="mb-4 flex justify-end gap-2">
 						<Button variant="outline" size="sm" onClick={handleAddForm}>
 							<Plus />
 							Add Form
@@ -104,15 +104,16 @@ export default function GamesAdminPage() {
 					<div className="space-y-6">
 						{Array.from({ length: formCount }).map((_, index) => (
 							<Card
+								// biome-ignore lint/suspicious/noArrayIndexKey: this is fine
 								key={index}
 								className="overflow-hidden rounded-lg border-none"
 							>
-								<CardHeader className="p-5 rounded bg-card">
+								<CardHeader className="rounded bg-card p-5">
 									<CardTitle>
 										{formCount > 1 ? `Game ${index + 1}` : "New Game"}
 									</CardTitle>
 								</CardHeader>
-								<CardContent className="w-full max-h-[75vh] overflow-y-auto">
+								<CardContent className="max-h-[75vh] w-full overflow-y-auto">
 									<GameForm formIndex={index} />
 								</CardContent>
 							</Card>

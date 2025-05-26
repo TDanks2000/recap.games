@@ -34,7 +34,7 @@ export const VideoCardDialog = ({ video }: Props) => {
 						<DialogTrigger asChild>
 							<Button>Add this video</Button>
 						</DialogTrigger>
-						<DialogContent className="w-[90svw] min-w-[90svw] h-[90svh] min-h-[90svh] flex flex-col">
+						<DialogContent className="flex h-[90svh] min-h-[90svh] w-[90svw] min-w-[90svw] flex-col">
 							<DialogHeader className="flex-shrink-0">
 								<DialogTitle>Add Video: {currentTitle}</DialogTitle>
 							</DialogHeader>

@@ -24,7 +24,6 @@ export const ShareButton = ({
 	title = "",
 	className,
 }: ShareButtonProps) => {
-	const [copied, setCopied] = useState(false);
 	const [open, setOpen] = useState(false);
 
 	const resolvedUrl =

@@ -52,7 +52,13 @@ export default function StreamsList({ searchQuery }: Props) {
 		return (
 			<div className="space-y-4">
 				{Array.from({ length: 3 }).map((_, i) => (
-					<div key={`stream-skeleton-${i}`} className="space-y-2">
+					<div
+						key={`stream-skeleton-${
+							// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a skeleton
+							i
+						}`}
+						className="space-y-2"
+					>
 						<Skeleton className="h-6 w-3/4" />
 						<Skeleton className="h-4 w-1/2" />
 						<Separator className="my-2" />

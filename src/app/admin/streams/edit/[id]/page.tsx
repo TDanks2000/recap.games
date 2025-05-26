@@ -307,7 +307,7 @@ export default function EditStreamPage() {
 						</CardHeader>
 						<CardContent>
 							<div className="space-y-4">
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									Games that were announced or showcased during this stream.
 								</p>
 								{/* This section will be implemented in the future when the API is available */}

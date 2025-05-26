@@ -170,7 +170,7 @@ export default function EditConferencePage() {
 					<TabsTrigger value="streams">
 						Streams
 						{conference?.streams?.length > 0 && (
-							<span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+							<span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
 								{conference.streams.length}
 							</span>
 						)}
@@ -303,7 +303,7 @@ export default function EditConferencePage() {
 									{conference.streams.map((stream) => (
 										<div
 											key={stream.id}
-											className="flex flex-col md:flex-row md:items-center justify-between rounded-md border p-4 hover:bg-accent/50 transition-colors"
+											className="flex flex-col justify-between rounded-md border p-4 transition-colors hover:bg-accent/50 md:flex-row md:items-center"
 										>
 											<div className="space-y-1">
 												<h3 className="font-medium">{stream.title}</h3>
@@ -318,7 +318,7 @@ export default function EditConferencePage() {
 													</a>
 												</p>
 											</div>
-											<div className="flex space-x-2 mt-2 md:mt-0">
+											<div className="mt-2 flex space-x-2 md:mt-0">
 												<Button
 													variant="outline"
 													size="sm"
@@ -331,7 +331,7 @@ export default function EditConferencePage() {
 												<Button
 													variant="ghost"
 													size="sm"
-													className="text-red-500 hover:text-red-700 hover:bg-red-100"
+													className="text-red-500 hover:bg-red-100 hover:text-red-700"
 													onClick={() => {
 														if (
 															confirm(
@@ -353,7 +353,7 @@ export default function EditConferencePage() {
 								</div>
 							) : (
 								<div className="flex flex-col items-center justify-center py-8 text-center">
-									<p className="text-muted-foreground mb-4">
+									<p className="mb-4 text-muted-foreground">
 										No streams associated with this conference.
 									</p>
 									<Button

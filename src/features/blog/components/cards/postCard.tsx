@@ -18,9 +18,7 @@ export function PostCard({
 	title,
 	description,
 	createdAt,
-	authorName,
 	content,
-	published,
 }: RouterOutputs["blog"]["listPosts"][number]) {
 	return (
 		<Link href={`/blog/${slug}`} key={id} className="block h-64">

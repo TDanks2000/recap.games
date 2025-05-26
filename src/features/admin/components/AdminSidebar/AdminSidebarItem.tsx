@@ -54,7 +54,7 @@ export function AdminSidebarNavItem({
 				{item.badge && (
 					<Badge
 						variant="outline"
-						className="ml-auto text-xs py-0 px-1.5 border-primary/20 text-primary bg-primary/5"
+						className="ml-auto border-primary/20 bg-primary/5 px-1.5 py-0 text-primary text-xs"
 					>
 						{item.badge}
 					</Badge>

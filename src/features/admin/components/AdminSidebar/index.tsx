@@ -95,9 +95,9 @@ export function AdminSidebar({ children, session }: AdminSidebarProps) {
 	return (
 		<SidebarProvider defaultOpen>
 			<Sidebar className="border-r bg-card/40 backdrop-blur-sm">
-				<SidebarHeader className="px-6 py-4 border-b border-border/50">
+				<SidebarHeader className="border-border/50 border-b px-6 py-4">
 					<Link href="/admin" className="flex items-center gap-3">
-						<div className="flex items-center justify-center w-8 h-8 rounded-md bg-primary/10">
+						<div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary/10">
 							<Home className="h-5 w-5 text-primary" />
 						</div>
 						<span className="font-semibold text-xl">Admin</span>
@@ -106,9 +106,9 @@ export function AdminSidebar({ children, session }: AdminSidebarProps) {
 				<SidebarContent>
 					<ScrollArea className="h-[calc(100vh-12rem)]">
 						<div className="px-1">
-							<div className="flex items-center gap-3 px-3 py-2 mb-6">
-								<Avatar className="h-10 w-10 flex justify-center items-center border-2 border-primary/20">
-									<AvatarFallback className="bg-primary/10 text-primary font-medium">
+							<div className="mb-6 flex items-center gap-3 px-3 py-2">
+								<Avatar className="flex h-10 w-10 items-center justify-center border-2 border-primary/20">
+									<AvatarFallback className="bg-primary/10 font-medium text-primary">
 										{session?.user?.username?.split("").splice(0, 2).join("")}
 									</AvatarFallback>
 								</Avatar>
@@ -116,7 +116,7 @@ export function AdminSidebar({ children, session }: AdminSidebarProps) {
 									<span className="font-medium text-sm">
 										{session?.user?.username}
 									</span>
-									<span className="text-xs text-muted-foreground">
+									<span className="text-muted-foreground text-xs">
 										{session?.user?.role}
 									</span>
 								</div>
@@ -125,10 +125,10 @@ export function AdminSidebar({ children, session }: AdminSidebarProps) {
 								{navItems.map((item) =>
 									"items" in item ? (
 										<SidebarGroup key={item.title} className="mb-4">
-											<SidebarGroupLabel className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+											<SidebarGroupLabel className="px-3 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 												{item.title}
 											</SidebarGroupLabel>
-											<div className="space-y-1 mt-1">
+											<div className="mt-1 space-y-1">
 												{item.items.map((subItem) => (
 													<AdminSidebarNavItem
 														key={subItem.title}
@@ -154,7 +154,7 @@ export function AdminSidebar({ children, session }: AdminSidebarProps) {
 						</div>
 					</ScrollArea>
 				</SidebarContent>
-				<SidebarFooter className="border-t border-border/50 px-6 py-4">
+				<SidebarFooter className="border-border/50 border-t px-6 py-4">
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Link href="/">

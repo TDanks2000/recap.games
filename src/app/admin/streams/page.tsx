@@ -20,10 +20,10 @@ export default function StreamsAdminPage() {
 		formCount > 1 && setFormCount((prev) => prev - 1);
 
 	return (
-		<main className="w-full max-w-screen-2xl mx-auto min-h-screen">
+		<main className="mx-auto min-h-screen w-full max-w-screen-2xl">
 			{/* Top bar */}
 			<div className="flex items-center justify-between py-6">
-				<h1 className="font-bold text-2xl sm:text-3xl text-white">
+				<h1 className="font-bold text-2xl text-white sm:text-3xl">
 					Streams Management
 				</h1>
 				<Button variant="outline" asChild className="gap-2">
@@ -35,7 +35,7 @@ export default function StreamsAdminPage() {
 			</div>
 
 			<Tabs defaultValue="existing" className="w-full">
-				<div className="flex items-center gap-4 mb-6">
+				<div className="mb-6 flex items-center gap-4">
 					<TabsList>
 						<TabsTrigger value="existing">Existing Streams</TabsTrigger>
 						<TabsTrigger value="add" className="flex items-center">
@@ -49,20 +49,20 @@ export default function StreamsAdminPage() {
 
 				{/* Existing Streams Tab */}
 				<TabsContent value="existing">
-					<div className="flex justify-end mb-4">
+					<div className="mb-4 flex justify-end">
 						<div className="relative w-full max-w-xs">
-							<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+							<Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
 								type="search"
 								placeholder="Search streams..."
-								className="w-full pl-9 text-white border-none"
+								className="w-full border-none pl-9 text-white"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
 					</div>
 					<Card className="overflow-hidden rounded-lg border-none bg-transparent">
-						<CardHeader className="p-5 rounded bg-card">
+						<CardHeader className="rounded bg-card p-5">
 							<div className="flex items-center justify-between">
 								<CardTitle>All Streams</CardTitle>
 								<Button variant="outline">
@@ -79,7 +79,7 @@ export default function StreamsAdminPage() {
 
 				{/* Add New Stream Tab */}
 				<TabsContent value="add">
-					<div className="flex gap-2 justify-end mb-4">
+					<div className="mb-4 flex justify-end gap-2">
 						<Button variant="outline" size="sm" onClick={handleAddForm}>
 							<Plus />
 							Add Form
@@ -94,10 +94,11 @@ export default function StreamsAdminPage() {
 					<div className="space-y-6">
 						{Array.from({ length: formCount }).map((_, index) => (
 							<Card
+								// biome-ignore lint/suspicious/noArrayIndexKey: this is fine
 								key={index}
 								className="overflow-hidden rounded-lg border-none"
 							>
-								<CardHeader className="p-5 rounded bg-card">
+								<CardHeader className="rounded bg-card p-5">
 									<CardTitle>
 										{formCount > 1 ? `Stream ${index + 1}` : "New Stream"}
 									</CardTitle>

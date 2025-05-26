@@ -55,13 +55,13 @@ export function BlogAnalytics() {
 						<BarChart3 className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="font-bold text-2xl flex items-baseline gap-1 w-fit">
+						<div className="flex w-fit items-baseline gap-1 font-bold text-2xl">
 							{numberFormatter.format(data.totalStats.totalViews)}
 							<span className="text-base text-muted-foreground">views</span>
 						</div>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<p className="text-muted-foreground text-xs cursor-help underline decoration-dotted w-fit">
+								<p className="w-fit cursor-help text-muted-foreground text-xs underline decoration-dotted">
 									All-time blog post views
 								</p>
 							</TooltipTrigger>
@@ -82,7 +82,7 @@ export function BlogAnalytics() {
 					</CardHeader>
 
 					<CardContent>
-						<div className="font-bold text-2xl flex items-baseline gap-1">
+						<div className="flex items-baseline gap-1 font-bold text-2xl">
 							{numberFormatter.format(
 								data.totalStats.averageReadTimeAcrossAllPosts,
 							)}
@@ -90,7 +90,7 @@ export function BlogAnalytics() {
 						</div>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<p className="text-muted-foreground text-xs cursor-help underline decoration-dotted w-fit">
+								<p className="w-fit cursor-help text-muted-foreground text-xs underline decoration-dotted">
 									Average read time
 								</p>
 							</TooltipTrigger>

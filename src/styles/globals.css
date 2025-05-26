@@ -127,15 +127,15 @@
 }
 
 @layer utilities {
-  /**
-   * Hides scrollbars in all major browsers
-   * Usage: add `scrollbar-hide` to any scrollable element
-   */
-  .scrollbar-hide {
-    -ms-overflow-style: none;    /* IE and Edge */
-    scrollbar-width: none;       /* Firefox */
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;               /* Chrome, Safari, Opera */
-  }
+	/**
+	 * Hides scrollbars in all major browsers
+	 * Usage: add `scrollbar-hide` to any scrollable element
+	 */
+	.scrollbar-hide {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none; /* Chrome, Safari, Opera */
+	}
 }

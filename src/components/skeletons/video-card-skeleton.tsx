@@ -10,7 +10,7 @@ export const VideoCardSkeleton = () => {
 	return (
 		<Card className="overflow-hidden pt-0">
 			<Skeleton className="aspect-video w-full" />
-			<CardHeader className="pb-2 pt-4">
+			<CardHeader className="pt-4 pb-2">
 				<div className="space-y-1">
 					<Skeleton className="h-3 w-3/5" />
 					<Skeleton className="h-5 w-full" />

@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.0.0-beta.2/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.0.0-beta.5/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/node_modules/**"]
+		"includes": ["**", "!**/node_modules/**", "!**/components/ui/**"]
 	},
 	"formatter": { "enabled": true },
 	"assist": {
@@ -35,7 +35,6 @@
 				"noCommaOperator": "error",
 				"useNodejsImportProtocol": "error",
 				"useAsConstAssertion": "error",
-				"useNumericLiterals": "error",
 				"useEnumInitializers": "error",
 				"useSelfClosingElements": "error",
 				"useConst": "error",
@@ -53,6 +52,9 @@
 				"useExportType": "error",
 				"noUselessElse": "error",
 				"useShorthandFunctionType": "error"
+			},
+			"complexity": {
+				"useNumericLiterals": "error"
 			}
 		}
 	}

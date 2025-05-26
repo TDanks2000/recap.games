@@ -31,9 +31,9 @@ export default async function GamesDisplay({
 		.filter((n) => !Number.isNaN(n) && n > 0);
 
 	return (
-		<div className="flex flex-col gap-6 w-full ">
+		<div className="flex w-full flex-col gap-6 ">
 			{/* Header */}
-			<div className="flex flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center w-full">
+			<div className="flex w-full flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
 				<div className="flex items-center gap-2">
 					<Gamepad2 className="h-6 w-6 text-primary" />
 					<h3 className="font-semibold text-xl tracking-tight sm:text-2xl">
@@ -52,7 +52,7 @@ export default async function GamesDisplay({
 
 			{/* Games Grid */}
 			{filteredGames.length === 0 ? (
-				<div className="col-span-full flex flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center w-full">
+				<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
 					<Gamepad2 className="h-12 w-12 text-muted-foreground" />
 					<h3 className="font-semibold text-xl">No Games Found</h3>
 					<p className="text-muted-foreground text-sm">
