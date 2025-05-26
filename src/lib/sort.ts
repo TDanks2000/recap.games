@@ -25,7 +25,7 @@ function safeDate(date: string | Date | null | undefined): number {
 
 export function sortGames(
 	games: Game[],
-	sort: SortOption = "releaseDate",
+	sort: SortOption = "date_added",
 	direction: SortDirection = "desc",
 ): Game[] {
 	if (!Array.isArray(games) || games.length <= 1) return games;
@@ -52,8 +52,9 @@ export function sortGames(
 			const bTime = safeDate(b.g.releaseDate);
 			cmp = aTime - bTime;
 		} else if (sort === "date_added") {
-			const aTime = safeDate(a.g.createdAt);
-			const bTime = safeDate(b.g.createdAt);
+			const aTime = a.g.createdAt?.getTime();
+			const bTime = b.g.createdAt?.getTime();
+
 			cmp = aTime - bTime;
 		}
 

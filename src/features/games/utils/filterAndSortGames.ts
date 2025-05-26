@@ -23,14 +23,13 @@ export function filterAndSortGames(
 	if (search.length > 0) {
 		filteredGames = filteredGames.filter((g) => {
 			const title = g.title?.toLowerCase() ?? "";
-			// If conference is null/undefined, treat as "upcoming"
 			const conferenceName = g.conference?.name?.toLowerCase() ?? "upcoming";
 			return title.includes(search) || conferenceName.includes(search);
 		});
 	}
 
 	// Sort
-	const sort = searchParams.sort ?? "releaseDate";
+	const sort = searchParams.sort ?? "date_added";
 	const direction = searchParams.direction ?? "desc";
 	filteredGames = sortGames(filteredGames, sort, direction);
 
