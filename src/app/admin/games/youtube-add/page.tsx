@@ -2,39 +2,32 @@ import { ChannelVideosGrid } from "@/features/youtube/components/channel-videos-
 import { SearchChannels } from "@/features/youtube/components/search-channels";
 
 interface Props {
-	searchParams: {
+	searchParams: Promise<{
 		channel_search?: string;
 		channel_id?: string;
 		page_token?: string;
 		max_results?: string;
-	};
+	}>;
 }
 
 export default async function YoutubeTestPage({ searchParams }: Props) {
-	const channelSearchQuery = searchParams.channel_search;
-	const currentSelectedChannelIdForSearch = searchParams.channel_id;
+	const { channel_id, page_token, max_results, channel_search } =
+		await searchParams;
 
-	const channelIdForVideos = searchParams.channel_id;
-	const pageTokenForVideos = searchParams.page_token;
-	const maxResultsParam = searchParams.max_results
-		? parseInt(searchParams.max_results, 10)
-		: 25;
+	const maxResultsParam = max_results ? parseInt(max_results, 10) : 25;
 	const maxResultsForVideos = isNaN(maxResultsParam) ? 25 : maxResultsParam;
 
 	return (
 		<main className="container mx-auto flex min-h-screen flex-col items-center gap-8 p-4">
 			<div className="w-full flex flex-col items-center">
-				<SearchChannels
-					search={channelSearchQuery}
-					id={currentSelectedChannelIdForSearch}
-				/>
+				<SearchChannels search={channel_search} id={channel_id} />
 			</div>
 
 			<div className="w-full">
-				{channelIdForVideos ? (
+				{channel_id ? (
 					<ChannelVideosGrid
-						channelId={channelIdForVideos}
-						initialPageToken={pageTokenForVideos}
+						channelId={channel_id}
+						initialPageToken={page_token}
 						maxResults={maxResultsForVideos}
 					/>
 				) : (
