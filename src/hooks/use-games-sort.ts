@@ -2,9 +2,10 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import type { SortDirection, SortOption } from "@/@types";
 
-export type SortOption = "title" | "releaseDate";
-export type SortDirection = "asc" | "desc";
+const DEFAULT_SORT_OPTION: SortOption = "date_added";
+const DEFAULT_SORT_DIRECTION: SortDirection = "desc";
 
 export function useGamesSort() {
 	const searchParams = useSearchParams();
@@ -13,29 +14,29 @@ export function useGamesSort() {
 
 	const currentSort = useMemo(() => {
 		const sort = searchParams.get("sort") as SortOption;
-		return sort || "releaseDate";
+		return sort || DEFAULT_SORT_OPTION;
 	}, [searchParams]);
 
 	const currentDirection = useMemo(() => {
 		const direction = searchParams.get("direction") as SortDirection;
-		return direction || "desc";
+		return direction || DEFAULT_SORT_DIRECTION;
 	}, [searchParams]);
 
 	const onSortChange = useCallback(
-		(sortOption: SortOption, direction?: SortDirection) => {
+		(newSortToApply: SortOption, newDirectionToApply?: SortDirection) => {
 			const params = new URLSearchParams(searchParams.toString());
 
-			if (sortOption && sortOption !== "releaseDate") {
-				params.set("sort", sortOption);
-			} else {
+			if (newSortToApply === DEFAULT_SORT_OPTION) {
 				params.delete("sort");
+			} else {
+				params.set("sort", newSortToApply);
 			}
 
-			if (direction) {
-				if (direction !== "desc") {
-					params.set("direction", direction);
-				} else {
+			if (newDirectionToApply !== undefined) {
+				if (newDirectionToApply === DEFAULT_SORT_DIRECTION) {
 					params.delete("direction");
+				} else {
+					params.set("direction", newDirectionToApply);
 				}
 			}
 
@@ -45,7 +46,10 @@ export function useGamesSort() {
 	);
 
 	const toggleDirection = useCallback(() => {
-		const newDirection = currentDirection === "asc" ? "desc" : "asc";
+		const newDirection =
+			currentDirection === "asc"
+				? DEFAULT_SORT_DIRECTION
+				: ("asc" as SortDirection);
 		onSortChange(currentSort, newDirection);
 	}, [currentDirection, currentSort, onSortChange]);
 

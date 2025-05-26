@@ -1,12 +1,26 @@
-import type { Game, SortOption, SortDirection } from "@/@types";
+import type { Game, SortDirection, SortOption } from "@/@types";
 
-function safeString(str: string | null | undefined) {
+function safeString(str: string | null | undefined): string {
 	return (str ?? "").toLocaleLowerCase();
 }
 
+const TBA_SORT_KEY = Number.POSITIVE_INFINITY - 1;
+const MISSING_DATE_SORT_KEY = Number.POSITIVE_INFINITY;
+
 function safeDate(date: string | Date | null | undefined): number {
-	if (!date) return Number.NEGATIVE_INFINITY;
-	return typeof date === "string" ? new Date(date).getTime() : date.getTime();
+	if (date === null || date === undefined) {
+		return MISSING_DATE_SORT_KEY;
+	}
+	if (typeof date === "string") {
+		if (date.toLocaleUpperCase() === "TBA") {
+			return TBA_SORT_KEY;
+		}
+		const parsedDate = new Date(date);
+		const time = parsedDate.getTime();
+		return Number.isNaN(time) ? MISSING_DATE_SORT_KEY : time;
+	}
+	const time = date.getTime();
+	return Number.isNaN(time) ? MISSING_DATE_SORT_KEY : time;
 }
 
 export function sortGames(
@@ -16,7 +30,6 @@ export function sortGames(
 ): Game[] {
 	if (!Array.isArray(games) || games.length <= 1) return games;
 
-	// Attach original index for stable sort
 	const withIndex = games.map((g, i) => ({ g, i }));
 
 	withIndex.sort((a, b) => {
@@ -26,7 +39,6 @@ export function sortGames(
 			const aTitle = safeString(a.g.title);
 			const bTitle = safeString(b.g.title);
 
-			// Empty titles go last
 			if (!aTitle && !bTitle) cmp = 0;
 			else if (!aTitle) cmp = 1;
 			else if (!bTitle) cmp = -1;
@@ -38,15 +50,13 @@ export function sortGames(
 		} else if (sort === "releaseDate") {
 			const aTime = safeDate(a.g.releaseDate);
 			const bTime = safeDate(b.g.releaseDate);
-
-			// Missing dates go last
-			if (aTime === bTime) cmp = 0;
-			else if (aTime === Number.NEGATIVE_INFINITY) cmp = 1;
-			else if (bTime === Number.NEGATIVE_INFINITY) cmp = -1;
-			else cmp = aTime - bTime;
+			cmp = aTime - bTime;
+		} else if (sort === "date_added") {
+			const aTime = safeDate(a.g.createdAt);
+			const bTime = safeDate(b.g.createdAt);
+			cmp = aTime - bTime;
 		}
 
-		// Stable sort: if equal, use original index
 		if (cmp === 0) cmp = a.i - b.i;
 
 		return direction === "asc" ? cmp : -cmp;

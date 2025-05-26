@@ -7,7 +7,7 @@ export interface PaginationOptions {
 }
 
 export type Game = RouterOutputs["game"]["getAll"][number];
-export type SortOption = "title" | "releaseDate";
+export type SortOption = "title" | "releaseDate" | "date_added";
 export type SortDirection = "asc" | "desc";
 
 export type HomeSearchParams = {

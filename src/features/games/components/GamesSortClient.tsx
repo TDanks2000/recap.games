@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpNarrowWide } from "lucide-react";
+import type { SortOption } from "@/@types";
 import { Button } from "@/components/ui/button";
 import {
 	Select,
@@ -9,10 +10,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { type SortOption, useGamesSort } from "@/hooks/use-games-sort";
+import { useGamesSort } from "@/hooks/use-games-sort";
 import { cn } from "@/lib/utils";
 
 const SORT_OPTIONS: { label: string; value: SortOption }[] = [
+	{ label: "Date Added", value: "date_added" },
 	{ label: "Release Date", value: "releaseDate" },
 	{ label: "Title", value: "title" },
 ];
