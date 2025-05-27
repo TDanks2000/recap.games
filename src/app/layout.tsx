@@ -40,6 +40,7 @@ export const metadata: Metadata = {
 		`upcoming games ${currentYear}`,
 		`best game trailers ${currentYear}`,
 	],
+
 	authors: [{ name: "Tommy Danks", url: "https://tdanks.com" }],
 	creator: "Tommy Danks",
 	publisher: "Game Trailers Recapped",
@@ -88,7 +89,7 @@ export const metadata: Metadata = {
 	twitter: {
 		card: "summary_large_image",
 		site: "@gamesrecapped",
-		creator: "@tommyjdanks",
+		creator: "@tommydanks", // Corrected
 		title: `Best Game Trailers of ${currentYear} | Game Trailers Recapped`,
 		description: `Don't miss out! Get the latest ${currentYear} game trailers, demos, and announcements from Summer Game Fest & more. #GameTrailers #${currentYear}Games`,
 		images: [new URL("/social-large.webp", BASE_URL).toString()],
