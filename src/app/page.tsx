@@ -19,7 +19,7 @@ export default async function Home({ searchParams }: HomeProps) {
 				</div>
 
 				{/* Conferences Display Section with sticky only on larger screens */}
-				<div className="order-1 transition-all sm:sticky sm:top-5 sm:right-0 sm:order-2 sm:h-[calc(100vh-50px)] sm:max-h-full sm:w-[450px] sm:overflow-hidden">
+				<div className="order-1 transition-all sm:sticky sm:top-5 sm:right-0 sm:bottom-5 sm:order-2 sm:h-[calc(100vh-50px)] sm:max-h-full sm:w-[450px] sm:overflow-hidden">
 					<ConferencesDisplay searchParams={params} />
 				</div>
 			</main>

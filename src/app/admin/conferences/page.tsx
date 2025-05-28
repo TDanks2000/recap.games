@@ -94,7 +94,7 @@ export default function ConferencesAdminPage() {
 					<div className="space-y-6">
 						{Array.from({ length: formCount }).map((_, index) => (
 							<Card
-								// biome-ignore lint/suspicious/noArrayIndexKey: this is fine
+								// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for skeleton
 								key={index}
 								className="overflow-hidden rounded-lg border-none"
 							>
