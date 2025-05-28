@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/node_modules/**", "!**/components/ui/**"]
+		"includes": ["**", "!**/node_modules/**"]
 	},
 	"formatter": { "enabled": true },
 	"assist": {
