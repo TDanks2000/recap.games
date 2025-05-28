@@ -358,7 +358,7 @@ export default function GameForm({
 													: NONE_CONFERENCE_ID_PLACEHOLDER
 											}
 										>
-											<FormControl>
+											<FormControl className="w-full">
 												<SelectTrigger>
 													<SelectValue placeholder="Select a conference" />
 												</SelectTrigger>
