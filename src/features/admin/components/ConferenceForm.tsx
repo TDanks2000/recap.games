@@ -359,8 +359,6 @@ export default function ConferenceForm() {
 									render={({ field }) => (
 										<FormItem className="flex min-h-20 flex-col justify-start">
 											<div className="mb-2 flex min-h-[24px] items-center">
-												{" "}
-												{/* Consistent height for label row */}
 												<FormLabel>Stream Title</FormLabel>
 											</div>
 											<FormControl>
