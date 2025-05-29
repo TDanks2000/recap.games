@@ -79,7 +79,8 @@ const conferenceFormSchema = z
 
 type ConferenceFormValues = z.infer<typeof conferenceFormSchema>;
 
-export default function ConferenceForm() {
+// biome-ignore lint/correctness/noUnusedFunctionParameters: add formIndex back later
+export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 	const utils = api.useUtils();
 
 	const [showConfirmation, setShowConfirmation] = useState(false);
