@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useId } from "react";
 import { register } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignUpForm() {
+	const emailId = useId();
+	const usernameId = useId();
+	const firstNameId = useId();
+	const lastNameId = useId();
+	const passwordId = useId();
+
 	return (
 		<form
 			action={async (values) => {
@@ -50,9 +57,9 @@ export function SignUpForm() {
 
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor={emailId}>Email</Label>
 						<Input
-							id="email"
+							id={emailId}
 							name="email"
 							type="email"
 							placeholder="Enter your email"
@@ -60,9 +67,9 @@ export function SignUpForm() {
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="username">Username</Label>
+						<Label htmlFor={usernameId}>Username</Label>
 						<Input
-							id="username"
+							id={usernameId}
 							name="username"
 							type="text"
 							placeholder="Choose a username"
@@ -71,9 +78,9 @@ export function SignUpForm() {
 					</div>
 					<div className="grid grid-cols-2 gap-4">
 						<div className="space-y-2">
-							<Label htmlFor="firstName">First Name</Label>
+							<Label htmlFor={firstNameId}>First Name</Label>
 							<Input
-								id="firstName"
+								id={firstNameId}
 								name="firstName"
 								type="text"
 								placeholder="First name"
@@ -81,9 +88,9 @@ export function SignUpForm() {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="lastName">Last Name</Label>
+							<Label htmlFor={lastNameId}>Last Name</Label>
 							<Input
-								id="lastName"
+								id={lastNameId}
 								name="lastName"
 								type="text"
 								placeholder="Last name"
@@ -92,9 +99,9 @@ export function SignUpForm() {
 						</div>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="password">Password</Label>
+						<Label htmlFor={passwordId}>Password</Label>
 						<Input
-							id="password"
+							id={passwordId}
 							name="password"
 							type="password"
 							placeholder="Create a password"

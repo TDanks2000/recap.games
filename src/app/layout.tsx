@@ -113,6 +113,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
 			<head>
+				{/** biome-ignore lint/nursery/useUniqueElementIds: Fine here */}
 				<Script
 					async
 					strategy="afterInteractive"

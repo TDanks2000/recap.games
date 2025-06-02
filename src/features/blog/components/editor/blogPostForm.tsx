@@ -120,7 +120,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 					name="title"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel htmlFor="title" className="font-semibold text-lg">
+							<FormLabel htmlFor={field.name} className="font-semibold text-lg">
 								Title
 							</FormLabel>
 							<FormDescription>
@@ -128,7 +128,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 							</FormDescription>
 							<FormControl>
 								<Input
-									id="title"
+									id={field.name}
 									placeholder="Enter your blog post title"
 									className="font-medium text-xl"
 									{...field}
@@ -144,10 +144,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 					name="description"
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel
-								htmlFor="description"
-								className="font-semibold text-lg"
-							>
+							<FormLabel htmlFor={field.name} className="font-semibold text-lg">
 								Description
 							</FormLabel>
 							<FormDescription>
@@ -155,7 +152,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 							</FormDescription>
 							<FormControl>
 								<Input
-									id="description"
+									id={field.name}
 									placeholder="Enter a brief description of your blog post"
 									className="font-medium"
 									{...field}

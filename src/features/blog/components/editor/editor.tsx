@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -71,7 +71,7 @@ export function Editor({
 
 				<TabsContent value="write" className="mt-4">
 					<Textarea
-						id="editor"
+						id={useId()}
 						name="editor"
 						ref={textareaRef}
 						value={content}

@@ -134,7 +134,7 @@ export function MultiSelect<T extends BaseOption>({
 						disabled={Boolean(disabled)}
 						title={selectedLabels}
 					>
-						<div className="flex w-full flex-wrap items-center gap-1 overflow-hidden">
+						<div className="flex w-full flex-wrap items-center gap-1 overflow-visible">
 							{selected.length > 0 ? (
 								<>
 									{selected.slice(0, 2).map((val) => {
@@ -181,7 +181,7 @@ export function MultiSelect<T extends BaseOption>({
 						</div>
 					</Button>
 				</PopoverTrigger>
-				<PopoverContent className="w-full p-0">
+				<PopoverContent className="w-full overflow-visible p-0">
 					<Command>
 						<CommandInput
 							placeholder="Search..."
@@ -208,7 +208,7 @@ export function MultiSelect<T extends BaseOption>({
 							</CommandItem>
 						</CommandGroup>
 						<CommandGroup heading={optionsGroupLabel}>
-							<div className="scrollbar-hide max-h-[200px] overflow-y-auto">
+							<div className="ios-scroll relative z-10 max-h-[200px] overflow-y-auto">
 								{loading ? (
 									<div className="px-4 py-2 text-muted-foreground text-sm">
 										Loading...

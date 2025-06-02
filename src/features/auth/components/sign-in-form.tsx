@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useId } from "react";
 import { login } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +14,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function SignInForm() {
+	const emailId = useId();
+	const passwordId = useId();
+
 	return (
 		<form
 			action={async (form) => {
@@ -38,9 +42,9 @@ export function SignInForm() {
 
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="email">Email</Label>
+						<Label htmlFor={emailId}>Email</Label>
 						<Input
-							id="email"
+							id={emailId}
 							name="email"
 							type="email"
 							placeholder="Enter your email"
@@ -48,9 +52,9 @@ export function SignInForm() {
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="password">Password</Label>
+						<Label htmlFor={passwordId}>Password</Label>
 						<Input
-							id="password"
+							id={passwordId}
 							name="password"
 							type="password"
 							placeholder="Enter your password"

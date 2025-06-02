@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useId } from "react";
 import { FaEnvelope, FaTwitter } from "react-icons/fa";
 import { SiBluesky, SiInstagram, SiKofi } from "react-icons/si";
 
@@ -37,6 +38,7 @@ const QUICK_LINKS = [
 
 export default function Footer() {
 	const pathname = usePathname().toLowerCase();
+	const footerHeadingId = useId();
 
 	if (pathname.startsWith("/admin")) return null;
 
@@ -44,7 +46,7 @@ export default function Footer() {
 
 	return (
 		<footer className="mt-10 border-t bg-muted/40 py-10">
-			<h2 id="footer-heading" className="sr-only">
+			<h2 id={footerHeadingId} className="sr-only">
 				Site Footer
 			</h2>
 
