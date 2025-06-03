@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
 import { TRPCReactProvider } from "@/trpc/react";
 
-function favicon() {
+export function favicon() {
 	return new Date().getMonth() === 5 ? "/icon-pride.png" : "/favicon.ico";
 }
 
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 
 	icons: {
 		icon: favicon(),
-		shortcut: "/favicon.ico",
+		shortcut: favicon(),
 		apple: "/apple-touch-icon.png",
 	},
 

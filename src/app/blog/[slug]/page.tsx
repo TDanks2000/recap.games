@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getBlogPost } from "@/app/actions/blog";
+import { favicon } from "@/app/layout";
 import { buttonVariants } from "@/components/ui/button";
 import { BlogHero } from "@/features/blog/components/blogHero";
 import { DeletePost } from "@/features/blog/components/editor/deletePost";
@@ -130,7 +131,7 @@ export async function generateMetadata({
 		},
 		metadataBase: new URL(siteUrl),
 		icons: {
-			icon: "/favicon.ico",
+			icon: favicon(),
 		},
 		verification: {
 			google: process.env.GOOGLE_SITE_VERIFICATION ?? "",

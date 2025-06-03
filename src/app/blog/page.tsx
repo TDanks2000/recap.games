@@ -5,6 +5,7 @@ import { PostCard } from "@/features/blog/components/cards/postCard";
 import { BlogLayout } from "@/features/blog/components/Layout";
 import { HydrateClient } from "@/trpc/server";
 import { getBlogPosts } from "../actions/blog";
+import { favicon } from "../layout";
 
 const BASE_URL_STR = "https://recap.games";
 const BLOG_PAGE_PATH = "/blog";
@@ -69,7 +70,7 @@ export default async function BlogsPage() {
 			name: "Game Trailers Recapped",
 			logo: {
 				"@type": "ImageObject",
-				url: new URL("/favicon.ico", BASE_URL_STR).toString(),
+				url: new URL(favicon(), BASE_URL_STR).toString(),
 			},
 		},
 		mainEntityOfPage: {
