@@ -1,7 +1,7 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { MediaType } from "@/@types";
-import { games } from "@/server/db/schema";
+import { games, media } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const gameRouter = createTRPCRouter({
@@ -64,6 +64,8 @@ export const gameRouter = createTRPCRouter({
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
+
+			await ctx.db.delete(media).where(eq(media.gameId, id));
 
 			await ctx.db.delete(games).where(eq(games.id, id));
 
