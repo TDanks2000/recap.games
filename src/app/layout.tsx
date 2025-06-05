@@ -1,8 +1,9 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
 import Footer from "@/components/footer";
+import ClarityProvider from "@/components/providers/ClarityProvider";
+import TrackingScriptsProvider from "@/components/providers/TrackingScriptsProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NavigationBar from "@/features/navigation/components/navbar";
@@ -113,16 +114,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
 			<head>
-				{/** biome-ignore lint/nursery/useUniqueElementIds: Fine here */}
-				<Script
-					async
-					strategy="afterInteractive"
-					src={
-						"https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6066620838335611"
-					}
-					crossOrigin="anonymous"
-					id="adsense-script"
-				/>
+				<TrackingScriptsProvider />
 
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
 				<link
@@ -175,6 +167,8 @@ export default function RootLayout({
 						</TooltipProvider>
 					</ThemeProvider>
 				</TRPCReactProvider>
+
+				<ClarityProvider />
 			</body>
 		</html>
 	);
