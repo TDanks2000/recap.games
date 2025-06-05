@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Footer from "@/components/footer";
-import ClarityProvider from "@/components/providers/ClarityProvider";
+import { Clarity } from "@/components/providers/ClarityProvider";
 import TrackingScriptsProvider from "@/components/providers/TrackingScriptsProvider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
 	twitter: {
 		card: "summary_large_image",
 		site: "@gamesrecapped",
-		creator: "@tommydanks", // Corrected
+		creator: "@tommydanks",
 		title: `Best Game Trailers of ${currentYear} | Game Trailers Recapped`,
 		description: `Don't miss out! Get the latest ${currentYear} game trailers, demos, and announcements from Summer Game Fest & more. #GameTrailers #${currentYear}Games`,
 		images: [new URL("/social-large.webp", BASE_URL).toString()],
@@ -114,6 +114,7 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
 			<head>
+				<Clarity />
 				<TrackingScriptsProvider />
 
 				<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -167,8 +168,6 @@ export default function RootLayout({
 						</TooltipProvider>
 					</ThemeProvider>
 				</TRPCReactProvider>
-
-				<ClarityProvider />
 			</body>
 		</html>
 	);
