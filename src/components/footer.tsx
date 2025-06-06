@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId } from "react";
 import { FaEnvelope, FaTwitter } from "react-icons/fa";
-import { SiBluesky, SiInstagram, SiKofi } from "react-icons/si";
+import { SiBluesky, SiBuymeacoffee } from "react-icons/si";
 
 const SOCIAL_LINKS = [
 	{
@@ -19,14 +19,9 @@ const SOCIAL_LINKS = [
 		icon: SiBluesky,
 	},
 	{
-		href: "https://www.instagram.com/gamesrecapped/",
-		label: "Instagram",
-		icon: SiInstagram,
-	},
-	{
-		href: "https://ko-fi.com/tdanks2000",
-		label: "Ko-Fi",
-		icon: SiKofi,
+		href: "https://coff.ee/tdanks2000",
+		label: "BuyMeACoffee",
+		icon: SiBuymeacoffee,
 	},
 ];
 
