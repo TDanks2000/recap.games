@@ -19,14 +19,10 @@ interface Props {
 }
 
 export const VideoCardDialog = ({ video }: Props) => {
-	const title = getPrimaryYouTubeTitleSegment(video.title);
 	return (
 		<YoutubeVideoCard
 			key={video.id}
-			video={{
-				...video,
-				title,
-			}}
+			video={video}
 			renderActionButton={(currentVideo) => {
 				const currentTitle = getPrimaryYouTubeTitleSegment(currentVideo.title);
 				return (
