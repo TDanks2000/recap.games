@@ -1,5 +1,5 @@
 import { FaTwitter } from "react-icons/fa";
-import { SiBluesky, SiBuymeacoffee, SiKofi } from "react-icons/si";
+import { SiBluesky, SiKofi } from "react-icons/si";
 
 export const SOCIAL_LINKS = [
 	{
@@ -19,11 +19,5 @@ export const SOCIAL_LINKS = [
 		label: "Ko-Fi",
 		icon: SiKofi,
 		type: "donate",
-	},
-	{
-		href: "https://coff.ee/tdanks2000",
-		label: "BuyMeACoffee",
-		icon: SiBuymeacoffee,
-		type: "donate",
-	},
+	}
 ];
