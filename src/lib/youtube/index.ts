@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: TODO: fix later */
 import type {
-	YouTubeChannel,
-	YouTubeChannelVideosPage,
-	YouTubeErrorResponse,
-	YouTubeVideo,
+  YouTubeChannel,
+  YouTubeChannelVideosPage,
+  YouTubeErrorResponse,
+  YouTubeVideo,
 } from "@/@types/youtube";
 import { env } from "@/env";
 
@@ -83,6 +83,37 @@ export class Youtube {
 		};
 	}
 
+	/**
+	 * Fetches detailed information for a batch of video IDs.
+	 */
+	private async getVideoDetails(
+		videoIds: string[],
+	): Promise<Map<string, any> | YouTubeErrorResponse> {
+		if (videoIds.length === 0) {
+			return new Map();
+		}
+
+		const params = {
+			part: "snippet,liveStreamingDetails",
+			id: videoIds.join(","),
+			maxResults: "50",
+		};
+
+		const response = await this.fetchApi<any>("videos", params);
+
+		if ("error" in response) {
+			return response;
+		}
+
+		const videoDetailsMap = new Map<string, any>();
+		if (response.items) {
+			for (const item of response.items) {
+				videoDetailsMap.set(item.id, item);
+			}
+		}
+		return videoDetailsMap;
+	}
+
 	async getChannelVideos(
 		channelIdentifier: string,
 		maxResults = 10,
@@ -145,9 +176,40 @@ export class Youtube {
 			return playlistResponse;
 		}
 
-		const videos: YouTubeVideo[] =
-			playlistResponse.items?.map((item: any): YouTubeVideo => {
+		if (!playlistResponse.items || playlistResponse.items.length === 0) {
+			return {
+				videos: [],
+			};
+		}
+
+		const videoIds = playlistResponse.items.map(
+			(item: any) => item.snippet.resourceId.videoId,
+		);
+		const videoDetailsResult = await this.getVideoDetails(videoIds);
+
+		if ("error" in videoDetailsResult) {
+			return videoDetailsResult;
+		}
+		const videoDetailsMap = videoDetailsResult;
+
+		const videos: YouTubeVideo[] = playlistResponse.items.map(
+			(item: any): YouTubeVideo => {
 				const videoId = item.snippet.resourceId.videoId;
+				const videoDetails = videoDetailsMap.get(videoId);
+
+				let videoType: "video" | "stream" = "video";
+
+				if (videoDetails) {
+					const isLive =
+						videoDetails.snippet.liveBroadcastContent === "live" ||
+						videoDetails.snippet.liveBroadcastContent === "upcoming";
+					const wasLive = !!videoDetails.liveStreamingDetails;
+
+					if (isLive || wasLive) {
+						videoType = "stream";
+					}
+				}
+
 				return {
 					id: videoId,
 					title: item.snippet.title,
@@ -157,8 +219,10 @@ export class Youtube {
 						item.snippet.thumbnails?.default?.url,
 					publishedAt: item.snippet.publishedAt,
 					videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+					type: videoType,
 				};
-			}) || [];
+			},
+		);
 
 		return {
 			videos,
