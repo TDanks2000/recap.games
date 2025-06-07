@@ -13,14 +13,14 @@ const donationLinks = SOCIAL_LINKS.filter((link) => link.type === "donate");
 
 export default function DonationsHeader() {
 	return (
-		<Card className="overflow-hidden">
-			<CardHeader className="space-y-2 pb-4">
+		<Card className="overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/5">
+			<CardHeader className="space-y-4 pb-8">
 				<motion.div
 					initial={{ opacity: 0, y: -20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 				>
-					<CardTitle className="text-center text-3xl sm:text-4xl">
+					<CardTitle className="text-center text-4xl font-bold sm:text-5xl">
 						Support the Project
 					</CardTitle>
 				</motion.div>
@@ -29,15 +29,15 @@ export default function DonationsHeader() {
 					animate={{ opacity: 1 }}
 					transition={{ delay: 0.2, duration: 0.5 }}
 				>
-					<CardDescription className="text-center text-lg">
+					<CardDescription className="mx-auto max-w-2xl text-center text-lg sm:text-xl">
 						Your support helps keep the servers running and enables continuous
 						improvements. Every contribution makes a difference!
 					</CardDescription>
 				</motion.div>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="pb-8">
 				<motion.div
-					className="flex flex-wrap justify-center gap-4"
+					className="flex flex-wrap justify-center gap-6"
 					initial="hidden"
 					animate="visible"
 					variants={{
@@ -60,13 +60,13 @@ export default function DonationsHeader() {
 								asChild
 								size="lg"
 								variant="default"
-								className="relative overflow-hidden transition-all hover:shadow-lg"
+								className="relative overflow-hidden transition-all hover:shadow-lg hover:scale-105"
 							>
 								<a
 									href={link.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="flex items-center gap-3 px-2"
+									className="flex items-center gap-3 px-4 py-1"
 								>
 									<link.icon className="h-5 w-5" />
 									{link.label}
