@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId } from "react";
 import { FaEnvelope, FaTwitter } from "react-icons/fa";
-import { SiBluesky, SiBuymeacoffee } from "react-icons/si";
+import { SiBluesky, SiBuymeacoffee, SiKofi } from "react-icons/si";
 
 const SOCIAL_LINKS = [
 	{
@@ -17,6 +17,11 @@ const SOCIAL_LINKS = [
 		href: "https://bsky.app/profile/recap.games",
 		label: "Bluesky",
 		icon: SiBluesky,
+	},
+	{
+		href: "https://ko-fi.com/tdanks2000",
+		label: "Ko-fi",
+		icon: SiKofi,
 	},
 	{
 		href: "https://coff.ee/tdanks2000",
