@@ -85,7 +85,7 @@ export const gameRouter = createTRPCRouter({
 				developer: z.array(z.string()).optional(),
 				publisher: z.array(z.string()).optional(),
 				hidden: z.boolean().optional(),
-				conferenceId: z.number().optional(),
+				conferenceId: z.number().optional().nullable(), // Allow null to unset
 				media: z
 					.array(
 						z.object({
@@ -99,9 +99,12 @@ export const gameRouter = createTRPCRouter({
 		.mutation(async ({ ctx, input }) => {
 			const { id, ...data } = input;
 
-			// Convert arrays to SQL expressions for JSON strings
+			const conferenceId =
+				data.conferenceId === undefined ? undefined : data.conferenceId;
+
 			const updateData = {
 				...data,
+				conferenceId,
 				genres: data.genres ? sql`${JSON.stringify(data.genres)}` : undefined,
 				exclusive: data.exclusive
 					? sql`${JSON.stringify(data.exclusive)}`
@@ -115,7 +118,7 @@ export const gameRouter = createTRPCRouter({
 				publisher: data.publisher
 					? sql`${JSON.stringify(data.publisher)}`
 					: undefined,
-				media: data.media,
+				media: data.media ? sql`${JSON.stringify(data.media)}` : undefined,
 			};
 
 			const game = await ctx.db
@@ -123,6 +126,10 @@ export const gameRouter = createTRPCRouter({
 				.set(updateData)
 				.where(eq(games.id, id))
 				.returning();
+
+			if (game.length === 0) {
+				throw new Error("Game not found or update failed");
+			}
 
 			return game[0];
 		}),
