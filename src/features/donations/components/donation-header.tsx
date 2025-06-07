@@ -20,7 +20,7 @@ export default function DonationsHeader() {
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ duration: 0.5 }}
 				>
-					<CardTitle className="text-center text-4xl font-bold sm:text-5xl">
+					<CardTitle className="text-center font-bold text-4xl sm:text-5xl">
 						Support the Project
 					</CardTitle>
 				</motion.div>
@@ -60,7 +60,7 @@ export default function DonationsHeader() {
 								asChild
 								size="lg"
 								variant="default"
-								className="relative overflow-hidden transition-all hover:shadow-lg hover:scale-105"
+								className="relative overflow-hidden transition-all hover:scale-105 hover:shadow-lg"
 							>
 								<a
 									href={link.href}

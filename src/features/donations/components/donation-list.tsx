@@ -36,7 +36,9 @@ export default function DonationsList() {
 						animate={{ opacity: 1 }}
 						transition={{ duration: 0.5 }}
 					>
-						<h2 className="mb-12 text-center font-bold text-4xl">Recent Supporters</h2>
+						<h2 className="mb-12 text-center font-bold text-4xl">
+							Recent Supporters
+						</h2>
 						{donations?.length === 0 ? (
 							<div className="rounded-lg border bg-muted/50 p-12 text-center">
 								<p className="text-muted-foreground text-xl">

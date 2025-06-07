@@ -12,7 +12,7 @@ export default async function Donations() {
 
 	return (
 		<HydrateClient>
-			<main className="container mx-auto flex min-h-screen flex-col items-center py-16 px-4 transition-all sm:px-6 lg:px-8">
+			<main className="container mx-auto flex min-h-screen flex-col items-center px-4 py-16 transition-all sm:px-6 lg:px-8">
 				<div className="w-full max-w-7xl">
 					<DonationsList />
 				</div>

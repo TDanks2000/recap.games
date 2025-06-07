@@ -1,48 +1,48 @@
 {
-  "version": "7",
-  "dialect": "sqlite",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "6",
-      "when": 1746660506983,
-      "tag": "0000_nosy_jubilee",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1746710425070,
-      "tag": "0001_ambitious_grey_gargoyle",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1746971851734,
-      "tag": "0002_brown_raza",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1747170416943,
-      "tag": "0003_numerous_whirlwind",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1747614751537,
-      "tag": "0004_blushing_ultragirl",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "6",
-      "when": 1749290918194,
-      "tag": "0005_third_marrow",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "sqlite",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "6",
+			"when": 1746660506983,
+			"tag": "0000_nosy_jubilee",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "6",
+			"when": 1746710425070,
+			"tag": "0001_ambitious_grey_gargoyle",
+			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "6",
+			"when": 1746971851734,
+			"tag": "0002_brown_raza",
+			"breakpoints": true
+		},
+		{
+			"idx": 3,
+			"version": "6",
+			"when": 1747170416943,
+			"tag": "0003_numerous_whirlwind",
+			"breakpoints": true
+		},
+		{
+			"idx": 4,
+			"version": "6",
+			"when": 1747614751537,
+			"tag": "0004_blushing_ultragirl",
+			"breakpoints": true
+		},
+		{
+			"idx": 5,
+			"version": "6",
+			"when": 1749290918194,
+			"tag": "0005_third_marrow",
+			"breakpoints": true
+		}
+	]
 }
