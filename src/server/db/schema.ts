@@ -1,5 +1,10 @@
 import { relations, sql } from "drizzle-orm";
-import { index, primaryKey, sqliteTableCreator } from "drizzle-orm/sqlite-core";
+import {
+	index,
+	primaryKey,
+	sqliteTableCreator,
+	unique,
+} from "drizzle-orm/sqlite-core";
 import type { AdapterAccount } from "next-auth/adapters";
 import {
 	type Feature,
@@ -333,3 +338,31 @@ export const blogPostViewsRelations = relations(blogPostViews, ({ one }) => ({
 		references: [users.id],
 	}),
 }));
+
+export const donations = createTable(
+	"donations",
+	(d) => ({
+		id: d
+			.text()
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		provider: d.text().notNull(),
+		providerTransactionId: d.text().notNull(),
+		amountInCents: d.integer().notNull(),
+		currency: d.text().notNull(),
+		donatorName: d.text().notNull(),
+		donatorMessage: d.text(),
+		donatedAt: d.integer({ mode: "timestamp" }).notNull(),
+		rawData: d.text({ mode: "json" }).notNull(),
+		createdAt: d
+			.integer({ mode: "timestamp" })
+			.notNull()
+			.default(sql`(unixepoch())`),
+	}),
+	(donationsTable) => [
+		unique("provider_unique_constraint").on(
+			donationsTable.provider,
+			donationsTable.providerTransactionId,
+		),
+	],
+);

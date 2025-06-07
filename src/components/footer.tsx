@@ -4,34 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId } from "react";
-import { FaEnvelope, FaTwitter } from "react-icons/fa";
-import { SiBluesky, SiBuymeacoffee, SiKofi } from "react-icons/si";
-
-const SOCIAL_LINKS = [
-	{
-		href: "https://twitter.com/gamesrecapped",
-		label: "Twitter",
-		icon: FaTwitter,
-	},
-	{
-		href: "https://bsky.app/profile/recap.games",
-		label: "Bluesky",
-		icon: SiBluesky,
-	},
-	{
-		href: "https://ko-fi.com/tdanks2000",
-		label: "Ko-fi",
-		icon: SiKofi,
-	},
-	{
-		href: "https://coff.ee/tdanks2000",
-		label: "BuyMeACoffee",
-		icon: SiBuymeacoffee,
-	},
-];
+import { FaEnvelope } from "react-icons/fa";
+import { SOCIAL_LINKS } from "@/lib/links";
 
 const QUICK_LINKS = [
 	{ href: "/blog", label: "Blog" },
+	{ href: "/donations", label: "Donations" },
 	{ href: "/faq", label: "FAQ" },
 	{ href: "/privacy-policy", label: "Privacy Policy" },
 ];
