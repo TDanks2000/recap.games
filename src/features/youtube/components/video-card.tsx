@@ -7,12 +7,12 @@ import type { YouTubeVideo } from "@/@types/youtube";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import { findSpecificLinks } from "@/lib/link-helper";
 import { cn } from "@/lib/utils";
@@ -35,6 +35,8 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 	});
 
 	const steamLinks = findSpecificLinks(video.description || "", "steam");
+
+  console.log({video})
 
 	return (
 		<Card className="group hover:-translate-y-1 overflow-hidden pt-0 transition-all duration-300 hover:border-primary/20 hover:shadow-md">
@@ -60,8 +62,10 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 				</div>
 
 				<div className="absolute top-2 right-2 z-10">
-					<Badge variant="secondary" className="px-2 py-0.5 text-xs shadow-md">
-						Video
+					<Badge variant="secondary" className="px-2 py-0.5 text-xs shadow-md capitalize">
+						{
+              video.type 
+            }
 					</Badge>
 				</div>
 			</div>

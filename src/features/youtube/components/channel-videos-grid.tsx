@@ -2,7 +2,6 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import type { YouTubeVideo } from "@/@types/youtube";
 import { VideoCardSkeleton } from "@/components/skeletons/video-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -143,7 +142,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 			{videos.length > 0 && (
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{videos.map((video) => (
-						<VideoCardDialog key={video.id} video={video as YouTubeVideo} />
+						<VideoCardDialog key={video.id} video={video} />
 					))}
 				</div>
 			)}

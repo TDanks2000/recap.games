@@ -4,11 +4,11 @@ import { MediaType } from "@/@types";
 import type { YouTubeVideo } from "@/@types/youtube";
 import { Button } from "@/components/ui/button";
 import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import GameForm from "@/features/admin/components/GameForm";
 import { getPrimaryYouTubeTitleSegment } from "@/lib/title";
@@ -25,6 +25,7 @@ export const VideoCardDialog = ({ video }: Props) => {
 			video={video}
 			renderActionButton={(currentVideo) => {
 				const currentTitle = getPrimaryYouTubeTitleSegment(currentVideo.title);
+        
 				return (
 					<Dialog>
 						<DialogTrigger asChild>
