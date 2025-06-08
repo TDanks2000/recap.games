@@ -10,7 +10,7 @@ export const youtubeRouter = createTRPCRouter({
 			z.object({
 				channelId: z.string(),
 				maxResults: z.number().optional().default(10),
-				pageToken: z.string().optional(), // Add pageToken to input schema
+				pageToken: z.string().optional(),
 			}),
 		)
 		.query(async ({ input }) => {
@@ -21,6 +21,16 @@ export const youtubeRouter = createTRPCRouter({
 			);
 			if ("error" in result) {
 				return { error: result.error, videos: [], nextPageToken: undefined };
+			}
+			return result;
+		}),
+
+	getChannelInfo: publicProcedure
+		.input(z.object({ channelId: z.string() }))
+		.query(async ({ input }) => {
+			const result = await youtube.getChannelInfo(input.channelId);
+			if ("error" in result) {
+				return { error: result.error };
 			}
 			return result;
 		}),

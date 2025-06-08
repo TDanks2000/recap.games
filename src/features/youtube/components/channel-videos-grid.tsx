@@ -1,12 +1,15 @@
 "use client";
 
-import { Dot, Wifi, WifiOff } from "lucide-react"; // <-- Import icons
+import { ExternalLink, Wifi, WifiOff } from "lucide-react";
+import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { VideoCardSkeleton } from "@/components/skeletons/video-card-skeleton";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SelectConference } from "@/features/conferences/components/select-conference";
+import { cn } from "@/lib";
 import { api, type RouterOutputs } from "@/trpc/react";
 import { VideoCardDialog } from "./video-card-dialog";
 
@@ -23,10 +26,8 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	const pathname = usePathname();
 	const currentSearchParams = useSearchParams();
 
-	// --- START: State for new features ---
 	const [selectedConference, setSelectedConference] = useState<Conference>();
-	const [isLiveEnabled, setIsLiveEnabled] = useState(true); // State for the toggle
-	// --- END: State for new features ---
+	const [isLiveEnabled, setIsLiveEnabled] = useState(true);
 
 	const pageTokenFromUrl = currentSearchParams.get("page_token");
 
@@ -39,18 +40,29 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 		{
 			enabled: !!channelId,
 			refetchOnWindowFocus: false,
-			// The refetch interval is now controlled by our state
 			refetchInterval: isLiveEnabled ? 30_000 : false,
+		},
+	);
+
+	const getChannelInfoQuery = api.youtube.getChannelInfo.useQuery(
+		{ channelId },
+		{
+			enabled: !!channelId,
+			refetchOnWindowFocus: false,
+			staleTime: 5 * 60 * 1000, // 5 minutes
 		},
 	);
 
 	const {
 		data: videosPageData,
-		isLoading,
+		isLoading: isLoadingVideos,
 		isError,
 		error: queryError,
 		isFetching,
 	} = getChannelVideosQuery;
+
+	const { data: channelData, isLoading: isLoadingChannel } =
+		getChannelInfoQuery;
 
 	const createQueryStringWithPageToken = useCallback(
 		(tokenValue: string | undefined) => {
@@ -102,12 +114,34 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 		}
 	};
 
+	const isLoading = isLoadingVideos || isLoadingChannel;
+
 	if (isLoading || (isFetching && !videosPageData)) {
 		return (
-			<div className="flex flex-col gap-4">
+			<div className="flex flex-col gap-6">
+				{/* Channel info skeleton */}
+				<Card>
+					<CardContent className="p-6">
+						<div className="flex items-center gap-4">
+							<Skeleton className="h-20 w-20 rounded-full" />
+							<div className="flex-1 space-y-2">
+								<Skeleton className="h-6 w-48" />
+								<Skeleton className="h-4 w-32" />
+								<Skeleton className="h-4 w-full max-w-2xl" />
+							</div>
+							<Skeleton className="h-10 w-28" />
+						</div>
+					</CardContent>
+				</Card>
+
+				<div className="flex items-center justify-between gap-4 rounded-lg border bg-card/50 p-4 shadow-sm">
+					<Skeleton className="h-10 w-40" />
+					<Skeleton className="h-10 w-48" />
+				</div>
+
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{Array.from({ length: maxResults }).map((_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: fine for skeli
+						// biome-ignore lint/suspicious/noArrayIndexKey: This is fine for a skeeton
 						<VideoCardSkeleton key={index} />
 					))}
 				</div>
@@ -134,6 +168,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	}
 
 	const videos = videosPageData?.videos || [];
+	const channel = channelData && !("error" in channelData) ? channelData : null;
 
 	if (
 		videos.length === 0 &&
@@ -142,55 +177,139 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 		!videosPageData?.prevPageToken
 	) {
 		return (
-			<div className="mt-8 text-center text-muted-foreground">
-				No videos found for this channel.
+			<div className="flex flex-col gap-6">
+				{/* Show channel info even when no videos */}
+				{channel && (
+					<Card>
+						<CardContent className="p-6">
+							<div className="flex items-center gap-4">
+								{channel.thumbnailUrl && (
+									<Image
+										src={channel.thumbnailUrl}
+										alt={channel.title}
+										width={80}
+										height={80}
+										className="rounded-full"
+									/>
+								)}
+								<div className="flex-1">
+									<h2 className="font-bold text-2xl">{channel.title}</h2>
+									{channel.description && (
+										<p className="mt-2 line-clamp-2 text-muted-foreground">
+											{channel.description}
+										</p>
+									)}
+								</div>
+								<Button variant="outline" asChild>
+									<a
+										href={channel.channelUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="flex items-center gap-2"
+									>
+										<ExternalLink className="h-4 w-4" />
+										View Channel
+									</a>
+								</Button>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+				<div className="mt-8 text-center text-muted-foreground">
+					No videos found for this channel.
+				</div>
 			</div>
 		);
 	}
 
 	return (
 		<div className="flex flex-col gap-6">
-			{/* --- START: Controls Area --- */}
-			<div className="flex items-center justify-end gap-4">
+			{/* Channel Info Card */}
+			{channel && (
+				<Card>
+					<CardContent className="p-6">
+						<div className="flex items-center gap-4">
+							{channel.thumbnailUrl && (
+								<Image
+									src={channel.thumbnailUrl}
+									alt={channel.title}
+									width={80}
+									height={80}
+									className="rounded-full"
+								/>
+							)}
+							<div className="flex-1">
+								<h2 className="font-bold text-2xl">{channel.title}</h2>
+								{channel.description && (
+									<p className="mt-2 line-clamp-2 text-muted-foreground">
+										{channel.description}
+									</p>
+								)}
+							</div>
+							<Button variant="outline" asChild>
+								<a
+									href={channel.channelUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="flex items-center gap-2"
+								>
+									<ExternalLink className="h-4 w-4" />
+									View Channel
+								</a>
+							</Button>
+						</div>
+					</CardContent>
+				</Card>
+			)}
+
+			{/* Controls */}
+			<div className="flex items-center justify-between gap-4 rounded-lg border bg-card/50 p-4 shadow-sm">
+				<div className="flex items-center gap-3">
+					<div
+						className={cn(
+							"flex items-center gap-2 rounded-full px-4 py-1.5 transition-all",
+							isLiveEnabled
+								? "bg-red-500/10 text-red-500"
+								: "bg-muted text-muted-foreground",
+						)}
+					>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-6 w-6"
+							onClick={() => setIsLiveEnabled((prev) => !prev)}
+							aria-label={
+								isLiveEnabled ? "Disable live updates" : "Enable live updates"
+							}
+						>
+							{isLiveEnabled ? <WifiOff /> : <Wifi />}
+						</Button>
+
+						{isLiveEnabled && (
+							<span className="relative flex h-2 w-2">
+								<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
+								<span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+							</span>
+						)}
+						<span className="font-medium text-sm">
+							{isFetching && isLiveEnabled
+								? "Updating..."
+								: isLiveEnabled
+									? "Live"
+									: "Updates paused"}
+						</span>
+					</div>
+				</div>
+
 				<SelectConference
-					placeholder="Select a conference"
+					placeholder="Filter by conference"
 					onSelect={(conference) => {
 						setSelectedConference(conference);
 					}}
 				/>
-				<div className="flex items-center gap-2">
-					<span
-						className={`text-muted-foreground text-sm transition-colors ${
-							isFetching && isLiveEnabled ? "text-blue-500" : ""
-						}`}
-					>
-						{isLiveEnabled && (
-							<Dot className="h-2 w-2 animate-pulse rounded-full bg-destructive" />
-						)}
-						{isFetching && isLiveEnabled
-							? "Checking..."
-							: isLiveEnabled
-								? "Live"
-								: "Paused"}
-					</span>
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setIsLiveEnabled((prev) => !prev)}
-						aria-label={
-							isLiveEnabled ? "Disable live updates" : "Enable live updates"
-						}
-					>
-						{isLiveEnabled ? (
-							<WifiOff className="h-4 w-4" />
-						) : (
-							<Wifi className="h-4 w-4" />
-						)}
-					</Button>
-				</div>
 			</div>
-			{/* --- END: Controls Area --- */}
 
+			{/* Videos Grid */}
 			{videos.length > 0 && (
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{videos.map((video) => (
@@ -203,6 +322,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 				</div>
 			)}
 
+			{/* Pagination */}
 			{((videosPageData &&
 				!("error" in videosPageData) &&
 				(videosPageData.prevPageToken || videosPageData.nextPageToken)) ||

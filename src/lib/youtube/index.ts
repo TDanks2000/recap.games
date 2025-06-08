@@ -114,6 +114,52 @@ export class Youtube {
 		return videoDetailsMap;
 	}
 
+	async getChannelInfo(
+		channelIdentifier: string,
+	): Promise<YouTubeChannel | YouTubeErrorResponse> {
+		const channelIdResult =
+			await this.getChannelIdFromIdentifier(channelIdentifier);
+
+		if (typeof channelIdResult !== "string") {
+			return channelIdResult;
+		}
+		const channelId = channelIdResult;
+
+		const params = {
+			part: "snippet,statistics",
+			id: channelId,
+		};
+
+		const response = await this.fetchApi<any>("channels", params);
+
+		if ("error" in response) {
+			return response;
+		}
+
+		if (!response.items || response.items.length === 0) {
+			return {
+				error: {
+					code: 404,
+					message: `Channel with ID '${channelId}' not found.`,
+					errors: [],
+				},
+			};
+		}
+
+		const item = response.items[0];
+		return {
+			id: channelId,
+			title: item.snippet.title,
+			description: item.snippet.description || "",
+			thumbnailUrl:
+				item.snippet.thumbnails?.high?.url ||
+				item.snippet.thumbnails?.medium?.url ||
+				item.snippet.thumbnails?.default?.url ||
+				"",
+			channelUrl: `https://www.youtube.com/channel/${channelId}`,
+		};
+	}
+
 	async getChannelVideos(
 		channelIdentifier: string,
 		maxResults = 10,

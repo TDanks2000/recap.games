@@ -1,13 +1,20 @@
 "use client";
 
-import { Loader2Icon, Search } from "lucide-react";
+import { Loader2Icon, Search, YoutubeIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { YouTubeChannel } from "@/@types/youtube";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { api } from "@/trpc/react";
 
 export interface SearchChannelsProps {
@@ -85,68 +92,91 @@ export const SearchChannels = ({ search, id }: SearchChannelsProps) => {
 	const displayError = queryError || apiError;
 
 	return (
-		<div className="mx-auto w-full max-w-xl space-y-6">
-			<Card>
-				<CardHeader>
-					<CardTitle>Search YouTube Channels</CardTitle>
+		<div className="mx-auto w-full max-w-3xl space-y-6">
+			<Card className="border-2">
+				<CardHeader className="space-y-2">
+					<div className="flex items-center gap-2">
+						<YoutubeIcon className="h-6 w-6 text-red-500" />
+						<CardTitle>Search YouTube Channels</CardTitle>
+					</div>
+					<CardDescription>
+						Search and select YouTube channels to view their content
+					</CardDescription>
 				</CardHeader>
-				<CardContent>
-					<form onSubmit={handleSearchFormSubmit} className="flex gap-2">
+				<CardContent className="space-y-4">
+					<form onSubmit={handleSearchFormSubmit} className="flex gap-3">
 						<Input
 							type="text"
 							value={searchInput}
 							onChange={(e) => setSearchInput(e.target.value)}
-							placeholder="Search for YouTube channels..."
+							placeholder="Enter channel name or keywords..."
 							className="flex-1"
 							disabled={!!id}
 						/>
-						<Button type="submit" disabled={!!id || isLoading}>
+						<Button
+							type="submit"
+							disabled={!!id || isLoading}
+							variant="default"
+							size="default"
+						>
 							<Search className="mr-2 h-4 w-4" />
 							Search
 						</Button>
 					</form>
+
 					{isLoading && (
-						<div className="mt-2 flex items-center gap-2">
-							<Loader2Icon size="sm" className="animate-spin" />
-							<span>Searching channels...</span>
+						<div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+							<Loader2Icon className="h-5 w-5 animate-spin" />
+							<span>Searching YouTube channels...</span>
 						</div>
 					)}
+
 					{displayError && (
-						<div className="mt-2 text-red-500 text-sm">
-							Error: {displayError.message}
+						<div className="rounded-lg bg-destructive/10 p-4 text-destructive text-sm">
+							<strong>Error:</strong> {displayError.message}
 						</div>
 					)}
+
 					{!id && channels.length > 0 && (
-						<div className="mt-4 flex flex-wrap gap-2">
-							{channels.map((ch: YouTubeChannel) => (
-								<Button
-									key={ch.id}
-									variant="outline"
-									size="sm"
-									onClick={() => handleChannelSelect(ch.id)}
-									className="flex items-center gap-2"
-								>
-									{ch.thumbnailUrl && (
-										<Image
-											src={ch.thumbnailUrl}
-											alt={ch.title}
-											className="h-6 w-6 rounded-full"
-											width={48}
-											height={48}
-										/>
-									)}
-									<span>{ch.title}</span>
-								</Button>
-							))}
-						</div>
+						<ScrollArea className="h-[300px] rounded-lg border p-4">
+							<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+								{channels.map((ch: YouTubeChannel) => (
+									<Button
+										key={ch.id}
+										variant="outline"
+										size="lg"
+										onClick={() => handleChannelSelect(ch.id)}
+										className="flex items-center gap-3 p-4 hover:bg-accent"
+									>
+										{ch.thumbnailUrl && (
+											<Image
+												src={ch.thumbnailUrl}
+												alt={ch.title}
+												className="h-10 w-10 rounded-full"
+												width={48}
+												height={48}
+											/>
+										)}
+										<span className="flex-1 truncate text-left">
+											{ch.title}
+										</span>
+									</Button>
+								))}
+							</div>
+						</ScrollArea>
 					)}
+
 					{!id &&
 						!isLoading &&
 						!displayError &&
 						channels.length === 0 &&
 						searchInput.trim() !== "" && (
-							<div className="mt-2 text-muted-foreground text-sm">
-								No channels found for "{searchInput}".
+							<div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+								<Search className="h-8 w-8" />
+								<p>No channels found for "{searchInput}"</p>
+								<p className="text-sm">
+									Try different keywords or check the spelling
+								</p>
 							</div>
 						)}
 				</CardContent>
