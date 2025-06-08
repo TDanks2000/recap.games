@@ -27,10 +27,7 @@ export const VideoCardDialog = ({ video, conference }: Props) => {
 	return (
 		<YoutubeVideoCard
 			key={video.id}
-			video={{
-				...video,
-				title,
-			}}
+			video={video}
 			renderActionButton={(currentVideo) => {
 				const currentTitle = getPrimaryYouTubeTitleSegment(currentVideo.title);
 
