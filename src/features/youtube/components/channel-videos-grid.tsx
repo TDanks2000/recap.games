@@ -1,6 +1,6 @@
 "use client";
 
-import { Wifi, WifiOff } from "lucide-react"; // <-- Import icons
+import { Dot, Wifi, WifiOff } from "lucide-react"; // <-- Import icons
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { VideoCardSkeleton } from "@/components/skeletons/video-card-skeleton";
@@ -164,6 +164,9 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 							isFetching && isLiveEnabled ? "text-blue-500" : ""
 						}`}
 					>
+						{isLiveEnabled && (
+							<Dot className="h-2 w-2 animate-pulse rounded-full bg-destructive" />
+						)}
 						{isFetching && isLiveEnabled
 							? "Checking..."
 							: isLiveEnabled
