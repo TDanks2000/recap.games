@@ -29,7 +29,15 @@ export function getFormattedDate(
 		/^Year \d{4}$/i,
 		/^Q[1-4] \d{4}$/i,
 		/^\d{4}$/,
-		/^(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?) \d{4}$/i, //
+		/^(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?) \d{4}$/i,
+		// Seasonal patterns
+		/^(Winter|Spring|Summer|Fall|Autumn) \d{4}$/i,
+		// Early/Late/Mid patterns
+		/^(Early|Late|Mid) \d{4}$/i,
+		// Holiday patterns
+		/^(Holiday|Christmas) \d{4}$/i,
+		// Coming Soon variations
+		/^Coming Soon$/i,
 	];
 
 	for (const pattern of passthroughPatterns) {
@@ -38,8 +46,9 @@ export function getFormattedDate(
 		}
 	}
 
-	// Handle "Coming Soon" or other specific literal strings
-	if (dateStr.toLowerCase() === "coming soon") {
+	// Handle other literal strings that should be returned as-is
+	const literalStrings = ["coming soon", "tba", "tbd"];
+	if (literalStrings.includes(dateStr.toLowerCase())) {
 		return dateStr;
 	}
 
