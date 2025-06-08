@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: TODO: fix later */
 import type {
-  YouTubeChannel,
-  YouTubeChannelVideosPage,
-  YouTubeErrorResponse,
-  YouTubeVideo,
+	YouTubeChannel,
+	YouTubeChannelVideosPage,
+	YouTubeErrorResponse,
+	YouTubeVideo,
 } from "@/@types/youtube";
 import { env } from "@/env";
 

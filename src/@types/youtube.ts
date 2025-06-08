@@ -5,7 +5,7 @@ export interface YouTubeVideo {
 	thumbnailUrl: string;
 	publishedAt: string;
 	videoUrl: string;
-  type: "video" | "stream" | "playlist"
+	type: "video" | "stream" | "playlist";
 }
 
 export interface YouTubeChannel {

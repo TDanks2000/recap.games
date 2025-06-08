@@ -23,7 +23,6 @@ interface Props {
 }
 
 export const VideoCardDialog = ({ video, conference }: Props) => {
-	const title = getPrimaryYouTubeTitleSegment(video.title);
 	return (
 		<YoutubeVideoCard
 			key={video.id}

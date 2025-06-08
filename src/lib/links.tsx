@@ -19,5 +19,5 @@ export const SOCIAL_LINKS = [
 		label: "Ko-Fi",
 		icon: SiKofi,
 		type: "donate",
-	}
+	},
 ];
