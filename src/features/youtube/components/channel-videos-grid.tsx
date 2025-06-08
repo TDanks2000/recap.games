@@ -1,5 +1,6 @@
 "use client";
 
+import { Wifi, WifiOff } from "lucide-react"; // <-- Import icons
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { VideoCardSkeleton } from "@/components/skeletons/video-card-skeleton";
@@ -21,7 +22,11 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const currentSearchParams = useSearchParams();
+
+	// --- START: State for new features ---
 	const [selectedConference, setSelectedConference] = useState<Conference>();
+	const [isLiveEnabled, setIsLiveEnabled] = useState(true); // State for the toggle
+	// --- END: State for new features ---
 
 	const pageTokenFromUrl = currentSearchParams.get("page_token");
 
@@ -34,6 +39,8 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 		{
 			enabled: !!channelId,
 			refetchOnWindowFocus: false,
+			// The refetch interval is now controlled by our state
+			refetchInterval: isLiveEnabled ? 30_000 : false,
 		},
 	);
 
@@ -100,7 +107,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 			<div className="flex flex-col gap-4">
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{Array.from({ length: maxResults }).map((_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: this is fine for a skeleton
+						// biome-ignore lint/suspicious/noArrayIndexKey: fine for skeli
 						<VideoCardSkeleton key={index} />
 					))}
 				</div>
@@ -143,14 +150,43 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 
 	return (
 		<div className="flex flex-col gap-6">
-			<div className="self-end">
+			{/* --- START: Controls Area --- */}
+			<div className="flex items-center justify-end gap-4">
 				<SelectConference
 					placeholder="Select a conference"
 					onSelect={(conference) => {
 						setSelectedConference(conference);
 					}}
 				/>
+				<div className="flex items-center gap-2">
+					<span
+						className={`text-muted-foreground text-sm transition-colors ${
+							isFetching && isLiveEnabled ? "text-blue-500" : ""
+						}`}
+					>
+						{isFetching && isLiveEnabled
+							? "Checking..."
+							: isLiveEnabled
+								? "Live"
+								: "Paused"}
+					</span>
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setIsLiveEnabled((prev) => !prev)}
+						aria-label={
+							isLiveEnabled ? "Disable live updates" : "Enable live updates"
+						}
+					>
+						{isLiveEnabled ? (
+							<WifiOff className="h-4 w-4" />
+						) : (
+							<Wifi className="h-4 w-4" />
+						)}
+					</Button>
+				</div>
 			</div>
+			{/* --- END: Controls Area --- */}
 
 			{videos.length > 0 && (
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
