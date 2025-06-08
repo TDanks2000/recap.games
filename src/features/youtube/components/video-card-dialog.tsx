@@ -4,21 +4,25 @@ import { MediaType } from "@/@types";
 import type { YouTubeVideo } from "@/@types/youtube";
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
 } from "@/components/ui/dialog";
 import GameForm from "@/features/admin/components/GameForm";
 import { getPrimaryYouTubeTitleSegment } from "@/lib/title";
+import type { RouterOutputs } from "@/trpc/react";
 import { YoutubeVideoCard } from "./video-card";
+
+type Conference = RouterOutputs["conference"]["getAll"][number];
 
 interface Props {
 	video: YouTubeVideo;
+	conference?: Conference;
 }
 
-export const VideoCardDialog = ({ video }: Props) => {
+export const VideoCardDialog = ({ video, conference }: Props) => {
 	const title = getPrimaryYouTubeTitleSegment(video.title);
 	return (
 		<YoutubeVideoCard
@@ -29,7 +33,7 @@ export const VideoCardDialog = ({ video }: Props) => {
 			}}
 			renderActionButton={(currentVideo) => {
 				const currentTitle = getPrimaryYouTubeTitleSegment(currentVideo.title);
-        
+
 				return (
 					<Dialog>
 						<DialogTrigger asChild>
@@ -45,6 +49,7 @@ export const VideoCardDialog = ({ video }: Props) => {
 									formIndex={0}
 									initialData={{
 										title: currentTitle ?? currentVideo.title ?? "",
+										conference: conference,
 										media: [
 											{
 												link: currentVideo.videoUrl,

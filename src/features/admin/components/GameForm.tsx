@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { type Control, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -28,7 +28,9 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { api } from "@/trpc/react";
+import { api, type RouterOutputs } from "@/trpc/react";
+
+type Conference = RouterOutputs["conference"]["getAll"][number];
 
 const mediaSchema = z.object({
 	type: z.nativeEnum(MediaType),
@@ -52,26 +54,181 @@ const gameFormSchema = z.object({
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
 
+interface GameFormInitialData {
+	title?: string;
+	releaseDate?: string;
+	genres?: Genre[];
+	exclusive?: Platform[];
+	features?: Feature[];
+	developer?: string[];
+	publisher?: string[];
+	hidden?: boolean;
+	conference?: Conference;
+	media?: Array<{ type: MediaType; link: string }>;
+}
+
 interface GameFormProps {
 	formIndex: number;
-	initialData?: Partial<GameFormValues>;
+	initialData?: GameFormInitialData;
 	onFormSubmitSuccess?: () => void;
 }
 
-const NONE_CONFERENCE_ID_PLACEHOLDER = "NONE_CONFERENCE_ID_PLACEHOLDER";
+const formFieldConfigs = {
+	title: {
+		label: "Title",
+		description: "The name of the game. This field is required.",
+		placeholder: "Game title",
+	},
+	releaseDate: {
+		label: "Release Date",
+		description:
+			'Optional. Enter the release date in MM-DD-YYYY format or use text like "Q4 2023".',
+		placeholder: "Release date",
+	},
+	genres: {
+		label: "Genres",
+		description: "Optional. Select one or more genres that describe the game.",
+		placeholder: "Select genres",
+	},
+	exclusive: {
+		label: "Exclusive Platforms",
+		description:
+			"Optional. Select the platforms where the game is exclusively available.",
+		placeholder: "Select platforms",
+	},
+	features: {
+		label: "Features",
+		description:
+			"Optional. Select the features that the game supports (e.g., multiplayer, VR).",
+		placeholder: "Select features",
+	},
+	developer: {
+		label: "Developer",
+		description: "Optional. Enter a comma-separated list of developer names.",
+		placeholder: "Developer names",
+	},
+	publisher: {
+		label: "Publisher",
+		description: "Optional. Enter a comma-separated list of publisher names.",
+		placeholder: "Publisher names",
+	},
+	conference: {
+		label: "Conference",
+		description: "Optional. Associate the game with a conference.",
+		placeholder: "Select a conference",
+	},
+} as const;
 
-const baseDefaultValues: GameFormValues = {
-	title: "",
-	releaseDate: "",
-	genres: [],
-	exclusive: [],
-	features: [],
-	developer: [],
-	publisher: [],
-	hidden: false,
-	media: [{ type: MediaType.Video, link: "" }],
-	conferenceId: undefined,
-};
+// Helper components moved outside
+const FormFieldWrapper = ({ children }: { children: React.ReactNode }) => (
+	<FormItem className="flex min-h-20 flex-col justify-start">
+		{children}
+	</FormItem>
+);
+
+interface BasicFormFieldProps {
+	name: "title" | "releaseDate";
+	config: (typeof formFieldConfigs)[keyof typeof formFieldConfigs];
+	control: Control<GameFormValues>;
+}
+
+const BasicFormField = ({ name, config, control }: BasicFormFieldProps) => (
+	<FormField
+		control={control}
+		name={name}
+		render={({ field }) => (
+			<FormFieldWrapper>
+				<FormLabel>{config.label}</FormLabel>
+				<FormDescription className="mb-2">{config.description}</FormDescription>
+				<FormControl>
+					<Input
+						placeholder={config.placeholder}
+						{...field}
+						value={field.value || ""}
+					/>
+				</FormControl>
+				<FormMessage />
+			</FormFieldWrapper>
+		)}
+	/>
+);
+
+interface MultiSelectFieldProps {
+	name: "genres" | "exclusive" | "features";
+	config: (typeof formFieldConfigs)[keyof typeof formFieldConfigs];
+	options: readonly string[];
+	optionsGroupLabel: string;
+	control: Control<GameFormValues>;
+}
+
+const MultiSelectField = ({
+	name,
+	config,
+	options,
+	optionsGroupLabel,
+	control,
+}: MultiSelectFieldProps) => (
+	<FormField
+		control={control}
+		name={name}
+		render={({ field }) => (
+			<FormFieldWrapper>
+				<FormLabel>{config.label}</FormLabel>
+				<FormDescription className="mb-2">{config.description}</FormDescription>
+				<FormControl>
+					<MultiSelect
+						options={options.map((option) => ({
+							label: option,
+							value: option,
+						}))}
+						selected={field.value || []}
+						onChange={field.onChange}
+						placeholder={config.placeholder}
+						showFullSelected={true}
+						selectedBadgeDisplay="whole"
+						optionsGroupLabel={optionsGroupLabel}
+					/>
+				</FormControl>
+				<FormMessage />
+			</FormFieldWrapper>
+		)}
+	/>
+);
+
+interface ArrayInputFieldProps {
+	name: "developer" | "publisher";
+	config: (typeof formFieldConfigs)[keyof typeof formFieldConfigs];
+	control: Control<GameFormValues>;
+	onArrayInput: (value: string, onChange: (value: string[]) => void) => void;
+	arrayToString: (array?: string[]) => string;
+}
+
+const ArrayInputField = ({
+	name,
+	config,
+	control,
+	onArrayInput,
+	arrayToString,
+}: ArrayInputFieldProps) => (
+	<FormField
+		control={control}
+		name={name}
+		render={({ field }) => (
+			<FormFieldWrapper>
+				<FormLabel>{config.label}</FormLabel>
+				<FormDescription className="mb-2">{config.description}</FormDescription>
+				<FormControl>
+					<Input
+						placeholder={config.placeholder}
+						value={arrayToString(field.value)}
+						onChange={(e) => onArrayInput(e.target.value, field.onChange)}
+					/>
+				</FormControl>
+				<FormMessage />
+			</FormFieldWrapper>
+		)}
+	/>
+);
 
 export default function GameForm({
 	formIndex,
@@ -81,37 +238,62 @@ export default function GameForm({
 	const utils = api.useUtils();
 	const conferences = api.conference.getAll.useQuery();
 
+	// Calculate default values with initial data
+	const defaultFormValues = useMemo((): GameFormValues => {
+		const baseDefaults: GameFormValues = {
+			title: "",
+			releaseDate: "",
+			genres: [],
+			exclusive: [],
+			features: [],
+			developer: [],
+			publisher: [],
+			hidden: false,
+			media: [{ type: MediaType.Video, link: "" }],
+			conferenceId: undefined,
+		};
+
+		if (!initialData) return baseDefaults;
+
+		return {
+			title: initialData.title || baseDefaults.title,
+			releaseDate: initialData.releaseDate || baseDefaults.releaseDate,
+			genres: initialData.genres || baseDefaults.genres,
+			exclusive: initialData.exclusive || baseDefaults.exclusive,
+			features: initialData.features || baseDefaults.features,
+			developer: initialData.developer || baseDefaults.developer,
+			publisher: initialData.publisher || baseDefaults.publisher,
+			hidden: initialData.hidden ?? baseDefaults.hidden,
+			media:
+				initialData.media && initialData.media.length > 0
+					? initialData.media
+					: baseDefaults.media,
+			conferenceId: initialData.conference?.id || baseDefaults.conferenceId,
+		};
+	}, [initialData]);
+
 	const form = useForm<GameFormValues>({
 		resolver: zodResolver(gameFormSchema),
-		defaultValues: baseDefaultValues,
+		defaultValues: defaultFormValues,
 	});
-
-	useEffect(() => {
-		if (initialData) {
-			const populatedValues: GameFormValues = {
-				...baseDefaultValues,
-				...initialData,
-				media:
-					initialData.media && initialData.media.length > 0
-						? initialData.media
-						: baseDefaultValues.media,
-				conferenceId:
-					initialData.conferenceId === null
-						? undefined
-						: initialData.conferenceId,
-			};
-			form.reset(populatedValues);
-		} else {
-			form.reset(baseDefaultValues);
-		}
-	}, [initialData, form.reset]);
 
 	const createGameMutation = api.combined.createGameWithMedia.useMutation({
 		onSuccess: () => {
 			toast.success(`Game created successfully (Form ${formIndex})`);
-			form.reset(baseDefaultValues);
+			form.reset({
+				title: "",
+				releaseDate: "",
+				genres: [],
+				exclusive: [],
+				features: [],
+				developer: [],
+				publisher: [],
+				hidden: false,
+				media: [{ type: MediaType.Video, link: "" }],
+				conferenceId: undefined,
+			});
 			utils.game.getAll.invalidate();
-			if (onFormSubmitSuccess) onFormSubmitSuccess();
+			onFormSubmitSuccess?.();
 		},
 		onError: (error) => {
 			toast.error(`Error creating game (Form ${formIndex}): ${error.message}`);
@@ -123,7 +305,26 @@ export default function GameForm({
 		name: "media",
 	});
 
-	function onSubmit(data: GameFormValues) {
+	// Only reset when defaultFormValues change (which happens when initialData changes)
+	useEffect(() => {
+		form.reset(defaultFormValues);
+	}, [defaultFormValues, form]);
+
+	// Utility functions
+	const handleArrayInput = (
+		value: string,
+		onChange: (value: string[]) => void,
+	) => {
+		if (!value.trim()) {
+			onChange([]);
+			return;
+		}
+		onChange(value.split(",").map((item) => item.trim()));
+	};
+
+	const arrayToString = (array?: string[]) => array?.join(", ") ?? "";
+
+	const onSubmit = (data: GameFormValues) => {
 		createGameMutation.mutate({
 			game: {
 				title: data.title,
@@ -138,257 +339,129 @@ export default function GameForm({
 			},
 			media: data.media,
 		});
-	}
-
-	const handleArrayInput = (
-		value: string,
-		field: { onChange: (value: string[]) => void },
-	) => {
-		if (!value.trim()) {
-			field.onChange([]);
-			return;
-		}
-		const array = value.split(",").map((item) => item.trim());
-		field.onChange(array);
-	};
-
-	const arrayToString = (array: string[] | undefined) => {
-		if (!array || array?.length === 0) return "";
-		return array.join(", ");
 	};
 
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
 				<div className="space-y-8">
+					{/* Basic Details */}
 					<div className="space-y-4">
 						<h3 className="font-semibold text-xl tracking-tight">
 							Basic Details
 						</h3>
 						<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-							<FormField
-								control={form.control}
+							<BasicFormField
 								name="title"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Title</FormLabel>
-										<FormDescription className="mb-2">
-											The name of the game. This field is required.
-										</FormDescription>
-										<FormControl>
-											<Input placeholder="Game title" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
+								config={formFieldConfigs.title}
 								control={form.control}
+							/>
+							<BasicFormField
 								name="releaseDate"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Release Date</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Enter the release date in MM-DD-YYYY format or
-											use text like "Q4 2023".
-										</FormDescription>
-										<FormControl>
-											<Input placeholder="Release date" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								config={formFieldConfigs.releaseDate}
+								control={form.control}
 							/>
 						</div>
 					</div>
 
+					{/* Game Details */}
 					<div className="space-y-4">
 						<h3 className="font-semibold text-xl tracking-tight">
 							Game Details
 						</h3>
 						<div className="grid gap-x-6 gap-y-4 md:grid-cols-2">
-							<FormField
-								control={form.control}
+							<MultiSelectField
 								name="genres"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Genres</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Select one or more genres that describe the
-											game.
-										</FormDescription>
-										<FormControl>
-											<MultiSelect
-												options={Object.values(Genre).map((genre) => ({
-													label: genre,
-													value: genre,
-												}))}
-												selected={field.value || []}
-												onChange={(selected) => field.onChange(selected)}
-												placeholder="Select genres"
-												showFullSelected={true}
-												selectedBadgeDisplay={"whole"}
-												optionsGroupLabel="Genres"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
+								config={formFieldConfigs.genres}
+								options={Object.values(Genre)}
+								optionsGroupLabel="Genres"
 								control={form.control}
+							/>
+							<MultiSelectField
 								name="exclusive"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Exclusive Platforms</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Select the platforms where the game is
-											exclusively available.
-										</FormDescription>
-										<FormControl>
-											<MultiSelect
-												options={Object.values(Platform).map((platform) => ({
-													label: platform,
-													value: platform,
-												}))}
-												selected={field.value || []}
-												onChange={(selected) => field.onChange(selected)}
-												placeholder="Select platforms"
-												showFullSelected={true}
-												selectedBadgeDisplay={"whole"}
-												optionsGroupLabel="Platforms"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
+								config={formFieldConfigs.exclusive}
+								options={Object.values(Platform)}
+								optionsGroupLabel="Platforms"
 								control={form.control}
+							/>
+							<MultiSelectField
 								name="features"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Features</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Select the features that the game supports
-											(e.g., multiplayer, VR).
-										</FormDescription>
-										<FormControl>
-											<MultiSelect
-												options={Object.values(Feature).map((feature) => ({
-													label: feature,
-													value: feature,
-												}))}
-												selected={field.value || []}
-												onChange={(selected) => field.onChange(selected)}
-												placeholder="Select features"
-												showFullSelected={true}
-												selectedBadgeDisplay={"whole"}
-												optionsGroupLabel="Features"
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
+								config={formFieldConfigs.features}
+								options={Object.values(Feature)}
+								optionsGroupLabel="Features"
 								control={form.control}
+							/>
+							<ArrayInputField
 								name="developer"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Developer</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Enter a comma-separated list of developer names.
-										</FormDescription>
-										<FormControl>
-											<Input
-												placeholder="Developer names"
-												value={arrayToString(field.value)}
-												onChange={(e) =>
-													handleArrayInput(e.target.value, field)
-												}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
+								config={formFieldConfigs.developer}
 								control={form.control}
-								name="publisher"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Publisher</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Enter a comma-separated list of publisher names.
-										</FormDescription>
-										<FormControl>
-											<Input
-												placeholder="Publisher names"
-												value={arrayToString(field.value)}
-												onChange={(e) =>
-													handleArrayInput(e.target.value, field)
-												}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
+								onArrayInput={handleArrayInput}
+								arrayToString={arrayToString}
 							/>
+							<ArrayInputField
+								name="publisher"
+								config={formFieldConfigs.publisher}
+								control={form.control}
+								onArrayInput={handleArrayInput}
+								arrayToString={arrayToString}
+							/>
+
+							{/* Conference Field */}
 							<FormField
 								control={form.control}
 								name="conferenceId"
-								render={({ field }) => (
-									<FormItem className="flex min-h-20 flex-col justify-start">
-										<FormLabel>Conference</FormLabel>
-										<FormDescription className="mb-2">
-											Optional. Associate the game with a conference.
-										</FormDescription>
-										<Select
-											onValueChange={(value) => {
-												if (value === NONE_CONFERENCE_ID_PLACEHOLDER) {
-													field.onChange(undefined);
-												} else {
-													field.onChange(Number(value));
+								render={({ field }) => {
+									return (
+										<FormFieldWrapper>
+											<FormLabel>{formFieldConfigs.conference.label}</FormLabel>
+											<FormDescription className="mb-2">
+												{formFieldConfigs.conference.description}
+											</FormDescription>
+											<Select
+												onValueChange={(value) =>
+													field.onChange(
+														value === "none" ? undefined : Number(value),
+													)
 												}
-											}}
-											value={
-												field.value !== undefined
-													? field.value.toString()
-													: NONE_CONFERENCE_ID_PLACEHOLDER
-											}
-										>
-											<FormControl className="w-full">
-												<SelectTrigger>
-													<SelectValue placeholder="Select a conference" />
-												</SelectTrigger>
-											</FormControl>
-											<SelectContent>
-												<SelectItem value={NONE_CONFERENCE_ID_PLACEHOLDER}>
-													None
-												</SelectItem>
-												{conferences.data?.map(
-													(conference) =>
-														conference.id != null && (
+												value={field.value ? field.value.toString() : "none"}
+												disabled={conferences.isLoading}
+											>
+												<FormControl>
+													<SelectTrigger>
+														<SelectValue
+															placeholder={
+																conferences.isLoading
+																	? "Loading conferences..."
+																	: formFieldConfigs.conference.placeholder
+															}
+														/>
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="none">None</SelectItem>
+													{conferences.data?.map((conference) =>
+														conference.id ? (
 															<SelectItem
 																key={conference.id}
 																value={conference.id.toString()}
 															>
 																{conference.name}
 															</SelectItem>
-														),
-												)}
-											</SelectContent>
-										</Select>
-										<FormMessage />
-									</FormItem>
-								)}
+														) : null,
+													)}
+												</SelectContent>
+											</Select>
+											<FormMessage />
+										</FormFieldWrapper>
+									);
+								}}
 							/>
 						</div>
 					</div>
 
 					<Separator className="my-8" />
 
+					{/* Media Section */}
 					<div className="space-y-4">
 						<div className="flex items-center justify-between">
 							<h3 className="font-semibold text-xl tracking-tight">Media</h3>
@@ -411,7 +484,7 @@ export default function GameForm({
 										control={form.control}
 										name={`media.${index}.type`}
 										render={({ field }) => (
-											<FormItem className="flex min-h-20 flex-col justify-start">
+											<FormFieldWrapper>
 												<FormLabel>Media Type</FormLabel>
 												<FormDescription className="mb-2">
 													Required. Select the type of media (e.g., video,
@@ -419,7 +492,7 @@ export default function GameForm({
 												</FormDescription>
 												<Select
 													onValueChange={field.onChange}
-													defaultValue={field.value}
+													value={field.value}
 												>
 													<FormControl>
 														<SelectTrigger>
@@ -427,25 +500,22 @@ export default function GameForm({
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
-														{Object.values(MediaType).map(
-															(type) =>
-																!!type?.length && (
-																	<SelectItem key={type} value={type}>
-																		{type}
-																	</SelectItem>
-																),
-														)}
+														{Object.values(MediaType).map((type) => (
+															<SelectItem key={type} value={type}>
+																{type}
+															</SelectItem>
+														))}
 													</SelectContent>
 												</Select>
 												<FormMessage />
-											</FormItem>
+											</FormFieldWrapper>
 										)}
 									/>
 									<FormField
 										control={form.control}
 										name={`media.${index}.link`}
 										render={({ field }) => (
-											<FormItem className="flex min-h-20 flex-col justify-start">
+											<FormFieldWrapper>
 												<FormLabel>Media URL</FormLabel>
 												<FormDescription className="mb-2">
 													Required. Provide a valid URL for the media item.
@@ -457,7 +527,7 @@ export default function GameForm({
 													/>
 												</FormControl>
 												<FormMessage />
-											</FormItem>
+											</FormFieldWrapper>
 										)}
 									/>
 								</div>
@@ -467,7 +537,7 @@ export default function GameForm({
 									size="icon"
 									className="mt-8"
 									onClick={() => remove(index)}
-									disabled={fields?.length === 1}
+									disabled={fields.length === 1}
 								>
 									<Trash2 className="h-4 w-4" />
 								</Button>

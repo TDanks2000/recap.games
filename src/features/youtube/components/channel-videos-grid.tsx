@@ -1,11 +1,12 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { VideoCardSkeleton } from "@/components/skeletons/video-card-skeleton";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/trpc/react";
+import { SelectConference } from "@/features/conferences/components/select-conference";
+import { api, type RouterOutputs } from "@/trpc/react";
 import { VideoCardDialog } from "./video-card-dialog";
 
 interface Props {
@@ -14,10 +15,13 @@ interface Props {
 	maxResults: number;
 }
 
+type Conference = RouterOutputs["conference"]["getAll"][number];
+
 export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	const router = useRouter();
 	const pathname = usePathname();
 	const currentSearchParams = useSearchParams();
+	const [selectedConference, setSelectedConference] = useState<Conference>();
 
 	const pageTokenFromUrl = currentSearchParams.get("page_token");
 
@@ -139,10 +143,23 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 
 	return (
 		<div className="flex flex-col gap-6">
+			<div className="self-end">
+				<SelectConference
+					placeholder="Select a conference"
+					onSelect={(conference) => {
+						setSelectedConference(conference);
+					}}
+				/>
+			</div>
+
 			{videos.length > 0 && (
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{videos.map((video) => (
-						<VideoCardDialog key={video.id} video={video} />
+						<VideoCardDialog
+							key={video.id}
+							video={video}
+							conference={selectedConference}
+						/>
 					))}
 				</div>
 			)}
