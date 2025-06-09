@@ -1,9 +1,11 @@
 "use client";
 
+import { Calendar, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { type ReactNode } from "react";
+import { DateComponent } from "@/components/date";
 import { ShareButton } from "@/components/share-button";
 import {
 	Breadcrumb,
@@ -13,12 +15,16 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useReadingTime } from "@/lib/readingTime";
 
 interface BlogHeroProps {
 	title: string;
 	breadcrumb?: { href: string; label: string }[];
 	render?: ReactNode;
 	showShareButton?: boolean;
+	content?: string;
+	publishedDate?: Date;
+	authorName?: string | null;
 }
 
 export function BlogHero({
@@ -26,8 +32,15 @@ export function BlogHero({
 	breadcrumb,
 	render,
 	showShareButton,
+	content,
+	publishedDate,
+	authorName,
 }: BlogHeroProps) {
 	const pathname = usePathname();
+
+	const { text: readingTime } = useReadingTime(content || "", {
+		contentType: "blog",
+	});
 
 	const pathSegments = pathname
 		.split("/")
@@ -42,13 +55,17 @@ export function BlogHero({
 	return (
 		<div className="relative w-full overflow-hidden px-8 py-14 drop-shadow-xl">
 			<div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-primary/5" />
-			<Image
-				src="/tiled-bg.png"
-				alt="Tiled background"
-				className="absolute inset-0 overflow-hidden object-cover opacity-50"
-				width={1920}
-				height={1080}
-			/>
+
+			{/* Animated background image */}
+			<div className="absolute inset-0 animate-float-background">
+				<Image
+					src="/tiled-bg.png"
+					alt="Tiled background"
+					className="absolute inset-0 scale-105 overflow-hidden object-cover opacity-50"
+					width={1920}
+					height={1080}
+				/>
+			</div>
 
 			<div className="relative mx-auto max-w-7xl px-8 sm:px-16">
 				<div className="mb-3 flex flex-row items-center gap-3">
@@ -81,9 +98,32 @@ export function BlogHero({
 						</Breadcrumb>
 					)}
 				</div>
+
 				<h1 className="mb-4 font-extrabold text-4xl leading-tight drop-shadow-lg">
 					{title}
 				</h1>
+
+				{(publishedDate || content) && (
+					<div className="mb-6 flex flex-wrap items-center gap-3 text-muted-foreground text-sm sm:gap-4">
+						{publishedDate && (
+							<div className="flex items-center gap-2 rounded-md bg-background/20 px-2.5 py-1.5 backdrop-blur-sm sm:px-3">
+								<Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+								<DateComponent date={publishedDate} />
+							</div>
+						)}
+						{content && (
+							<div className="flex items-center gap-2 rounded-md bg-background/20 px-2.5 py-1.5 backdrop-blur-sm sm:px-3">
+								<Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+								<span>{readingTime}</span>
+							</div>
+						)}
+						{authorName && (
+							<div className="rounded-md bg-background/20 px-2.5 py-1.5 backdrop-blur-sm sm:px-3">
+								By {authorName}
+							</div>
+						)}
+					</div>
+				)}
 
 				{render && <div className="mt-8">{render}</div>}
 			</div>

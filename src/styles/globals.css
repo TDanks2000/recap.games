@@ -138,4 +138,57 @@
 	.scrollbar-hide::-webkit-scrollbar {
 		display: none; /* Chrome, Safari, Opera */
 	}
+
+	/**
+	 * Perfect gaming background animation
+	 * Combines parallax movement, breathing effect, and subtle rotation
+	 */
+	@keyframes float-background {
+		0% {
+			transform: translate(0, 0) scale(1.08) rotate(0deg);
+		}
+		12.5% {
+			transform: translate(-8px, -6px) scale(1.085) rotate(0.3deg);
+		}
+		25% {
+			transform: translate(-12px, -8px) scale(1.09) rotate(0.5deg);
+		}
+		37.5% {
+			transform: translate(-8px, -12px) scale(1.092) rotate(0.3deg);
+		}
+		50% {
+			transform: translate(0, -15px) scale(1.095) rotate(0deg);
+		}
+		62.5% {
+			transform: translate(8px, -12px) scale(1.092) rotate(-0.3deg);
+		}
+		75% {
+			transform: translate(12px, -6px) scale(1.09) rotate(-0.5deg);
+		}
+		87.5% {
+			transform: translate(6px, 0) scale(1.085) rotate(-0.3deg);
+		}
+		100% {
+			transform: translate(0, 0) scale(1.08) rotate(0deg);
+		}
+	}
+
+	@keyframes background-glow {
+		0%,
+		100% {
+			filter: brightness(1) saturate(1);
+		}
+		50% {
+			filter: brightness(1.05) saturate(1.1);
+		}
+	}
+
+	.animate-float-background {
+		animation:
+			float-background 25s cubic-bezier(0.4, 0, 0.6, 1) infinite,
+			background-glow 8s ease-in-out infinite;
+		will-change: transform, filter;
+		backface-visibility: hidden;
+		perspective: 1000px;
+	}
 }

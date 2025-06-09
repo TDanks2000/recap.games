@@ -20,7 +20,7 @@ const DateTimeDetails = ({ startTime, endTime }: CardHeaderProps) => {
 					{formattedDate}
 				</span>
 				<div className="hidden text-muted-foreground/70 sm:block">|</div>
-				<span className="text-muted-foreground/90 text-xs sm:text-sm">
+				<span className="text-muted-foreground text-xs sm:text-sm">
 					{formattedStartTime} - {formattedEndTime}
 					<span className="ml-1.5 text-[10px] text-muted-foreground sm:text-xs">
 						estimate

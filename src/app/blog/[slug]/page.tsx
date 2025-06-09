@@ -151,6 +151,8 @@ export default async function ViewBlog(props: ViewBlogProps) {
 	if (!data) notFound();
 	const isAuthor = session?.user.id === data.authorId;
 
+	const publishedDate = data.scheduledAt ?? data.createdAt;
+
 	return (
 		<HydrateClient>
 			<BlogLayout>
@@ -161,6 +163,9 @@ export default async function ViewBlog(props: ViewBlogProps) {
 					title={data.title}
 					breadcrumb={[{ href: "/blog", label: "Blog" }]}
 					showShareButton={true}
+					content={data.content}
+					publishedDate={publishedDate}
+					authorName={data.authorName}
 					render={
 						isAuthor && (
 							<div className="mx-auto mt-6 flex space-x-4">

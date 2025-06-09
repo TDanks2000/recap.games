@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Card, CardContent } from "@/components/ui/card";
 import { BlogHero } from "@/features/blog/components/blogHero";
-import { PostCard } from "@/features/blog/components/cards/postCard";
 import { BlogLayout } from "@/features/blog/components/Layout";
+import { PostGrid } from "@/features/blog/components/PostGrid";
 import { HydrateClient } from "@/trpc/server";
 import { getBlogPosts } from "../actions/blog";
 import { favicon } from "../layout";
@@ -47,7 +46,7 @@ export const metadata: Metadata = {
 	twitter: {
 		card: "summary_large_image",
 		site: "@gamesrecapped",
-		creator: "@tommydanks", // Corrected
+		creator: "@tommydanks",
 		title: "Game Trailers Recapped Blog: Gaming News & More",
 		description:
 			"Your go-to source for gaming news, articles, and insights. Follow the Game Trailers Recapped blog! #GamingBlog #VideoGames",
@@ -79,6 +78,9 @@ export default async function BlogsPage() {
 		},
 	};
 
+	// Optional: Set a featured post (could be the most recent or manually selected)
+	const featuredPostId = posts?.[0]?.id; // Use the first/newest post as featured
+
 	return (
 		<HydrateClient>
 			<BlogLayout>
@@ -89,29 +91,8 @@ export default async function BlogsPage() {
 				/>
 
 				<section className="-mt-16 relative z-10">
-					<div className="mx-auto max-w-7xl px-8 sm:px-16">
-						{!posts?.length ? (
-							<Card className="mt-10 p-8">
-								<CardContent className="flex flex-col items-center space-y-4">
-									<div className="space-y-2 text-center">
-										<h3 className="font-semibold text-xl leading-6">
-											No blog posts yet
-										</h3>
-										<p className="text-muted-foreground">
-											Create your first blog post to share your thoughts
-										</p>
-									</div>
-								</CardContent>
-							</Card>
-						) : (
-							<div className="grid grid-cols-1 gap-8 py-8 md:grid-cols-2 lg:grid-cols-3">
-								{posts.map((post) => (
-									<div key={post.id}>
-										<PostCard {...post} />
-									</div>
-								))}
-							</div>
-						)}
+					<div className="mx-auto max-w-7xl px-8 py-8 sm:px-16">
+						<PostGrid posts={posts || []} featuredPostId={featuredPostId} />
 					</div>
 				</section>
 			</BlogLayout>
