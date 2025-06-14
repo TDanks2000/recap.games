@@ -1,6 +1,6 @@
 import { Gamepad2 } from "lucide-react";
 import { Suspense } from "react";
-import type { HomeSearchParams, PaginationOptions } from "@/@types";
+import type { HomeSearchParams } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
 import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
 import { api } from "@/trpc/server";
@@ -8,23 +8,32 @@ import { filterAndSortGames } from "../utils/filterAndSortGames";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
 import GamesSortClient from "./GamesSortClient";
+import { PaginationControls } from "./PaginationControls";
 
-type GamesDisplayProps = PaginationOptions & {
+type GamesDisplayProps = {
 	searchParams: HomeSearchParams;
 };
 
 export default async function GamesDisplay({
 	searchParams,
 }: GamesDisplayProps) {
-	// fetch games & conferences on the server
-	const [games] = await Promise.all([
-		api.game.getAll(),
-		// api.conference.getAll(),
-	]);
+	const searchParamsPage = searchParams.page;
+	const page =
+		typeof searchParamsPage === "string"
+			? Number(searchParamsPage)
+			: searchParamsPage;
 
-	const filteredGames = filterAndSortGames(games, searchParams);
+	const gamesResponse = await api.game.getAll({
+		page,
+		limit: 20,
+		conferenceIds: searchParams.conferences,
+		search: searchParams.search,
+		sort: searchParams.sort,
+		direction: searchParams.direction,
+	});
 
-	// parse selected conference IDs from searchParams (for empty state message)
+	const filteredGames = filterAndSortGames(gamesResponse?.items, searchParams);
+
 	const selectedConferences = (searchParams.conferences ?? "")
 		.split(",")
 		.map((s) => Number(s))
@@ -32,7 +41,7 @@ export default async function GamesDisplay({
 
 	return (
 		<div className="flex w-full flex-col gap-6 ">
-			{/* Header */}
+			{/* Header (no changes) */}
 			<div className="flex w-full flex-col items-start justify-between gap-4 border-b pb-4 sm:flex-row sm:items-center">
 				<div className="flex items-center gap-2">
 					<Gamepad2 className="h-6 w-6 text-primary" />
@@ -50,7 +59,7 @@ export default async function GamesDisplay({
 				</div>
 			</div>
 
-			{/* Games Grid */}
+			{/* Games Grid (no changes) */}
 			{filteredGames.length === 0 ? (
 				<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
 					<Gamepad2 className="h-12 w-12 text-muted-foreground" />
@@ -84,6 +93,13 @@ export default async function GamesDisplay({
 					))}
 				</div>
 			)}
+
+			<div className="mt-6 flex w-full justify-center">
+				<PaginationControls
+					totalPages={gamesResponse.totalPages}
+					currentPage={gamesResponse.currentPage}
+				/>
+			</div>
 		</div>
 	);
 }

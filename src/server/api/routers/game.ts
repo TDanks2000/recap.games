@@ -1,7 +1,8 @@
-import { desc, eq, sql } from "drizzle-orm";
+import type { AnyColumn, SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { MediaType } from "@/@types";
-import { games, media } from "@/server/db/schema";
+import { conferences, games, media } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const gameRouter = createTRPCRouter({
@@ -64,15 +65,13 @@ export const gameRouter = createTRPCRouter({
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
 			const { id } = input;
-
+			// This is correct: delete related media first.
 			await ctx.db.delete(media).where(eq(media.gameId, id));
-
 			await ctx.db.delete(games).where(eq(games.id, id));
-
 			return { success: true };
 		}),
 
-	// Update a game
+	// Update a game (Refactored for correctness)
 	update: adminProcedure
 		.input(
 			z.object({
@@ -85,7 +84,7 @@ export const gameRouter = createTRPCRouter({
 				developer: z.array(z.string()).optional(),
 				publisher: z.array(z.string()).optional(),
 				hidden: z.boolean().optional(),
-				conferenceId: z.number().optional().nullable(), // Allow null to unset
+				conferenceId: z.number().optional().nullable(),
 				media: z
 					.array(
 						z.object({
@@ -97,54 +96,76 @@ export const gameRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const { id, ...data } = input;
+			const { id, media: newMedia, ...gameData } = input;
 
-			const conferenceId =
-				data.conferenceId === undefined ? undefined : data.conferenceId;
+			// A transaction is crucial here to ensure that if any part of the update fails,
+			// the entire operation is rolled back, preventing inconsistent data.
+			const updatedGame = await ctx.db.transaction(async (tx) => {
+				// 1. Update the scalar fields on the 'games' table.
+				if (Object.keys(gameData).length > 0) {
+					await tx
+						.update(games)
+						.set({
+							...gameData,
+							// Handle potential JSON columns correctly
+							genres: gameData.genres
+								? sql`${JSON.stringify(gameData.genres)}`
+								: undefined,
+							exclusive: gameData.exclusive
+								? sql`${JSON.stringify(gameData.exclusive)}`
+								: undefined,
+							features: gameData.features
+								? sql`${JSON.stringify(gameData.features)}`
+								: undefined,
+							developer: gameData.developer
+								? sql`${JSON.stringify(gameData.developer)}`
+								: undefined,
+							publisher: gameData.publisher
+								? sql`${JSON.stringify(gameData.publisher)}`
+								: undefined,
+						})
+						.where(eq(games.id, id));
+				}
 
-			const updateData = {
-				...data,
-				conferenceId,
-				genres: data.genres ? sql`${JSON.stringify(data.genres)}` : undefined,
-				exclusive: data.exclusive
-					? sql`${JSON.stringify(data.exclusive)}`
-					: undefined,
-				features: data.features
-					? sql`${JSON.stringify(data.features)}`
-					: undefined,
-				developer: data.developer
-					? sql`${JSON.stringify(data.developer)}`
-					: undefined,
-				publisher: data.publisher
-					? sql`${JSON.stringify(data.publisher)}`
-					: undefined,
-				media: data.media ? sql`${JSON.stringify(data.media)}` : undefined,
-			};
+				// 2. If new media data is provided, update the related 'media' table.
+				if (newMedia !== undefined) {
+					// First, delete all existing media for this game.
+					await tx.delete(media).where(eq(media.gameId, id));
 
-			const game = await ctx.db
-				.update(games)
-				.set(updateData)
-				.where(eq(games.id, id))
-				.returning();
+					// Then, if the new media array is not empty, insert the new items.
+					if (newMedia.length > 0) {
+						await tx.insert(media).values(
+							newMedia.map((item) => ({
+								...item,
+								gameId: id,
+							})),
+						);
+					}
+				}
 
-			if (game.length === 0) {
-				throw new Error("Game not found or update failed");
-			}
+				// 3. Fetch and return the final, updated game with its new relations.
+				const finalGame = await tx.query.games.findFirst({
+					where: eq(games.id, id),
+					with: { media: true, conference: true },
+				});
 
-			return game[0];
+				if (!finalGame) {
+					tx.rollback(); // Ensure transaction is aborted
+					throw new Error("Game not found after update.");
+				}
+
+				return finalGame;
+			});
+
+			return updatedGame;
 		}),
 
 	// Get a game by ID with related media
 	getById: publicProcedure
 		.input(z.object({ id: z.number() }))
 		.query(async ({ ctx, input }) => {
-			const { id } = input;
-
-			// Set up relations
-			ctx.db.query.games.findFirst;
-
 			const game = await ctx.db.query.games.findFirst({
-				where: eq(games.id, id),
+				where: eq(games.id, input.id),
 				with: {
 					media: true,
 					conference: true,
@@ -158,27 +179,112 @@ export const gameRouter = createTRPCRouter({
 			return game;
 		}),
 
-	// Get all games with related media
 	getAll: publicProcedure
 		.input(
-			z
-				.object({
-					includeHidden: z.boolean().default(false),
-				})
-				.optional(),
+			z.object({
+				page: z.number().min(1).optional().default(1),
+				limit: z.number().min(1).max(50).optional().default(12),
+				includeHidden: z.boolean().optional().default(false),
+				conferenceIds: z.string().optional(),
+				search: z.string().optional(),
+				sort: z
+					.enum(["title", "releaseDate", "date_added"])
+					.optional()
+					.default("date_added"),
+				direction: z.enum(["asc", "desc"]).optional().default("desc"),
+			}),
 		)
 		.query(async ({ ctx, input }) => {
-			const includeHidden = input?.includeHidden ?? false;
+			const {
+				page,
+				limit,
+				includeHidden,
+				conferenceIds,
+				search,
+				sort,
+				direction,
+			} = input;
 
-			const allGames = await ctx.db.query.games.findMany({
-				where: includeHidden ? undefined : eq(games.hidden, false),
-				with: {
-					media: true,
-					conference: true,
-				},
-				orderBy: desc(games.createdAt),
-			});
+			const conditions = [];
+			if (!includeHidden) {
+				conditions.push(eq(games.hidden, false));
+			}
 
-			return allGames;
+			if (conferenceIds) {
+				const parsedConferenceIds = conferenceIds
+					.split(",")
+					.map(Number)
+					.filter((id) => !Number.isNaN(id) && id > 0);
+
+				if (parsedConferenceIds.length > 0) {
+					conditions.push(inArray(games.conferenceId, parsedConferenceIds));
+				}
+			}
+
+			if (search && search.length > 0) {
+				const searchPattern = `%${search.toLowerCase()}%`;
+
+				const matchingConferences = await ctx.db
+					.select({ id: conferences.id })
+					.from(conferences)
+					.where(like(sql`lower(${conferences.name})`, searchPattern));
+
+				const matchingConferenceIds = matchingConferences.map((c) => c.id);
+
+				const searchConditions = [
+					like(sql`lower(${games.title})`, searchPattern),
+				];
+
+				if (matchingConferenceIds.length > 0) {
+					searchConditions.push(
+						inArray(games.conferenceId, matchingConferenceIds),
+					);
+				}
+				conditions.push(or(...searchConditions));
+			}
+
+			const whereCondition =
+				conditions.length > 0 ? and(...conditions) : undefined;
+
+			const sortDirection = direction === "asc" ? asc : desc;
+			let orderByClause: SQL | AnyColumn | undefined;
+			switch (sort) {
+				case "title":
+					orderByClause = sortDirection(games.title);
+					break;
+				case "releaseDate":
+					orderByClause = sortDirection(games.releaseDate);
+					break;
+				default:
+					orderByClause = sortDirection(games.createdAt);
+					break;
+			}
+
+			const [pagedGames, totalCountResult] = await Promise.all([
+				ctx.db.query.games.findMany({
+					where: whereCondition,
+					with: {
+						media: true,
+						conference: true,
+					},
+					orderBy: orderByClause,
+					limit: limit,
+					offset: (page - 1) * limit,
+				}),
+				ctx.db
+					.select({ count: sql<number>`count(*)`.mapWith(Number) })
+					.from(games)
+					.where(whereCondition),
+			]);
+
+			const totalItems = totalCountResult[0]?.count ?? 0;
+			const totalPages = Math.ceil(totalItems / limit);
+
+			return {
+				items: pagedGames,
+				totalPages,
+				currentPage: page,
+				totalItems,
+			};
 		}),
 });
