@@ -4,7 +4,6 @@ import type { HomeSearchParams } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
 import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
 import { api } from "@/trpc/server";
-import { filterAndSortGames } from "../utils/filterAndSortGames";
 import ConferenceFilterClient from "./ConferenceFilterClient";
 import GameCard from "./cards/game";
 import GamesSortClient from "./GamesSortClient";
@@ -32,7 +31,7 @@ export default async function GamesDisplay({
 		direction: searchParams.direction,
 	});
 
-	const filteredGames = filterAndSortGames(gamesResponse?.items, searchParams);
+	const games = gamesResponse?.items ?? [];
 
 	const selectedConferences = (searchParams.conferences ?? "")
 		.split(",")
@@ -60,7 +59,7 @@ export default async function GamesDisplay({
 			</div>
 
 			{/* Games Grid (no changes) */}
-			{filteredGames.length === 0 ? (
+			{games.length === 0 ? (
 				<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
 					<Gamepad2 className="h-12 w-12 text-muted-foreground" />
 					<h3 className="font-semibold text-xl">No Games Found</h3>
@@ -88,7 +87,7 @@ export default async function GamesDisplay({
 						gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
 					}}
 				>
-					{filteredGames.map((game) => (
+					{games.map((game) => (
 						<GameCard key={game.id} {...game} />
 					))}
 				</div>
