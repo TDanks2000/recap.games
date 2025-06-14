@@ -1,5 +1,7 @@
 import { FileText } from "lucide-react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { UserRole } from "@/@types";
 import { Separator } from "@/components/ui/separator";
 import { BlogPostForm } from "@/features/blog/components/editor/blogPostForm";
 import { auth } from "@/server/auth";
@@ -8,9 +10,9 @@ import { HydrateClient } from "@/trpc/server";
 export default async function CreatePage() {
 	const session = await auth();
 
-	// if (!session?.user || session.user.role !== UserRole.ADMIN) {
-	// 	redirect("/access-denied");
-	// }
+	if (!session?.user || session.user.role !== UserRole.ADMIN) {
+		redirect("/access-denied");
+	}
 
 	return (
 		<HydrateClient>
