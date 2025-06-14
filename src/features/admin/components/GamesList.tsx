@@ -50,6 +50,8 @@ export default function GamesList({ searchQuery }: Props) {
 		}
 	};
 
+	const items = games?.items || [];
+
 	if (isLoading) {
 		return (
 			<div className="space-y-4">
@@ -70,12 +72,11 @@ export default function GamesList({ searchQuery }: Props) {
 		);
 	}
 
-	if (!games || games.length === 0) {
+	if (!items || items.length === 0) {
 		return <p className="text-muted-foreground">No games found.</p>;
 	}
 
-	// --- FILTERING LOGIC ---
-	const filteredGames = games.filter((game) =>
+	const filteredGames = items?.filter((game) =>
 		game.title.toLowerCase().includes(searchQuery.trim().toLowerCase()),
 	);
 
