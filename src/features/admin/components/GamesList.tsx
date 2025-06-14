@@ -26,6 +26,7 @@ export default function GamesList({ searchQuery }: Props) {
 	const utils = api.useUtils();
 	const { data: games, isLoading } = api.game.getAll.useQuery({
 		includeHidden: true,
+		limit: 50,
 	});
 	const [gameToDelete, setGameToDelete] = useState<number | null>(null);
 
