@@ -55,7 +55,6 @@ const NavBarSearch = () => {
 		setOpen((prev) => {
 			const newOpen = !prev;
 			if (newOpen) {
-				// Small delay to ensure the input is rendered
 				setTimeout(() => inputRef.current?.focus(), 50);
 			}
 			return newOpen;
@@ -71,6 +70,7 @@ const NavBarSearch = () => {
 		setValue("");
 		if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
 		const params = new URLSearchParams(searchParams.toString());
+		params.delete("page");
 		params.delete("search");
 		router.push(`${pathname}?${params.toString()}`);
 		inputRef.current?.focus();
@@ -85,6 +85,7 @@ const NavBarSearch = () => {
 
 			if (!newValue?.length) {
 				const params = new URLSearchParams(searchParams.toString());
+				params.delete("page");
 				params.delete("search");
 				router.push(`${pathname}?${params.toString()}`);
 				return;
@@ -94,6 +95,7 @@ const NavBarSearch = () => {
 
 			debounceTimeout.current = setTimeout(() => {
 				const params = new URLSearchParams(searchParams.toString());
+				params.delete("page");
 				params.set("search", newValue);
 				router.push(`${pathname}?${params.toString()}`);
 			}, 300);
@@ -113,6 +115,7 @@ const NavBarSearch = () => {
 					} else {
 						params.delete("search");
 					}
+					params.delete("page");
 					router.push(`${pathname}?${params.toString()}`);
 				}
 			}
@@ -126,7 +129,7 @@ const NavBarSearch = () => {
 				ref={containerRef}
 				className="search-container relative flex items-center"
 			>
-				{/* Search Input (Expands from the right) */}
+				{/* Search Input */}
 				<Suspense fallback={null}>
 					<div
 						className={cn(
