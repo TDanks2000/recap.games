@@ -110,7 +110,7 @@ export function PostCard({
 						<span className="font-medium text-muted-foreground/70 text-xs uppercase tracking-wider">
 							Read Blog Post
 						</span>
-						<ArrowRight className="h-4 w-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
+						<ArrowRight className="size-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
 					</footer>
 				</div>
 
