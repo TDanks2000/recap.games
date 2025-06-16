@@ -1,13 +1,13 @@
 import { cache, useMemo } from "react";
 
-interface ReadingTimeOptions {
+export interface ReadingTimeOptions {
 	wordsPerMinute?: number;
 	includeCodeBlocks?: boolean;
-	contentType?: "blog" | "technical" | "casual";
+	contentType?: "fiction" | "non-fiction";
 	locale?: string;
 }
 
-interface ReadingTimeResult {
+export interface ReadingTimeResult {
 	minutes: number;
 	seconds: number;
 	words: number;
@@ -15,16 +15,55 @@ interface ReadingTimeResult {
 	formattedTime: string;
 }
 
-const getReadingTime = cache(
+const AVERAGE_NON_FICTION_WPM = 186;
+
+const getAdjustedWpm = (
+	baseWpm: number,
+	contentType: "fiction" | "non-fiction",
+): number => {
+	if (contentType === "fiction") {
+		return baseWpm * 1.09;
+	}
+	return baseWpm;
+};
+
+const stripHtml = (content: string): string => {
+	return content.replace(/<[^>]*>/g, " ");
+};
+
+const countWords = (content: string, locale: string): number => {
+	if (typeof Intl.Segmenter === "function") {
+		const segmenter = new Intl.Segmenter(locale, {
+			granularity: "word",
+		});
+		return Array.from(segmenter.segment(content)).filter(
+			(segment) => segment.isWordLike,
+		).length;
+	}
+	return content.trim().split(/\s+/).length;
+};
+
+const formatTime = (
+	minutes: number,
+	seconds: number,
+	locale: string,
+): string => {
+	const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+
+	if (minutes > 0) {
+		return rtf.format(minutes, "minute");
+	}
+	return rtf.format(seconds, "second");
+};
+
+export const getReadingTime = cache(
 	(content: string, options: ReadingTimeOptions = {}): ReadingTimeResult => {
 		const {
-			wordsPerMinute = 200,
 			includeCodeBlocks = false,
-			contentType = "blog",
+			contentType = "non-fiction",
 			locale = "en",
 		} = options;
 
-		// Handle empty content
 		if (!content?.trim()) {
 			return {
 				minutes: 0,
@@ -35,114 +74,38 @@ const getReadingTime = cache(
 			};
 		}
 
-		let processedContent = content;
+		let processedContent = stripHtml(content);
 
-		// Strip HTML tags for accurate word count
-		processedContent = processedContent.replace(/<[^>]*>/g, " ");
-
-		// Optionally remove code blocks (they're read slower)
 		if (!includeCodeBlocks) {
 			processedContent = processedContent
-				.replace(/```[\s\S]*?```/g, "") // Remove code blocks
-				.replace(/`[^`]*`/g, ""); // Remove inline code
+				.replace(/```[\s\S]*?```/g, "")
+				.replace(/`[^`]*`/g, "");
 		}
 
-		// Better word counting with improved regex
-		const words = processedContent
-			.trim()
-			.split(/\s+/)
-			.filter((word) => {
-				// Filter out empty strings and pure punctuation
-				const cleanWord = word.replace(/[^\w]/g, "");
-				return cleanWord.length > 0;
-			});
+		const wordCount = countWords(processedContent, locale);
 
-		const wordCount = words.length;
+		const baseWpm = options.wordsPerMinute || AVERAGE_NON_FICTION_WPM;
+		const adjustedWpm = getAdjustedWpm(baseWpm, contentType);
 
-		// Adjust reading speed based on content type
-		const adjustedWPM = getAdjustedReadingSpeed(wordsPerMinute, contentType);
-
-		// Calculate time more precisely
-		const totalSeconds = Math.ceil((wordCount / adjustedWPM) * 60);
+		const totalSeconds = Math.round((wordCount / adjustedWpm) * 60);
 		const minutes = Math.floor(totalSeconds / 60);
 		const seconds = totalSeconds % 60;
 
-		// Ensure minimum reading time for substantial content
 		const finalMinutes = wordCount > 0 ? Math.max(1, minutes) : 0;
-		const finalSeconds = finalMinutes === 1 && minutes === 0 ? seconds : 0;
-
-		// Generate various text formats
-		const shortText = generateShortText(finalMinutes, finalSeconds);
-		const formattedTime = generateFormattedTime(
-			finalMinutes,
-			finalSeconds,
-			locale,
-		);
 
 		return {
 			minutes: finalMinutes,
-			seconds: finalSeconds,
+			seconds,
 			words: wordCount,
-			text: shortText,
-			formattedTime,
+			text: `${finalMinutes} min read`,
+			formattedTime: formatTime(finalMinutes, seconds, locale),
 		};
 	},
 );
 
-// Helper function to adjust reading speed based on content type
-const getAdjustedReadingSpeed = (
-	baseWPM: number,
-	contentType: string,
-): number => {
-	const multipliers = {
-		casual: 1.1, // Casual content is read faster
-		blog: 1.0, // Standard blog content
-		technical: 0.8, // Technical content is read slower
-	};
-
-	return (
-		baseWPM * (multipliers[contentType as keyof typeof multipliers] || 1.0)
-	);
-};
-
-// Generate concise reading time text
-const generateShortText = (minutes: number, seconds: number): string => {
-	if (minutes === 0) return "< 1 min read";
-	if (minutes === 1 && seconds < 30) return "1 min read";
-	if (minutes < 5) return `${minutes} min read`;
-
-	// Round to nearest 5 minutes for longer content
-	const roundedMinutes = Math.round(minutes / 5) * 5;
-	return `${roundedMinutes} min read`;
-};
-
-// Generate detailed formatted time
-const generateFormattedTime = (
-	minutes: number,
-	seconds: number,
-	_locale: string,
-): string => {
-	if (minutes === 0) {
-		return `${seconds} seconds`;
-	}
-
-	if (minutes === 1) {
-		return seconds > 0 ? `1 minute ${seconds} seconds` : "1 minute";
-	}
-
-	return seconds > 0
-		? `${minutes} minutes ${seconds} seconds`
-		: `${minutes} minutes`;
-};
-
-// Hook version for component usage with memoization
-const useReadingTime = (content: string, options?: ReadingTimeOptions) => {
+export const useReadingTime = (
+	content: string,
+	options?: ReadingTimeOptions,
+) => {
 	return useMemo(() => getReadingTime(content, options), [content, options]);
-};
-
-export {
-	getReadingTime,
-	useReadingTime,
-	type ReadingTimeResult,
-	type ReadingTimeOptions,
 };

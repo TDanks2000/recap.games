@@ -2,11 +2,11 @@ import { Gamepad2 } from "lucide-react";
 import { Suspense } from "react";
 import type { HomeSearchParams } from "@/@types";
 import { ConferenceFilterSkeleton } from "@/components/skeletons/conference-filter-skeleton";
-import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
-import { GamesList } from "./GamesList";
 import { GamesGridSkeleton } from "@/components/skeletons/GamesGridSkeleton";
+import { GamesSortSkeleton } from "@/components/skeletons/games-sort-skeleton";
 import ConferenceFilterClient from "../ConferenceFilterClient";
 import GamesSortClient from "../GamesSortClient";
+import { GamesList } from "./GamesList";
 
 type GamesDisplayProps = {
 	searchParams: HomeSearchParams;
