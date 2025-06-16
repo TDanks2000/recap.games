@@ -78,8 +78,7 @@ export default async function BlogsPage() {
 		},
 	};
 
-	// Optional: Set a featured post (could be the most recent or manually selected)
-	const featuredPostId = posts?.[0]?.id; // Use the first/newest post as featured
+	const featuredPostId = posts?.[0]?.id;
 
 	return (
 		<HydrateClient>

@@ -3,7 +3,7 @@ import { cache, useMemo } from "react";
 export interface ReadingTimeOptions {
 	wordsPerMinute?: number;
 	includeCodeBlocks?: boolean;
-	contentType?: "fiction" | "non-fiction";
+	contentType?: "fiction" | "non-fiction" | "blog";
 	locale?: string;
 }
 
@@ -19,7 +19,7 @@ const AVERAGE_NON_FICTION_WPM = 186;
 
 const getAdjustedWpm = (
 	baseWpm: number,
-	contentType: "fiction" | "non-fiction",
+	contentType: "fiction" | "non-fiction" | "blog",
 ): number => {
 	if (contentType === "fiction") {
 		return baseWpm * 1.09;
@@ -60,7 +60,7 @@ export const getReadingTime = cache(
 	(content: string, options: ReadingTimeOptions = {}): ReadingTimeResult => {
 		const {
 			includeCodeBlocks = false,
-			contentType = "non-fiction",
+			contentType = "blog",
 			locale = "en",
 		} = options;
 

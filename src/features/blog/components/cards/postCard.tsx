@@ -35,15 +35,12 @@ export function PostCard({
 				className={cn(
 					"relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card via-card to-card/80 transition-all duration-300",
 					"hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10",
-					"before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100",
-					size === "large" ? "h-80" : "h-64",
+					"h-64 before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100",
 					featured && "shadow-lg shadow-primary/5 ring-2 ring-primary/20",
 				)}
 			>
-				{/* Gaming-inspired accent line */}
 				<div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-				{/* Featured badge */}
 				{featured && (
 					<div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-primary/90 px-3 py-1.5 font-medium text-primary-foreground text-xs backdrop-blur-sm">
 						<Gamepad2 className="h-3 w-3" />
@@ -111,7 +108,7 @@ export function PostCard({
 					{/* CTA Footer */}
 					<footer className="mt-auto flex items-center justify-between border-border/30 border-t pt-4">
 						<span className="font-medium text-muted-foreground/70 text-xs uppercase tracking-wider">
-							Continue Reading
+							Read Blog Post
 						</span>
 						<ArrowRight className="h-4 w-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
 					</footer>

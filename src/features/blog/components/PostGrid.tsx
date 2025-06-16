@@ -28,13 +28,12 @@ export function PostGrid({ posts, featuredPostId }: PostGridProps) {
 
 	return (
 		<div className="grid gap-6 md:gap-8">
-			{/* Featured post - larger display */}
 			{featuredPostId && (
 				<div className="mb-8">
 					{posts
 						.filter((post) => post.id === featuredPostId)
 						.map((post) => (
-							<PostCard key={post.id} {...post} featured size="large" />
+							<PostCard key={post.id} {...post} featured />
 						))}
 				</div>
 			)}
