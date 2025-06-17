@@ -10,7 +10,7 @@ import { SOCIAL_LINKS } from "@/lib/links";
 const QUICK_LINKS = [
 	{ href: "/blog", label: "Blog" },
 	{ href: "/donations", label: "Donations" },
-	{ href: "/faq", label: "FAQ" },
+	{ href: "/about", label: "About" },
 	{ href: "/privacy-policy", label: "Privacy Policy" },
 ];
 

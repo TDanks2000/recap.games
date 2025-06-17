@@ -17,8 +17,8 @@ const NavigationBar = () => {
 	if (pathname.startsWith("/admin")) return null;
 
 	const navLinks = [
-		{ href: "/faq", label: "FAQ" },
 		{ href: "/blog", label: "Blog" },
+		{ href: "/about", label: "About" },
 	];
 
 	return (
