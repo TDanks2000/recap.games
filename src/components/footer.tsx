@@ -11,6 +11,7 @@ const QUICK_LINKS = [
 	{ href: "/blog", label: "Blog" },
 	{ href: "/donations", label: "Donations" },
 	{ href: "/about", label: "About" },
+	{ href: "/contact", label: "Contact" },
 	{ href: "/privacy-policy", label: "Privacy Policy" },
 ];
 
