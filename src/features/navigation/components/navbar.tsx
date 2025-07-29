@@ -72,14 +72,14 @@ const NavigationBar = () => {
 
 			<div className="relative flex w-full items-center justify-end gap-3 overflow-hidden md:ml-auto md:gap-3 lg:gap-4">
 				<div className="shrink">
-					<Suspense fallback={null}>
-						<NavBarSearch />
-					</Suspense>
+					<NavBarSearch />
 				</div>
 
 				<ModeToggle />
 
-				<YearFilter />
+				<Suspense fallback={null}>
+					<YearFilter />
+				</Suspense>
 			</div>
 		</header>
 	);
