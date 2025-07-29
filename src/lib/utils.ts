@@ -1,9 +1,23 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import type { HomeSearchParams } from "@/@types";
 import { Feature } from "@/@types";
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
+}
+
+export function getYearFromSearchParams(
+	searchParams: HomeSearchParams,
+): number {
+	const yearParam = searchParams.year;
+	if (yearParam && typeof yearParam === "string") {
+		const parsedYear = Number.parseInt(yearParam, 10);
+		if (!Number.isNaN(parsedYear)) {
+			return parsedYear;
+		}
+	}
+	return new Date().getFullYear();
 }
 
 export const getIdFromURL = (

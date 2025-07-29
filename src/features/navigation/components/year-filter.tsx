@@ -12,10 +12,11 @@ import { useYearFilter } from "@/hooks/use-year-filter";
 import { api } from "@/trpc/react";
 
 export default function YearFilter() {
-	const { currentYear, onYearChange } = useYearFilter();
+	const { currentYear, onYearChange, isInitialized } = useYearFilter();
 	const { data: availableYears, isLoading } =
 		api.combined.getAvailableYears.useQuery(undefined, {
 			suspense: true,
+			enabled: isInitialized, // Only run query after localStorage is initialized
 		});
 
 	// Fallback to current year if no data available
@@ -23,6 +24,8 @@ export default function YearFilter() {
 
 	// Auto-redirect to first available year if current year is not available
 	useEffect(() => {
+		if (!isInitialized) return; // Don't redirect until initialized
+
 		if (
 			availableYears &&
 			availableYears.length > 0 &&
@@ -33,13 +36,13 @@ export default function YearFilter() {
 				onYearChange(firstAvailableYear);
 			}
 		}
-	}, [availableYears, currentYear, onYearChange]);
+	}, [availableYears, currentYear, onYearChange, isInitialized]);
 
 	return (
 		<Select
-			value={currentYear.toString()}
+			value={isInitialized ? currentYear.toString() : ""}
 			onValueChange={(val) => onYearChange(Number.parseInt(val, 10))}
-			disabled={isLoading}
+			disabled={isLoading || !isInitialized}
 		>
 			<SelectTrigger
 				id={useId()}
@@ -47,7 +50,7 @@ export default function YearFilter() {
 				name="year filter"
 				aria-label="Filter by year"
 			>
-				<SelectValue placeholder="Year" />
+				<SelectValue placeholder={isInitialized ? "Year" : "Loading..."} />
 			</SelectTrigger>
 			<SelectContent align="end">
 				{years.map((year) => (

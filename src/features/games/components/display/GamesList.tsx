@@ -1,5 +1,6 @@
 import { Gamepad2 } from "lucide-react";
 import type { HomeSearchParams } from "@/@types";
+import { getYearFromSearchParams } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import GameCard from "../cards/game";
 import { PaginationControls } from "./PaginationControls";
@@ -10,9 +11,7 @@ type GamesListProps = {
 
 export async function GamesList({ searchParams }: GamesListProps) {
 	const page = Number(searchParams.page ?? 1);
-	const year = searchParams.year
-		? Number.parseInt(searchParams.year, 10)
-		: new Date().getFullYear();
+	const year = getYearFromSearchParams(searchParams);
 
 	const gamesResponse = await api.game.getAll({
 		page,

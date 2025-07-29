@@ -1,6 +1,6 @@
 import type { HomeSearchParams } from "@/@types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, getYearFromSearchParams } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import { filterAndSortConferences } from "../utils/filterAndSortConferences";
 import ConferenceCard from "./cards/conference";
@@ -10,9 +10,7 @@ interface Props {
 }
 
 const ConferencesDisplay = async ({ searchParams }: Props) => {
-	const year = searchParams.year
-		? Number.parseInt(searchParams.year, 10)
-		: new Date().getFullYear();
+	const year = getYearFromSearchParams(searchParams);
 	const data = (await api.conference.getAll({ withStreams: true, year })) ?? [];
 	const sorted = filterAndSortConferences(data, searchParams);
 

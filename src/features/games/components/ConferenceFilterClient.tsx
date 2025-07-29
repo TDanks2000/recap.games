@@ -7,15 +7,16 @@ import { api } from "@/trpc/react";
 
 export default function ConferenceFilterClient() {
 	const { selectedConferences, onConferenceChange } = useConferenceFilter();
-	const { currentYear } = useYearFilter();
+	const { currentYear, isInitialized } = useYearFilter();
 	const { data: conferences, isError } = api.conference.getAll.useQuery(
 		{ year: currentYear },
 		{
 			suspense: true,
+			enabled: isInitialized, // Only run query after year filter is initialized
 		},
 	);
 
-	if (isError || !conferences?.length) return null;
+	if (!isInitialized || isError || !conferences?.length) return null;
 
 	const options = conferences.map((c) => ({
 		label: c.name,
