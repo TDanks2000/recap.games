@@ -10,7 +10,10 @@ interface Props {
 }
 
 const ConferencesDisplay = async ({ searchParams }: Props) => {
-	const data = (await api.conference.getAll({ withStreams: true })) ?? [];
+	const year = searchParams.year
+		? Number.parseInt(searchParams.year, 10)
+		: new Date().getFullYear();
+	const data = (await api.conference.getAll({ withStreams: true, year })) ?? [];
 	const sorted = filterAndSortConferences(data, searchParams);
 
 	return (
@@ -30,9 +33,12 @@ const ConferencesDisplay = async ({ searchParams }: Props) => {
 							<ConferenceCard key={conference.id} {...conference} />
 						))
 					) : (
-						<p className="text-center text-muted-foreground text-sm">
-							No conferences found.
-						</p>
+						<div className="text-center text-muted-foreground text-sm">
+							<p>No conferences found for {year}.</p>
+							{searchParams.search && (
+								<p className="mt-2">Try adjusting your search terms.</p>
+							)}
+						</div>
 					)}
 				</div>
 			</Card>

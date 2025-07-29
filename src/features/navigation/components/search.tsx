@@ -135,7 +135,7 @@ const NavBarSearch = () => {
 						className={cn(
 							"relative overflow-hidden transition-all duration-300 ease-out",
 							open
-								? "w-44 opacity-100 sm:w-72 md:w-80"
+								? "w-28 opacity-100 sm:w-72 md:w-80"
 								: "pointer-events-none w-0 opacity-0",
 						)}
 					>

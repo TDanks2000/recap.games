@@ -2,12 +2,14 @@
 
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useConferenceFilter } from "@/hooks/use-conference-filter";
+import { useYearFilter } from "@/hooks/use-year-filter";
 import { api } from "@/trpc/react";
 
 export default function ConferenceFilterClient() {
 	const { selectedConferences, onConferenceChange } = useConferenceFilter();
+	const { currentYear } = useYearFilter();
 	const { data: conferences, isError } = api.conference.getAll.useQuery(
-		undefined,
+		{ year: currentYear },
 		{
 			suspense: true,
 		},

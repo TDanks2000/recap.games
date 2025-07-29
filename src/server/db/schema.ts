@@ -147,6 +147,7 @@ export const games = createTable("game", (d) => ({
 		})
 		.default(false),
 	conferenceId: d.integer().references(() => conferences.id),
+	year: d.integer().default(2025),
 	createdAt: d
 		.integer({ mode: "timestamp" })
 		.default(sql`(unixepoch())`)
@@ -164,6 +165,7 @@ export const conferences = createTable("conference", (d) => ({
 		.integer({ mode: "timestamp" })
 		.default(sql`(unixepoch())`)
 		.notNull(),
+	year: d.integer().default(2025),
 	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
 }));
 

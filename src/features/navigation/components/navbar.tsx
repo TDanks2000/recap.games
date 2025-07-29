@@ -10,6 +10,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import LogoLink from "./links/logo";
 import NavBarSearch from "./search";
+import YearFilter from "./year-filter";
 
 const NavigationBar = () => {
 	const pathname = usePathname().toLowerCase();
@@ -69,7 +70,7 @@ const NavigationBar = () => {
 				</SheetContent>
 			</Sheet>
 
-			<div className="relative flex w-full items-center justify-end gap-4 overflow-hidden md:ml-auto md:gap-2 lg:gap-4">
+			<div className="relative flex w-full items-center justify-end gap-3 overflow-hidden md:ml-auto md:gap-3 lg:gap-4">
 				<div className="shrink">
 					<Suspense fallback={null}>
 						<NavBarSearch />
@@ -77,6 +78,8 @@ const NavigationBar = () => {
 				</div>
 
 				<ModeToggle />
+
+				<YearFilter />
 			</div>
 		</header>
 	);

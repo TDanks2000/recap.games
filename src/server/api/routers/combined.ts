@@ -2,9 +2,34 @@ import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { MediaType } from "@/@types/db";
 import { conferences, games, media, streams } from "@/server/db/schema";
-import { adminProcedure, createTRPCRouter } from "../trpc";
+import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
 export const combinedRouter = createTRPCRouter({
+	// Get all available years from both games and conferences
+	getAvailableYears: publicProcedure.query(async ({ ctx }) => {
+		const [gameYears, conferenceYears] = await Promise.all([
+			ctx.db
+				.selectDistinct({ year: games.year })
+				.from(games)
+				.where(sql`${games.hidden} = 0`),
+			ctx.db.selectDistinct({ year: conferences.year }).from(conferences),
+		]);
+
+		// Combine and deduplicate years
+		const allYears = new Set<number>();
+
+		gameYears.forEach((y) => {
+			if (y.year !== null) allYears.add(y.year);
+		});
+
+		conferenceYears.forEach((y) => {
+			if (y.year !== null) allYears.add(y.year);
+		});
+
+		// Return sorted in descending order (newest first)
+		return Array.from(allYears).sort((a, b) => b - a);
+	}),
+
 	// Create a game and its associated media in one operation
 	createGameWithMedia: adminProcedure
 		.input(

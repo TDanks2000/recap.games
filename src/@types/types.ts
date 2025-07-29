@@ -17,4 +17,5 @@ export type HomeSearchParams = {
 	conferenceOpen?: "true" | "false";
 	search?: string;
 	page?: number | string;
+	year?: string;
 };

@@ -11,12 +11,20 @@ export function filterAndSortGames(
 		.map((s) => Number(s))
 		.filter((n) => !Number.isNaN(n) && n > 0);
 
+	// Parse year filter
+	const yearFilter = searchParams.year
+		? Number.parseInt(searchParams.year, 10)
+		: new Date().getFullYear();
+
 	// Filter by selected conferences
 	let filteredGames = games.filter(
 		(g) =>
 			selectedConferences.length === 0 ||
 			(g.conferenceId && selectedConferences.includes(g.conferenceId)),
 	);
+
+	// Filter by year
+	filteredGames = filteredGames.filter((g) => g.year === yearFilter);
 
 	// Filter by search string
 	const search = searchParams.search?.toLowerCase() ?? "";

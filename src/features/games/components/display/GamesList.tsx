@@ -10,6 +10,9 @@ type GamesListProps = {
 
 export async function GamesList({ searchParams }: GamesListProps) {
 	const page = Number(searchParams.page ?? 1);
+	const year = searchParams.year
+		? Number.parseInt(searchParams.year, 10)
+		: new Date().getFullYear();
 
 	const gamesResponse = await api.game.getAll({
 		page,
@@ -18,6 +21,7 @@ export async function GamesList({ searchParams }: GamesListProps) {
 		search: searchParams.search,
 		sort: searchParams.sort,
 		direction: searchParams.direction,
+		year,
 	});
 
 	const games = gamesResponse?.items ?? [];
@@ -25,7 +29,8 @@ export async function GamesList({ searchParams }: GamesListProps) {
 	if (games.length === 0) {
 		const hasFilters =
 			(searchParams.conferences?.length ?? 0) > 0 ||
-			(searchParams.search?.length ?? 0) > 0;
+			(searchParams.search?.length ?? 0) > 0 ||
+			searchParams.year;
 
 		return (
 			<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
@@ -33,7 +38,7 @@ export async function GamesList({ searchParams }: GamesListProps) {
 				<h3 className="font-semibold text-xl">No Games Found</h3>
 				<p className="text-muted-foreground text-sm">
 					{hasFilters
-						? "Try adjusting your search or conference filters."
+						? "Try adjusting your search, conference filters, or year selection."
 						: "Check back later for new games."}
 				</p>
 				<p className="mt-4 text-muted-foreground text-sm">

@@ -19,6 +19,7 @@ export const gameRouter = createTRPCRouter({
 				publisher: z.array(z.string()).optional(),
 				hidden: z.boolean().optional(),
 				conferenceId: z.number().optional(),
+				year: z.number().optional().default(2025),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -32,6 +33,7 @@ export const gameRouter = createTRPCRouter({
 				publisher,
 				hidden,
 				conferenceId,
+				year,
 			} = input;
 
 			const game = await ctx.db
@@ -53,6 +55,7 @@ export const gameRouter = createTRPCRouter({
 							: undefined,
 						hidden,
 						conferenceId,
+						year,
 					},
 				])
 				.returning();
@@ -93,6 +96,7 @@ export const gameRouter = createTRPCRouter({
 						}),
 					)
 					.optional(),
+				year: z.number().optional().default(2025),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -162,7 +166,12 @@ export const gameRouter = createTRPCRouter({
 
 	// Get a game by ID with related media
 	getById: publicProcedure
-		.input(z.object({ id: z.number() }))
+		.input(
+			z.object({
+				id: z.number(),
+				year: z.number().optional().default(2025),
+			}),
+		)
 		.query(async ({ ctx, input }) => {
 			const game = await ctx.db.query.games.findFirst({
 				where: eq(games.id, input.id),
@@ -192,6 +201,7 @@ export const gameRouter = createTRPCRouter({
 					.optional()
 					.default("date_added"),
 				direction: z.enum(["asc", "desc"]).optional().default("desc"),
+				year: z.number().optional().default(2025),
 			}),
 		)
 		.query(async ({ ctx, input }) => {
@@ -203,12 +213,16 @@ export const gameRouter = createTRPCRouter({
 				search,
 				sort,
 				direction,
+				year,
 			} = input;
 
 			const conditions = [];
 			if (!includeHidden) {
 				conditions.push(eq(games.hidden, false));
 			}
+
+			// Filter by year
+			conditions.push(eq(games.year, year));
 
 			if (conferenceIds) {
 				const parsedConferenceIds = conferenceIds
@@ -287,4 +301,15 @@ export const gameRouter = createTRPCRouter({
 				totalItems,
 			};
 		}),
+
+	// Get all available years from games
+	getAvailableYears: publicProcedure.query(async ({ ctx }) => {
+		const years = await ctx.db
+			.selectDistinct({ year: games.year })
+			.from(games)
+			.where(eq(games.hidden, false))
+			.orderBy(desc(games.year));
+
+		return years.map((y) => y.year).filter((year) => year !== null);
+	}),
 });

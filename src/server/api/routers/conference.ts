@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { conferences } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
@@ -11,10 +11,11 @@ export const conferenceRouter = createTRPCRouter({
 				name: z.string().min(1),
 				startTime: z.date().optional(),
 				endTime: z.date().optional(),
+				year: z.number().optional().default(2025),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			const { name, startTime, endTime } = input;
+			const { name, startTime, endTime, year } = input;
 
 			const conference = await ctx.db
 				.insert(conferences)
@@ -22,6 +23,7 @@ export const conferenceRouter = createTRPCRouter({
 					name,
 					startTime: startTime ?? undefined,
 					endTime: endTime ?? undefined,
+					year,
 				})
 				.returning();
 
@@ -47,6 +49,7 @@ export const conferenceRouter = createTRPCRouter({
 				name: z.string().min(1).optional(),
 				startTime: z.date().optional(),
 				endTime: z.date().optional(),
+				year: z.number().optional().default(2025),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -55,6 +58,7 @@ export const conferenceRouter = createTRPCRouter({
 				...data,
 				startTime: data.startTime ?? undefined,
 				endTime: data.endTime ?? undefined,
+				year: data.year ?? undefined,
 			};
 
 			const conference = await ctx.db
@@ -68,7 +72,9 @@ export const conferenceRouter = createTRPCRouter({
 
 	// Get a conference by ID
 	getById: publicProcedure
-		.input(z.object({ id: z.number() }))
+		.input(
+			z.object({ id: z.number(), year: z.number().optional().default(2025) }),
+		)
 		.query(async ({ ctx, input }) => {
 			const conference = await ctx.db.query.conferences.findFirst({
 				where: eq(conferences.id, input.id),
@@ -89,18 +95,30 @@ export const conferenceRouter = createTRPCRouter({
 				z.object({
 					withGames: z.literal(true).optional(),
 					withStreams: z.literal(true).optional().default(true),
+					year: z.number().optional().default(2025),
 				}),
 			),
 		)
 		.query(async ({ ctx, input }) => {
-			const { withGames, withStreams } = input ?? {};
+			const { withGames, withStreams, year } = input ?? {};
 			const allConferences = await ctx.db.query.conferences.findMany({
 				with: {
 					games: withGames,
 					streams: withStreams,
 				},
+				where: year ? eq(conferences.year, year) : undefined,
 			});
 
 			return allConferences;
 		}),
+
+	// Get all available years from conferences
+	getAvailableYears: publicProcedure.query(async ({ ctx }) => {
+		const years = await ctx.db
+			.selectDistinct({ year: conferences.year })
+			.from(conferences)
+			.orderBy(desc(conferences.year));
+
+		return years.map((y) => y.year).filter((year) => year !== null);
+	}),
 });

@@ -43,8 +43,14 @@ export function filterAndSortConferences(
 	searchParams: HomeSearchParams,
 ): Conference[] {
 	const search = searchParams.search?.toLowerCase() ?? "";
+	const yearFilter = searchParams.year
+		? Number.parseInt(searchParams.year, 10)
+		: new Date().getFullYear();
 
 	let filtered = conferences;
+
+	// Filter by year
+	filtered = filtered.filter((conf) => conf.year === yearFilter);
 
 	if (search.length > 0) {
 		filtered = filtered.filter((conf) =>
