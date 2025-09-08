@@ -4,6 +4,7 @@ import {
 	CalendarDays,
 	FileText,
 	GamepadIcon,
+	HandCoins,
 	Home,
 	LayoutDashboard,
 	PlaySquare,
@@ -78,6 +79,11 @@ const navItems: NavItem[] = [
 				title: "Streams",
 				href: "/admin/streams",
 				icon: <PlaySquare className="size-5" />,
+			},
+			{
+				title: "Donations",
+				href: "/admin/donations",
+				icon: <HandCoins className="size-5" />,
 			},
 			{
 				title: "Blog Posts",

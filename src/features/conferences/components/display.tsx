@@ -23,7 +23,7 @@ const ConferencesDisplay = async ({ searchParams }: Props) => {
 				)}
 			>
 				<CardHeader className="flex items-center justify-center">
-					<CardTitle>Conferences</CardTitle>
+					<CardTitle>Conferences {year ? `· ${year}` : null}</CardTitle>
 				</CardHeader>
 				<div className="scrollbar-hide flex max-h-[calc(100svh-180px)] flex-col gap-3 overflow-y-scroll px-4 pt-1 pb-6">
 					{sorted.length > 0 ? (

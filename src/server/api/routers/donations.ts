@@ -1,6 +1,7 @@
 // src/server/api/routers/donations.ts
 
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
+import { z } from "zod";
 import { donations } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
 
@@ -26,6 +27,59 @@ export const donationsRouter = createTRPCRouter({
 
 		return allDonations;
 	}),
+
+	/**
+	 * Admin: Get all donations with full details for management.
+	 */
+	getAllAdmin: adminProcedure.query(async ({ ctx }) => {
+		const all = await ctx.db
+			.select()
+			.from(donations)
+			.orderBy(desc(donations.donatedAt));
+		return all;
+	}),
+
+	/**
+	 * Admin: Update a donation by id.
+	 */
+	update: adminProcedure
+		.input(
+			z.object({
+				id: z.string().uuid(),
+				donatorName: z.string().min(1).optional(),
+				donatorMessage: z.string().optional().nullable(),
+				amountInCents: z.number().int().positive().optional(),
+				currency: z.string().min(1).optional(),
+				donatedAt: z.date().optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const { id, ...data } = input;
+			const updated = await ctx.db
+				.update(donations)
+				.set({
+					...data,
+					// drizzle sqlite expects undefined to skip columns
+					donatorName: data.donatorName ?? undefined,
+					donatorMessage: data.donatorMessage ?? undefined,
+					amountInCents: data.amountInCents ?? undefined,
+					currency: data.currency ?? undefined,
+					donatedAt: data.donatedAt ?? undefined,
+				})
+				.where(eq(donations.id, id))
+				.returning();
+			return updated[0];
+		}),
+
+	/**
+	 * Admin: Delete a donation by id.
+	 */
+	delete: adminProcedure
+		.input(z.object({ id: z.string().uuid() }))
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db.delete(donations).where(eq(donations.id, input.id));
+			return { success: true } as const;
+		}),
 
 	/**
 	 * Admin dashboard stats for donations.

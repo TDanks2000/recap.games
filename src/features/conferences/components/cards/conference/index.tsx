@@ -1,5 +1,6 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { ExternalLinkIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { conferences, games, streams } from "@/server/db/schema";
 import CardHeader from "./CardHeader";
 import DateTimeDetails from "./DateTimeDetails";
@@ -11,15 +12,36 @@ interface ConferenceCardProps extends InferSelectModel<typeof conferences> {
 
 const ConferenceCard = (conference: ConferenceCardProps) => {
 	const stream = conference?.streams?.[0];
+	const now = new Date();
+	const isLive =
+		!!conference.startTime &&
+		conference.startTime <= now &&
+		(!conference.endTime || conference.endTime > now);
 
 	return (
 		<a
 			href={stream?.link}
-			className="group hover:-translate-y-1 relative flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow transition-all duration-300 hover:border-primary/40 hover:bg-primary/5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+			className={cn(
+				"group relative flex w-full flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow transition-all duration-300",
+				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
+				isLive
+					? "hover:border-red-400/50 hover:bg-red-500/5"
+					: "hover:border-primary/40 hover:bg-primary/5",
+				"hover:-translate-y-0.5 hover:shadow-lg",
+			)}
 			target="_blank"
 			rel="noreferrer"
 			aria-label={`View ${conference.name} conference stream`}
 		>
+			{isLive && (
+				<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] text-red-600 ring-1 ring-red-500/30">
+					<span
+						className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500"
+						aria-hidden="true"
+					/>
+					Live
+				</div>
+			)}
 			<CardHeader {...conference} />
 			<DateTimeDetails {...conference} />
 
