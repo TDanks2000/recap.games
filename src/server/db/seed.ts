@@ -1,7 +1,6 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 import { reset, seed } from "drizzle-seed";
-
 import * as schema from "./schema";
 import {
 	accounts,
