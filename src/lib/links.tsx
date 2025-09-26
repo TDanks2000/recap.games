@@ -1,11 +1,10 @@
-import { FaTwitter } from "react-icons/fa";
-import { SiBluesky, SiKofi } from "react-icons/si";
+import { SiBluesky, SiKofi, SiX } from "react-icons/si";
 
 export const SOCIAL_LINKS = [
 	{
-		href: "https://twitter.com/gamesrecapped",
-		label: "Twitter",
-		icon: FaTwitter,
+		href: "https://x.com/gamesrecapped",
+		label: "X",
+		icon: SiX,
 		type: "social",
 	},
 	{

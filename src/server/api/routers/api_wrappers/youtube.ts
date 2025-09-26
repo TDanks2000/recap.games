@@ -1,6 +1,6 @@
 import z from "zod";
 import { Youtube } from "@/lib/youtube";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, publicProcedure } from "../../trpc";
 
 const youtube = new Youtube();
 

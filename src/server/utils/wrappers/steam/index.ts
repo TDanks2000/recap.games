@@ -9,6 +9,7 @@ export type Locale = string;
 export type Country = string;
 
 export class SteamWrapper {
+	private static instance: SteamWrapper;
 	private readonly locale: Locale;
 	private readonly country: Country;
 	private readonly baseStoreUrl = "https://store.steampowered.com";
@@ -16,6 +17,13 @@ export class SteamWrapper {
 	constructor(opts?: { locale?: Locale; country?: Country }) {
 		this.locale = opts?.locale ?? "en";
 		this.country = opts?.country ?? "us";
+	}
+
+	public static getInstance(): SteamWrapper {
+		if (!SteamWrapper.instance) {
+			SteamWrapper.instance = new SteamWrapper();
+		}
+		return SteamWrapper.instance;
 	}
 
 	private constFetch = async (input: string): Promise<Response> => {

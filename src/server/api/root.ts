@@ -1,10 +1,13 @@
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
-import { conferenceRouter, gameRouter, streamRouter } from "./routers";
-import { blogRouter } from "./routers/blog";
-import { combinedRouter } from "./routers/combined";
-import { donationsRouter } from "./routers/donations";
-import { youtubeRouter } from "./routers/youtube";
-
+import {
+	blogRouter,
+	combinedRouter,
+	conferenceRouter,
+	donationsRouter,
+	gameRouter,
+	streamRouter,
+	youtubeRouter,
+} from "./routers";
 /**
  * This is the primary router for your server.
  *
