@@ -48,6 +48,7 @@ export default function ConferenceFilterClient() {
 				selected={selectedConferences.map(String)}
 				onChange={(vals) => onConferenceChange(vals.map(Number))}
 				placeholder="Filter by Conference"
+				optionsGroupLabel="Conferences"
 			/>
 		</div>
 	);
