@@ -10,10 +10,10 @@ export default function ConferenceFilterClient() {
 	const { selectedConferences, onConferenceChange } = useConferenceFilter();
 	const { currentYear, isInitialized } = useYearFilter();
 	const { data: conferences, isError } = api.conference.getAll.useQuery(
-		{ year: currentYear },
+		{ year: currentYear, withGames: true },
 		{
 			suspense: true,
-			enabled: isInitialized, // Only run query after year filter is initialized
+			enabled: isInitialized,
 		},
 	);
 
@@ -26,11 +26,20 @@ export default function ConferenceFilterClient() {
 		return 0;
 	});
 
-	const options = sortedConferences.map((c) => ({
-		label: c.name,
-		value: c.id.toString(),
-		description: c.startTime ? getFormattedDate(c.startTime) : undefined,
-	}));
+	const options = sortedConferences.map((c) => {
+		console.log(c.games?.length);
+		return {
+			label: c.name,
+			value: c.id.toString(),
+			description: [
+				c.startTime ? getFormattedDate(c.startTime) : undefined,
+				c.games?.length
+					? `${c.games?.length} game${c.games?.length === 1 ? "" : "s"}`
+					: undefined,
+			],
+			disabled: !!(c.games?.length === 0),
+		};
+	});
 
 	return (
 		<div className="w-full sm:w-[260px]">

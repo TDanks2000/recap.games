@@ -19,7 +19,7 @@ import { Carousel, CarouselContent, CarouselItem } from "./carousel";
 type BaseOption = {
 	label: string;
 	value: string;
-	description?: string;
+	description?: string | Array<string | undefined>;
 	disabled?: boolean;
 };
 
@@ -248,7 +248,11 @@ export function MultiSelect<T extends BaseOption>({
 														<span className="text-sm">{option.label}</span>
 														{!!option?.description && (
 															<span className="text-muted-foreground text-xs">
-																{option.description}
+																{Array.isArray(option.description)
+																	? option.description
+																			.filter((s) => !!s?.length)
+																			.join(" | ")
+																	: option.description}
 															</span>
 														)}
 													</div>
