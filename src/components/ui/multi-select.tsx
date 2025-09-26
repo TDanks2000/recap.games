@@ -19,6 +19,7 @@ import { Carousel, CarouselContent, CarouselItem } from "./carousel";
 type BaseOption = {
 	label: string;
 	value: string;
+	description?: string;
 	disabled?: boolean;
 };
 
@@ -240,9 +241,18 @@ export function MultiSelect<T extends BaseOption>({
 												>
 													{isSelected && <Check className="h-4 w-4" />}
 												</div>
-												{renderOption
-													? renderOption(option, isSelected)
-													: option.label}
+												{renderOption ? (
+													renderOption(option, isSelected)
+												) : (
+													<div className="flex flex-col">
+														<span className="text-sm">{option.label}</span>
+														{!!option?.description && (
+															<span className="text-muted-foreground text-xs">
+																{option.description}
+															</span>
+														)}
+													</div>
+												)}
 											</CommandItem>
 										);
 									})

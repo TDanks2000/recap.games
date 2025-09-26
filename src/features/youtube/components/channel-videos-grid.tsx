@@ -302,7 +302,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 				</div>
 
 				<SelectConference
-					placeholder="Filter by conference"
+					placeholder="Select conference to auto-associate"
 					onSelect={(conference) => {
 						setSelectedConference(conference);
 					}}

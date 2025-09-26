@@ -18,4 +18,5 @@ export type HomeSearchParams = {
 	search?: string;
 	page?: number | string;
 	year?: string;
+	status?: string;
 };

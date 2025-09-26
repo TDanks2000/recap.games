@@ -3,6 +3,7 @@
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useConferenceFilter } from "@/hooks/use-conference-filter";
 import { useYearFilter } from "@/hooks/use-year-filter";
+import { getFormattedDate } from "@/lib";
 import { api } from "@/trpc/react";
 
 export default function ConferenceFilterClient() {
@@ -18,9 +19,17 @@ export default function ConferenceFilterClient() {
 
 	if (!isInitialized || isError || !conferences?.length) return null;
 
-	const options = conferences.map((c) => ({
+	const sortedConferences = conferences.sort((a, b) => {
+		if (a.startTime && b.startTime) {
+			return new Date(b.startTime).getTime() - new Date(a.startTime).getTime();
+		}
+		return 0;
+	});
+
+	const options = sortedConferences.map((c) => ({
 		label: c.name,
 		value: c.id.toString(),
+		description: c.startTime ? getFormattedDate(c.startTime) : undefined,
 	}));
 
 	return (
