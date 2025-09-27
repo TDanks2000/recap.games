@@ -30,6 +30,14 @@ export class RateLimiter {
 		id: string,
 		points = 1,
 	): Promise<RateLimitResult> => {
+		// Input validation
+		if (points < 0) {
+			throw new Error("Points must be non-negative");
+		}
+		if (this.limiterConfig.limit <= 0) {
+			throw new Error("Limit must be positive");
+		}
+
 		const key = `${this.prefix}${id}`;
 		const now = Date.now();
 
@@ -99,48 +107,47 @@ export class RateLimiter {
 		if (this.limiterConfig.type === "fixed-window") {
 			const cfg = this.limiterConfig;
 			const maybe = this.storage.get(key);
-			const windowMs = cfg.windowMs;
 			if (!maybe || !("windowStart" in maybe)) {
 				const rec = { count: points, windowStart: now, touchedAt: now };
 				this.storage.set(key, rec);
 				const remaining = Math.max(0, cfg.limit - rec.count);
-				const resetAfter = rec.windowStart + windowMs - now;
+				const resetAfter = rec.windowStart + cfg.windowMs - now;
 				return {
 					success: rec.count <= cfg.limit,
 					limit: cfg.limit,
 					remaining,
-					reset: rec.windowStart + windowMs,
+					reset: rec.windowStart + cfg.windowMs,
 					resetAfter: Math.max(0, resetAfter),
-					consumedPoints: Math.min(points, cfg.limit),
+					consumedPoints: rec.count <= cfg.limit ? points : 0,
 				};
 			}
 			const rec = maybe;
-			if (rec.windowStart + windowMs <= now) {
+			if (rec.windowStart + cfg.windowMs <= now) {
 				rec.count = points;
 				rec.windowStart = now;
 				rec.touchedAt = now;
 				const remaining = Math.max(0, cfg.limit - rec.count);
-				const resetAfter = rec.windowStart + windowMs - now;
+				const resetAfter = rec.windowStart + cfg.windowMs - now;
 				return {
 					success: rec.count <= cfg.limit,
 					limit: cfg.limit,
 					remaining,
-					reset: rec.windowStart + windowMs,
+					reset: rec.windowStart + cfg.windowMs,
 					resetAfter: Math.max(0, resetAfter),
-					consumedPoints: Math.min(points, cfg.limit),
+					consumedPoints: rec.count <= cfg.limit ? points : 0,
 				};
 			}
 			rec.count = rec.count + points;
 			rec.touchedAt = now;
 			const remaining = Math.max(0, cfg.limit - rec.count);
-			const resetAfter = rec.windowStart + windowMs - now;
+			const resetAfter = rec.windowStart + cfg.windowMs - now;
 			return {
 				success: rec.count <= cfg.limit,
 				limit: cfg.limit,
 				remaining,
-				reset: rec.windowStart + windowMs,
+				reset: rec.windowStart + cfg.windowMs,
 				resetAfter: Math.max(0, resetAfter),
-				consumedPoints: Math.min(points, cfg.limit),
+				consumedPoints: rec.count <= cfg.limit ? points : 0,
 			};
 		}
 

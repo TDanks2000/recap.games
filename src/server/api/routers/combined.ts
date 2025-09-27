@@ -1,12 +1,23 @@
+import { TRPCError } from "@trpc/server";
 import { sql } from "drizzle-orm";
 import { z } from "zod";
 import { MediaType } from "@/@types/db";
 import { conferences, games, media, streams } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { rateLimit, throwRateLimit } from "../utils";
 
 export const combinedRouter = createTRPCRouter({
 	// Get all available years from both games and conferences
 	getAvailableYears: publicProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.low.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		const [gameYears, conferenceYears] = await Promise.all([
 			ctx.db
 				.selectDistinct({ year: games.year })
@@ -56,6 +67,15 @@ export const combinedRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			// Start a transaction to ensure both operations succeed or fail together
 			// Insert the game first
 			const game = await ctx.db
@@ -134,6 +154,15 @@ export const combinedRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			// Insert the conference first
 			const conference = await ctx.db
 				.insert(conferences)

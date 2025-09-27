@@ -38,13 +38,13 @@ export const consumeTokenBucket = (
 	if (rec.tokens + 1e-9 >= points) {
 		rec.tokens = rec.tokens - points;
 		const remaining = Math.max(0, Math.floor(rec.tokens));
-		const needed = Math.max(0, 1 - rec.tokens);
+		const needed = Math.max(0, points - rec.tokens);
 		const resetAfter =
 			needed <= 0 ? 0 : Math.ceil(needed / rec.refillRatePerMs);
 		return { success: true, remaining, resetAfter };
 	}
 	const remaining = Math.max(0, Math.floor(rec.tokens));
-	const needed = Math.max(0, 1 - rec.tokens);
+	const needed = Math.max(0, points - rec.tokens);
 	const resetAfter = Math.ceil(needed / rec.refillRatePerMs);
 	return { success: false, remaining, resetAfter };
 };

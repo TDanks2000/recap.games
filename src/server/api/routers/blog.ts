@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -13,12 +14,22 @@ import {
 	protectedProcedure,
 	publicProcedure,
 } from "../trpc";
+import { rateLimit, throwRateLimit } from "../utils";
 
 const DEBOUNCE_SECONDS = 60 * 60; // 1 hour
 
 export const blogRouter = createTRPCRouter({
 	// Admin-only: get aggregated analytics for all blog posts
 	getAllPostsAnalytics: adminProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.high.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		// Get analytics for all posts with post title
 		const postsWithAnalytics = await ctx.db
 			.select({
@@ -85,6 +96,15 @@ export const blogRouter = createTRPCRouter({
 	getPostAnalytics: adminProcedure
 		.input(z.object({ postId: z.number() }))
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			// Get the basic analytics data
 			const analytics = await ctx.db
 				.select()
@@ -144,6 +164,15 @@ export const blogRouter = createTRPCRouter({
 
 	// Fetch all published or due-scheduled blog posts with author info and analytics
 	listPosts: publicProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.low.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		const now = Math.floor(Date.now() / 1000);
 
 		const posts = await ctx.db
@@ -181,6 +210,15 @@ export const blogRouter = createTRPCRouter({
 	getPostBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const now = Math.floor(Date.now() / 1000);
 
 			const [post] = await ctx.db
@@ -232,6 +270,15 @@ export const blogRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const [newPost] = await ctx.db
 				.insert(blogPosts)
 				.values({
@@ -269,6 +316,15 @@ export const blogRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const [updated] = await ctx.db
 				.update(blogPosts)
 				.set({
@@ -298,6 +354,15 @@ export const blogRouter = createTRPCRouter({
 	deletePost: adminProcedure
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			await ctx.db
 				.delete(blogPostAnalytics)
 				.where(eq(blogPostAnalytics.postId, input.id));
@@ -309,6 +374,15 @@ export const blogRouter = createTRPCRouter({
 	addComment: protectedProcedure
 		.input(z.object({ postId: z.number(), content: z.string().min(1) }))
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.medium.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const [comment] = await ctx.db
 				.insert(blogComments)
 				.values({
@@ -331,6 +405,15 @@ export const blogRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const now = new Date();
 			const userId = ctx.session?.user?.id ?? null;
 			const sessionId = userId ? null : (input.sessionId ?? null);

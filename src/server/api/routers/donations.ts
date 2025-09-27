@@ -1,9 +1,11 @@
 // src/server/api/routers/donations.ts
 
+import { TRPCError } from "@trpc/server";
 import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { donations } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { rateLimit, throwRateLimit } from "../utils";
 
 export const donationsRouter = createTRPCRouter({
 	/**
@@ -11,6 +13,15 @@ export const donationsRouter = createTRPCRouter({
 	 * @returns List of donations sorted by most recent first
 	 */
 	listAll: publicProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.low.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		const allDonations = await ctx.db
 			.select({
 				id: donations.id,
@@ -32,6 +43,15 @@ export const donationsRouter = createTRPCRouter({
 	 * Admin: Get all donations with full details for management.
 	 */
 	getAllAdmin: adminProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.high.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		const all = await ctx.db
 			.select()
 			.from(donations)
@@ -54,6 +74,15 @@ export const donationsRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id, ...data } = input;
 			const updated = await ctx.db
 				.update(donations)
@@ -77,6 +106,15 @@ export const donationsRouter = createTRPCRouter({
 	delete: adminProcedure
 		.input(z.object({ id: z.string().uuid() }))
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			await ctx.db.delete(donations).where(eq(donations.id, input.id));
 			return { success: true } as const;
 		}),
@@ -86,6 +124,15 @@ export const donationsRouter = createTRPCRouter({
 	 * @returns Stats including total amounts, top supporters, and recent activity
 	 */
 	getAnalytics: adminProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.high.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		// Get all donation data for calculations
 		const allDonations = await ctx.db.query.donations.findMany();
 

@@ -16,9 +16,51 @@ export const rateLimit = {
 	}),
 };
 
-export const RateLimitResponse = (retryAfter?: number) => {
-	throw new TRPCError({
+/**
+ * Normalised TRPCError with optional `retryAfterSeconds` attached so
+ * transport layers can set a `Retry-After` header if needed.
+ */
+type RateLimitError = TRPCError & { retryAfterSeconds?: number };
+
+/**
+ * Create a rate-limit TRPCError.
+ * - `retryAfter` may be a number (seconds) or a Date.
+ * - Returns an error; call `throwRateLimit(...)` to throw it.
+ */
+export const createRateLimitError = (
+	retryAfter?: number | Date,
+): RateLimitError => {
+	const now = Date.now();
+
+	let retryAfterSeconds: number | undefined;
+	if (retryAfter instanceof Date) {
+		retryAfterSeconds = Math.max(
+			0,
+			Math.ceil((retryAfter.getTime() - now) / 1000),
+		);
+	}
+
+	if (typeof retryAfter === "number" && Number.isFinite(retryAfter)) {
+		retryAfterSeconds = Math.max(0, Math.ceil(retryAfter));
+	}
+
+	const message = retryAfterSeconds
+		? `Rate limit exceeded - try again in ${retryAfterSeconds} second${retryAfterSeconds === 1 ? "" : "s"}.`
+		: "Rate limit exceeded.";
+
+	const err = new TRPCError({
 		code: "TOO_MANY_REQUESTS",
-		message: `You have been rate limited${retryAfter ? `, try again in ${retryAfter}` : ""}`,
-	});
+		message,
+		cause: retryAfterSeconds ? { retryAfterSeconds } : undefined,
+	}) as RateLimitError;
+
+	if (typeof retryAfterSeconds === "number") {
+		err.retryAfterSeconds = retryAfterSeconds;
+	}
+
+	return err;
+};
+
+export const throwRateLimit = (retryAfter?: number | Date): never => {
+	throw createRateLimitError(retryAfter);
 };

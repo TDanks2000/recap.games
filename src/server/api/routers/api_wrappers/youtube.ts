@@ -1,6 +1,8 @@
+import { TRPCError } from "@trpc/server";
 import z from "zod";
 import { Youtube } from "@/lib/youtube";
 import { createTRPCRouter, publicProcedure } from "../../trpc";
+import { rateLimit, throwRateLimit } from "../../utils";
 
 const youtube = new Youtube();
 
@@ -13,7 +15,16 @@ export const youtubeRouter = createTRPCRouter({
 				pageToken: z.string().optional(),
 			}),
 		)
-		.query(async ({ input }) => {
+		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.medium.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const result = await youtube.getChannelVideos(
 				input.channelId,
 				input.maxResults,
@@ -27,7 +38,16 @@ export const youtubeRouter = createTRPCRouter({
 
 	getChannelInfo: publicProcedure
 		.input(z.object({ channelId: z.string() }))
-		.query(async ({ input }) => {
+		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.medium.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const result = await youtube.getChannelInfo(input.channelId);
 			if ("error" in result) {
 				return { error: result.error };
@@ -42,7 +62,16 @@ export const youtubeRouter = createTRPCRouter({
 				maxResults: z.number().optional().default(5),
 			}),
 		)
-		.query(async ({ input }) => {
+		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.medium.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const result = await youtube.searchChannels(
 				input.query,
 				input.maxResults,

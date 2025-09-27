@@ -1,7 +1,9 @@
+import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { streams } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { rateLimit, throwRateLimit } from "../utils";
 
 export const streamRouter = createTRPCRouter({
 	// Create a new stream
@@ -14,6 +16,15 @@ export const streamRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { title, link, conferenceId } = input;
 
 			const stream = await ctx.db
@@ -32,6 +43,15 @@ export const streamRouter = createTRPCRouter({
 	delete: adminProcedure
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id } = input;
 
 			await ctx.db.delete(streams).where(eq(streams.id, id));
@@ -50,6 +70,15 @@ export const streamRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id, ...data } = input;
 
 			const stream = await ctx.db
@@ -65,6 +94,15 @@ export const streamRouter = createTRPCRouter({
 	getById: publicProcedure
 		.input(z.object({ id: z.number() }))
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id } = input;
 
 			const stream = await ctx.db
@@ -89,6 +127,15 @@ export const streamRouter = createTRPCRouter({
 				.optional(),
 		)
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const query = ctx.db.select().from(streams);
 
 			if (input?.conferenceId) {

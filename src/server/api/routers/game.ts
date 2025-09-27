@@ -5,7 +5,7 @@ import { z } from "zod";
 import { MediaType } from "@/@types";
 import { conferences, games, media } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
-import { RateLimitResponse, rateLimit } from "../utils";
+import { rateLimit, throwRateLimit } from "../utils";
 
 export const gameRouter = createTRPCRouter({
 	// Create a new game
@@ -25,6 +25,15 @@ export const gameRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const {
 				title,
 				releaseDate,
@@ -69,6 +78,15 @@ export const gameRouter = createTRPCRouter({
 	delete: adminProcedure
 		.input(z.object({ id: z.number() }))
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id } = input;
 			// This is correct: delete related media first.
 			await ctx.db.delete(media).where(eq(media.gameId, id));
@@ -102,6 +120,15 @@ export const gameRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const { id, media: newMedia, ...gameData } = input;
 
 			// A transaction is crucial here to ensure that if any part of the update fails,
@@ -175,6 +202,15 @@ export const gameRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 			const game = await ctx.db.query.games.findFirst({
 				where: eq(games.id, input.id),
 				with: {
@@ -212,11 +248,12 @@ export const gameRouter = createTRPCRouter({
 			if (!ip)
 				throw new TRPCError({
 					code: "BAD_REQUEST",
+					message: "IP address not found",
 				});
 
 			const { success, resetAfter } = await rateLimit.low.limit(ip);
 
-			if (!success) RateLimitResponse(resetAfter);
+			if (!success) throwRateLimit(resetAfter);
 
 			const {
 				page,
@@ -317,6 +354,15 @@ export const gameRouter = createTRPCRouter({
 
 	// Get all available years from games
 	getAvailableYears: publicProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.low.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
 		const years = await ctx.db
 			.selectDistinct({ year: games.year })
 			.from(games)
