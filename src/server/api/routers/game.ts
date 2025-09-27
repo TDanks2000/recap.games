@@ -1,9 +1,11 @@
+import { TRPCError } from "@trpc/server";
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { and, asc, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { MediaType } from "@/@types";
 import { conferences, games, media } from "@/server/db/schema";
 import { adminProcedure, createTRPCRouter, publicProcedure } from "../trpc";
+import { RateLimitResponse, rateLimit } from "../utils";
 
 export const gameRouter = createTRPCRouter({
 	// Create a new game
@@ -205,6 +207,17 @@ export const gameRouter = createTRPCRouter({
 			}),
 		)
 		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+
+			if (!success) RateLimitResponse(resetAfter);
+
 			const {
 				page,
 				limit,

@@ -24,10 +24,15 @@ interface Props {
 
 export default function GamesList({ searchQuery }: Props) {
 	const utils = api.useUtils();
-	const { data: games, isLoading } = api.game.getAll.useQuery({
+	const {
+		data: games,
+		isLoading,
+		error,
+	} = api.game.getAll.useQuery({
 		includeHidden: true,
 		limit: 50,
 	});
+
 	const [gameToDelete, setGameToDelete] = useState<number | null>(null);
 
 	const deleteGameMutation = api.game.delete.useMutation({
@@ -71,6 +76,10 @@ export default function GamesList({ searchQuery }: Props) {
 				))}
 			</div>
 		);
+	}
+
+	if (error) {
+		return <p className="text-muted-foreground">{error.message}</p>;
 	}
 
 	if (!items || items.length === 0) {

@@ -1,5 +1,6 @@
 import { Gamepad2 } from "lucide-react";
 import type { HomeSearchParams } from "@/@types";
+import { tryCatch } from "@/lib/try-catch";
 import { getYearFromSearchParams } from "@/lib/utils";
 import { api } from "@/trpc/server";
 import GameCard from "../cards/game";
@@ -13,19 +14,29 @@ export async function GamesList({ searchParams }: GamesListProps) {
 	const page = Number(searchParams.page ?? 1);
 	const year = getYearFromSearchParams(searchParams);
 
-	const gamesResponse = await api.game.getAll({
-		page,
-		limit: 20,
-		conferenceIds: searchParams.conferences,
-		search: searchParams.search,
-		sort: searchParams.sort,
-		direction: searchParams.direction,
-		year,
-	});
+	const { data: gamesResponse, error } = await tryCatch(
+		api.game.getAll({
+			page,
+			limit: 20,
+			conferenceIds: searchParams.conferences,
+			search: searchParams.search,
+			sort: searchParams.sort,
+			direction: searchParams.direction,
+			year,
+		}),
+	);
+
+	if (error) {
+		return (
+			<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
+				<h3 className="font-semibold text-xl">{error.message}</h3>
+			</div>
+		);
+	}
 
 	const games = gamesResponse?.items ?? [];
 
-	if (games.length === 0) {
+	if (games.length === 0 || !gamesResponse) {
 		const hasFilters =
 			(searchParams.conferences?.length ?? 0) > 0 ||
 			(searchParams.search?.length ?? 0) > 0 ||
