@@ -36,8 +36,6 @@ export const YoutubeVideoCard = ({ video, renderActionButton }: Props) => {
 
 	const steamLinks = findSpecificLinks(video.description || "", "steam");
 
-	console.log({ video });
-
 	return (
 		<Card className="group hover:-translate-y-1 overflow-hidden pt-0 transition-all duration-300 hover:border-primary/20 hover:shadow-md">
 			<div className="relative">

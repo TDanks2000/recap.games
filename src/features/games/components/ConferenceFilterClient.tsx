@@ -27,7 +27,6 @@ export default function ConferenceFilterClient() {
 	});
 
 	const options = sortedConferences.map((c) => {
-		console.log(c.games?.length);
 		return {
 			label: c.name,
 			value: c.id.toString(),

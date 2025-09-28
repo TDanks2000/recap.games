@@ -1,4 +1,4 @@
-import { Gamepad2 } from "lucide-react";
+import { AlertTriangle, Gamepad2 } from "lucide-react";
 import type { HomeSearchParams } from "@/@types";
 import { tryCatch } from "@/lib/try-catch";
 import { getYearFromSearchParams } from "@/lib/utils";
@@ -29,7 +29,14 @@ export async function GamesList({ searchParams }: GamesListProps) {
 	if (error) {
 		return (
 			<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
-				<h3 className="font-semibold text-xl">{error.message}</h3>
+				<AlertTriangle className="h-12 w-12 text-destructive" />
+				<h3 className="font-semibold text-destructive text-xl">
+					Failed to Load Games
+				</h3>
+				<p className="max-w-md text-muted-foreground text-sm">
+					{error.message ??
+						"Something went wrong while loading the games. Please try again later."}
+				</p>
 			</div>
 		);
 	}

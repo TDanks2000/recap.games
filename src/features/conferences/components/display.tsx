@@ -1,6 +1,8 @@
+import { AlertTriangle } from "lucide-react";
 import Link from "next/link";
 import type { HomeSearchParams } from "@/@types";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { tryCatch } from "@/lib/try-catch";
 import { cn, getYearFromSearchParams } from "@/lib/utils";
 import type { RouterOutputs } from "@/trpc/react";
 import { api } from "@/trpc/server";
@@ -49,8 +51,27 @@ const getConferenceStatus = (
 
 const ConferencesDisplay = async ({ searchParams }: Props) => {
 	const year = getYearFromSearchParams(searchParams);
-	const data: ConferenceListOutput =
-		(await api.conference.getAll({ withStreams: true, year })) ?? [];
+	const res = await tryCatch(
+		api.conference.getAll({ withStreams: true, year }) ?? [],
+	);
+
+	const data = res.data ?? [];
+	const error = res.error;
+
+	if (error) {
+		return (
+			<div className="col-span-full flex w-full flex-col items-center justify-center gap-4 rounded-xl bg-muted/50 py-12 text-center">
+				<AlertTriangle className="h-12 w-12 text-destructive" />
+				<h3 className="font-semibold text-destructive text-xl">
+					Failed to Load Conferences
+				</h3>
+				<p className="max-w-md text-muted-foreground text-sm">
+					{error.message ??
+						"Something went wrong while loading the conferences. Please try again later."}
+				</p>
+			</div>
+		);
+	}
 
 	// compute counts safely
 	const counts: Record<"all" | "live" | "upcoming" | "ended", number> = {

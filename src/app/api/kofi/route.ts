@@ -27,8 +27,6 @@ export async function POST(request: Request) {
 
 	const result = await recordKofiDonation(kofiData);
 
-	console.log(result.message);
-
 	if (!result.success) {
 		return NextResponse.json(
 			{ success: false, message: "Internal Server Error" },

@@ -16,8 +16,6 @@ export function ToggleButton({ searchParams }: ToggleButtonProps) {
 
 	const open = searchParams?.conferenceOpen === "true";
 
-	console.log({ open });
-
 	// Build next search params
 	const nextParams = new URLSearchParams(currentParams.toString());
 	nextParams.set("conferenceOpen", (!open).toString());
