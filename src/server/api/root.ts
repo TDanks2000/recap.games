@@ -5,6 +5,8 @@ import {
 	conferenceRouter,
 	donationsRouter,
 	gameRouter,
+	igdbRouter,
+	steamRouter,
 	streamRouter,
 	youtubeRouter,
 } from "./routers";
@@ -21,6 +23,8 @@ export const appRouter = createTRPCRouter({
 	blog: blogRouter,
 	youtube: youtubeRouter,
 	donations: donationsRouter,
+	igdb: igdbRouter,
+	steam: steamRouter,
 });
 
 // export type definition of API
