@@ -21,27 +21,34 @@ export default function GamesAdminPage() {
 		formCount > 1 && setFormCount((prev) => prev - 1);
 
 	return (
-		<main className="mx-auto min-h-screen w-full max-w-screen-2xl">
-			{/* Top bar */}
-			<div className="flex items-center justify-between py-6">
+		<div className="mx-auto w-full max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8">
+			{/* Header */}
+			<div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
 				<h1 className="font-bold text-2xl text-white sm:text-3xl">
 					Games Management
 				</h1>
 				<Button variant="outline" asChild className="gap-2">
 					<Link href="/admin">
 						<ArrowLeft className="h-4 w-4" />
-						Back to Dashboard
+						<span className="hidden sm:inline">Back to Dashboard</span>
+						<span className="inline sm:hidden">Back</span>
 					</Link>
 				</Button>
 			</div>
 
+			{/* Tabs */}
 			<Tabs defaultValue="existing" className="w-full">
-				<div className="mb-6 flex items-center gap-4">
-					<TabsList>
-						<TabsTrigger value="existing">Existing Games</TabsTrigger>
-						<TabsTrigger value="add" className="flex items-center">
-							Add New
-							<Badge variant="secondary" className="ml-2 px-1.5 py-0.5">
+				{/* Tab Navigation */}
+				<div className="mb-6">
+					<TabsList className="grid w-full grid-cols-2 sm:inline-grid sm:w-auto">
+						<TabsTrigger value="existing">
+							<span className="hidden sm:inline">Existing Games</span>
+							<span className="inline sm:hidden">Existing</span>
+						</TabsTrigger>
+						<TabsTrigger value="add" className="gap-2">
+							<span className="hidden sm:inline">Add New</span>
+							<span className="inline sm:hidden">Add</span>
+							<Badge variant="secondary" className="px-1.5 py-0.5">
 								{formCount}
 							</Badge>
 						</TabsTrigger>
@@ -49,71 +56,84 @@ export default function GamesAdminPage() {
 				</div>
 
 				{/* Existing Games Tab */}
-				<TabsContent value="existing">
-					<div className="mb-4 flex justify-end gap-2">
-						<div className="relative w-full max-w-xs">
+				<TabsContent value="existing" className="mt-0 space-y-4">
+					{/* Search and Actions */}
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+						<div className="relative flex-1 sm:max-w-xs">
 							<Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
 								type="search"
 								placeholder="Search games..."
-								className="w-full border-none pl-9 text-white"
+								className="border-none pl-9 text-white"
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 							/>
 						</div>
-
-						<div>
-							<Button variant="outline" asChild>
-								<Link href="/admin/games/youtube-add">
-									<SiYoutube />
-									Add from YouTube
-								</Link>
-							</Button>
-						</div>
+						<Button variant="outline" asChild className="gap-2">
+							<Link href="/admin/games/youtube-add">
+								<SiYoutube />
+								<span>Add from YouTube</span>
+							</Link>
+						</Button>
 					</div>
-					<Card className="overflow-hidden rounded-lg border-none bg-transparent">
-						<CardHeader className="rounded bg-card p-5">
-							<div className="flex items-center justify-between">
+
+					{/* Games List Card */}
+					<Card className="border-none bg-transparent">
+						<CardHeader className="bg-card p-4 sm:p-5">
+							<div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
 								<CardTitle>All Games</CardTitle>
-								<Button variant="outline">
-									<ListFilter />
-									Filter
+								<Button variant="outline" size="sm" className="gap-2">
+									<ListFilter className="h-4 w-4" />
+									<span>Filter</span>
 								</Button>
 							</div>
 						</CardHeader>
-						<CardContent className="max-h-[75vh] overflow-y-auto p-0">
+						<CardContent className="p-0">
 							<GamesList searchQuery={searchQuery} />
 						</CardContent>
 					</Card>
 				</TabsContent>
 
 				{/* Add New Game Tab */}
-				<TabsContent value="add">
-					<div className="mb-4 flex justify-end gap-2">
-						<Button variant="outline" size="sm" onClick={handleAddForm}>
-							<Plus />
-							Add Form
+				<TabsContent value="add" className="mt-0 space-y-4">
+					{/* Form Controls */}
+					<div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleAddForm}
+							className="gap-2"
+						>
+							<Plus className="h-4 w-4" />
+							<span>Add Form</span>
 						</Button>
 						{formCount > 1 && (
-							<Button variant="outline" size="sm" onClick={handleRemoveForm}>
-								<Minus />
-								Remove Form
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleRemoveForm}
+								className="gap-2"
+							>
+								<Minus className="h-4 w-4" />
+								<span>Remove Form</span>
 							</Button>
 						)}
 					</div>
+
+					{/* Game Forms */}
 					<div className="space-y-6">
 						{Array.from({ length: formCount }).map((_, index) => (
 							<Card
 								// biome-ignore lint/suspicious/noArrayIndexKey: this is fine
 								key={index}
-								className="overflow-hidden rounded-lg border-none"
+								className="border-none"
 							>
-								<CardHeader className="rounded bg-card p-5">
+								<CardHeader className="bg-card p-4 sm:p-5">
 									<CardTitle>
 										{formCount > 1 ? `Game ${index + 1}` : "New Game"}
 									</CardTitle>
 								</CardHeader>
-								<CardContent className="max-h-[75vh] w-full overflow-y-auto">
+								<CardContent className="p-4 sm:p-6">
 									<GameForm formIndex={index} />
 								</CardContent>
 							</Card>
@@ -121,6 +141,6 @@ export default function GamesAdminPage() {
 					</div>
 				</TabsContent>
 			</Tabs>
-		</main>
+		</div>
 	);
 }

@@ -54,7 +54,7 @@ const gameFormSchema = z.object({
 
 type GameFormValues = z.infer<typeof gameFormSchema>;
 
-interface GameFormInitialData {
+export interface GameFormInitialData {
 	title?: string;
 	releaseDate?: string;
 	genres?: Genre[];
