@@ -44,7 +44,6 @@ export interface IGDBOption {
 
 export class IGDBWrapper extends IGDBApiBase {
 	private static instance: IGDBWrapper;
-	private readonly PC_PLATFORMS = [6, 14, 3];
 
 	private constructor() {
 		super(env.TWITCH_CLIENT_ID ?? "", env.TWITCH_CLIENT_SECRET ?? "");
@@ -55,12 +54,6 @@ export class IGDBWrapper extends IGDBApiBase {
 			IGDBWrapper.instance = new IGDBWrapper();
 		}
 		return IGDBWrapper.instance;
-	}
-
-	private getPlatformCondition(platformIds?: number[]): string {
-		const platformsToUse =
-			platformIds && platformIds.length > 0 ? platformIds : this.PC_PLATFORMS;
-		return `platforms = (${platformsToUse.join(",")})`;
 	}
 
 	private validateRating(rating: number): void {
@@ -146,9 +139,9 @@ export class IGDBWrapper extends IGDBApiBase {
 		offset = 0,
 	): Promise<IGDBReturnDataType[]> {
 		if (!query) throw new Error("Search query is required");
+
 		return this.makeReq<IGDBReturnDataType[]>("games", {
 			search: query,
-			where: this.getPlatformCondition(),
 			limit,
 			offset,
 		});
@@ -160,7 +153,7 @@ export class IGDBWrapper extends IGDBApiBase {
 	): Promise<IGDBReturnDataType[]> {
 		const now = Math.floor(Date.now() / 1000);
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `hypes != null & first_release_date > ${now} & ${this.getPlatformCondition()}`,
+			where: `hypes != null & first_release_date > ${now}`,
 			sort: "hypes desc",
 			limit,
 			offset,
@@ -175,7 +168,7 @@ export class IGDBWrapper extends IGDBApiBase {
 		const threeMonthsAgo = now - 7776000; // 90 days in seconds
 
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `first_release_date >= ${threeMonthsAgo} & first_release_date <= ${now} & rating_count >= ${MIN_RATING_COUNT} & ${this.getPlatformCondition()}`,
+			where: `first_release_date >= ${threeMonthsAgo} & first_release_date <= ${now} & rating_count >= ${MIN_RATING_COUNT}`,
 			sort: "first_release_date desc",
 			limit,
 			offset,
@@ -187,7 +180,7 @@ export class IGDBWrapper extends IGDBApiBase {
 		offset = 0,
 	): Promise<IGDBReturnDataType[]> {
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `aggregated_rating != null & aggregated_rating_count > ${MIN_RATING_COUNT} & category = 0 & version_parent = null & ${this.getPlatformCondition()}`,
+			where: `aggregated_rating != null & aggregated_rating_count > ${MIN_RATING_COUNT} & category = 0 & version_parent = null`,
 			sort: "aggregated_rating desc",
 			limit,
 			offset,
@@ -204,7 +197,7 @@ export class IGDBWrapper extends IGDBApiBase {
 	): Promise<IGDBReturnDataType[]> {
 		if (!genre) throw new Error("Genre is required");
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `genres.name = "${genre}" & aggregated_rating_count >= ${MIN_RATING_COUNT} & ${this.getPlatformCondition()}`,
+			where: `genres.name = "${genre}" & aggregated_rating_count >= ${MIN_RATING_COUNT}`,
 			sort: "aggregated_rating desc",
 			limit,
 			offset,
@@ -226,7 +219,7 @@ export class IGDBWrapper extends IGDBApiBase {
 		const genreCondition = `genres = [${genreIds.join(",")}]`;
 
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `${genreCondition} & aggregated_rating_count >= ${MIN_RATING_COUNT} & ${this.getPlatformCondition()}`,
+			where: `${genreCondition} & aggregated_rating_count >= ${MIN_RATING_COUNT}`,
 			sort: "aggregated_rating desc",
 			limit,
 			offset,
@@ -248,7 +241,7 @@ export class IGDBWrapper extends IGDBApiBase {
 			.join(",");
 
 		return this.makeReq<IGDBReturnDataType[]>("games", {
-			where: `id = (${similarGameIds}) & aggregated_rating_count >= ${MIN_RATING_COUNT} & ${this.getPlatformCondition()}`,
+			where: `id = (${similarGameIds}) & aggregated_rating_count >= ${MIN_RATING_COUNT}`,
 			sort: "aggregated_rating desc",
 			limit,
 			offset,
@@ -265,7 +258,7 @@ export class IGDBWrapper extends IGDBApiBase {
 		limit = DEFAULT_LIMIT,
 		offset = 0,
 	): Promise<IGDBReturnDataType[]> {
-		const conditions: string[] = [this.getPlatformCondition(filters.platforms)];
+		const conditions: string[] = [];
 
 		// Helper for array conditions. Uses `(id1,id2)` for OR logic.
 		const addArrayCondition = (field: string, ids?: number[]) => {

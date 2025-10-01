@@ -40,6 +40,7 @@ export class SteamWrapper {
 		try {
 			const q = encodeURIComponent(term);
 			const url = `${this.baseStoreUrl}/api/storesearch?cc=${this.country}&l=${this.locale}&term=${q}&num_per_page=${limit}`;
+			console.log({ url });
 			const res = await this.constFetch(url);
 			if (!res.ok) {
 				throw new Error(`Store search request failed: ${res.status}`);
