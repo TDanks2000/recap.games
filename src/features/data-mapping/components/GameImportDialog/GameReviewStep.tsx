@@ -12,8 +12,11 @@ import { useGameDetails } from "@/features/data-mapping/hooks/useInfoDataApis";
 import type { RouterOutputs } from "@/trpc/react";
 import { mapGameDataToForm } from "../../lib/gameFormMapper";
 
+type Conference = RouterOutputs["conference"]["getAll"][number];
+
 interface GameReviewStepProps {
 	initialData: GameFormInitialData | undefined;
+	conference?: Conference | undefined;
 	setInitialData: Dispatch<SetStateAction<GameFormInitialData | undefined>>;
 	selectedGame: number | null;
 	selectedType: "igdb" | "steam" | undefined;
@@ -29,10 +32,11 @@ const isSteamData = (game: IGDBInfo | SteamInfo): game is SteamInfo => {
 
 export function GameReviewStep({
 	initialData,
+	conference,
 	setInitialData,
 	selectedGame,
 	selectedType,
-	updateMedia = true,
+	updateMedia = false,
 }: GameReviewStepProps) {
 	const { data, isLoading, error, hasData } = useGameDetails({
 		gameId: selectedGame ?? -1,
@@ -55,17 +59,25 @@ export function GameReviewStep({
 	// Update initialData when game details are fetched
 	useEffect(() => {
 		if (transformedData) {
-			// biome-ignore lint/correctness/noUnusedVariables: this is fine as we are just removing the source from the data
-			const { source, media, ...rest } = transformedData;
+			const {
+				conference: _conf,
+				source: _source,
+				media,
+				title,
+				...rest
+			} = transformedData;
 
 			setInitialData((prev) => ({
 				...prev,
 				...rest,
+				conference: conference,
 				// Only include media if updateMedia is true
 				...(updateMedia && media ? { media } : {}),
+				// Only update title if prev has not already set it
+				title: prev?.title?.length ? prev.title : title,
 			}));
 		}
-	}, [transformedData, setInitialData, updateMedia]);
+	}, [transformedData, setInitialData, updateMedia, conference]);
 
 	if (isLoading) {
 		return (

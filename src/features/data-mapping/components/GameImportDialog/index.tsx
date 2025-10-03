@@ -9,11 +9,20 @@ import { GameSearchStep } from "./GameSearchStep";
 interface GameImportDialogProps {
 	isOpen: boolean;
 	onClose: () => void;
+	preData?: GameFormInitialData | undefined;
+	initalQuery?: string | undefined;
 }
 
-export function GameImportDialog({ isOpen, onClose }: GameImportDialogProps) {
-	const [initialData, setInitialData] = useState<GameFormInitialData>();
-	const [searchQuery, setSearchQuery] = useState("");
+export function GameImportDialog({
+	isOpen,
+	onClose,
+	preData,
+	initalQuery,
+}: GameImportDialogProps) {
+	const [initialData, setInitialData] = useState<
+		GameFormInitialData | undefined
+	>(preData);
+	const [searchQuery, setSearchQuery] = useState<string>(initalQuery ?? "");
 	const [selectedGame, setSelectedGame] = useState<number | null>(null);
 	const [selectedType, setSelectedType] = useState<"igdb" | "steam">();
 	const [steamOpen, setSteamOpen] = useState(true);
@@ -49,7 +58,6 @@ export function GameImportDialog({ isOpen, onClose }: GameImportDialogProps) {
 							selectedGame={selectedGame}
 							setSelectedGame={setSelectedGame}
 							setSelectedType={setSelectedType}
-							setInitialData={setInitialData}
 							steamOpen={steamOpen}
 							setSteamOpen={setSteamOpen}
 							igdbOpen={igdbOpen}
@@ -64,6 +72,7 @@ export function GameImportDialog({ isOpen, onClose }: GameImportDialogProps) {
 					component: (
 						<GameReviewStep
 							initialData={initialData}
+							conference={preData?.conference}
 							setInitialData={setInitialData}
 							selectedGame={selectedGame}
 							selectedType={selectedType}

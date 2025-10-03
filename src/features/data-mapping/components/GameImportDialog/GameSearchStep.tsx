@@ -3,7 +3,6 @@
 import { Database, Loader2 } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import type { GameFormInitialData } from "@/features/admin/components/GameForm";
 import { DataSourceSection } from "@/features/data-mapping/components/DataSourceSection";
 import { SearchEmptyState } from "@/features/data-mapping/components/SearchEmptyState";
 import { SearchInput } from "@/features/data-mapping/components/SearchInput";
@@ -15,7 +14,6 @@ interface GameSearchStepProps {
 	setSearchQuery: Dispatch<SetStateAction<string>>;
 	selectedGame: number | null;
 	setSelectedGame: Dispatch<SetStateAction<number | null>>;
-	setInitialData: Dispatch<SetStateAction<GameFormInitialData | undefined>>;
 	steamOpen: boolean;
 	setSteamOpen: Dispatch<SetStateAction<boolean>>;
 	igdbOpen: boolean;
@@ -28,7 +26,6 @@ export function GameSearchStep({
 	setSearchQuery,
 	selectedGame,
 	setSelectedGame,
-	setInitialData,
 	steamOpen,
 	setSteamOpen,
 	igdbOpen,
@@ -112,9 +109,6 @@ export function GameSearchStep({
 											onSelect={(id) => {
 												setSelectedGame(id);
 												setSelectedType("steam");
-												setInitialData({
-													title: game.name,
-												});
 											}}
 										/>
 									))}
@@ -137,9 +131,6 @@ export function GameSearchStep({
 											onSelect={(id) => {
 												setSelectedGame(id);
 												setSelectedType("igdb");
-												setInitialData({
-													title: game.name,
-												});
 											}}
 										/>
 									))}
