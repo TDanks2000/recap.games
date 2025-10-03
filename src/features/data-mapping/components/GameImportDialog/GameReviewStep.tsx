@@ -17,6 +17,7 @@ interface GameReviewStepProps {
 	setInitialData: Dispatch<SetStateAction<GameFormInitialData | undefined>>;
 	selectedGame: number | null;
 	selectedType: "igdb" | "steam" | undefined;
+	updateMedia?: boolean;
 }
 
 type IGDBInfo = NonNullable<RouterOutputs["igdb"]["info"]>;
@@ -31,6 +32,7 @@ export function GameReviewStep({
 	setInitialData,
 	selectedGame,
 	selectedType,
+	updateMedia = true,
 }: GameReviewStepProps) {
 	const { data, isLoading, error, hasData } = useGameDetails({
 		gameId: selectedGame ?? -1,
@@ -54,13 +56,16 @@ export function GameReviewStep({
 	useEffect(() => {
 		if (transformedData) {
 			// biome-ignore lint/correctness/noUnusedVariables: this is fine as we are just removing the source from the data
-			const { source, ...rest } = transformedData;
+			const { source, media, ...rest } = transformedData;
+
 			setInitialData((prev) => ({
 				...prev,
 				...rest,
+				// Only include media if updateMedia is true
+				...(updateMedia && media ? { media } : {}),
 			}));
 		}
-	}, [transformedData, setInitialData]);
+	}, [transformedData, setInitialData, updateMedia]);
 
 	if (isLoading) {
 		return (
@@ -117,6 +122,11 @@ export function GameReviewStep({
 				<AlertDescription className="flex items-center gap-1">
 					Game data imported from <strong>{transformedData.source}</strong>.
 					Review and edit the information below before saving.
+					{!updateMedia && (
+						<span className="ml-1 text-muted-foreground">
+							(Media will not be updated)
+						</span>
+					)}
 				</AlertDescription>
 			</Alert>
 
