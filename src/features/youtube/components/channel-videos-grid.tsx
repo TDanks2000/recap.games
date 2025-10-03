@@ -27,7 +27,7 @@ export function ChannelVideosGrid({ channelId, maxResults }: Props) {
 	const currentSearchParams = useSearchParams();
 
 	const [selectedConference, setSelectedConference] = useState<Conference>();
-	const [isLiveEnabled, setIsLiveEnabled] = useState(true);
+	const [isLiveEnabled, setIsLiveEnabled] = useState(false);
 
 	const pageTokenFromUrl = currentSearchParams.get("page_token");
 
