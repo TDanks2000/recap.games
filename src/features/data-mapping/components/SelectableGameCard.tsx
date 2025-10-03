@@ -1,6 +1,5 @@
 import { Calendar, Check, Gamepad2, ImageOff, Star, Tag } from "lucide-react";
 import Image from "next/image";
-import type { Dispatch, SetStateAction } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib";
 import type { RouterOutputs } from "@/trpc/react";
@@ -11,7 +10,7 @@ type SteamSearch = NonNullable<RouterOutputs["steam"]["searchStore"]>[number];
 type SelectGameCardProps = {
 	game: IGDBSearch | SteamSearch;
 	isSelected: boolean;
-	setSelectedGame: Dispatch<SetStateAction<number | null>>;
+	onSelect: (gameId: number | null) => void;
 };
 
 // Type guards
@@ -98,7 +97,7 @@ const formatRating = (
 export const SelectableGameCard = ({
 	game,
 	isSelected,
-	setSelectedGame,
+	onSelect,
 }: SelectGameCardProps) => {
 	const imageUrl = getImageUrl(game);
 	const releaseDate = getReleaseDate(game);
@@ -107,7 +106,7 @@ export const SelectableGameCard = ({
 
 	return (
 		<Card
-			onClick={() => setSelectedGame(game.id)}
+			onClick={() => onSelect(game.id)}
 			className={cn("cursor-pointer transition-all hover:border-primary/50", {
 				"border-2 border-primary": isSelected,
 			})}
