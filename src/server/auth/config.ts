@@ -6,7 +6,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import DiscordProvider from "next-auth/providers/discord";
 
 import type { UserRole } from "@/@types/db";
-import { LoginSchema } from "@/models/forms";
 import { db } from "@/server/db";
 import {
 	accounts,
@@ -15,7 +14,7 @@ import {
 	verificationTokens,
 } from "@/server/db/schema";
 import { verifyPassword } from "./utils/password";
-import { getUserById } from "./utils/user";
+import { findUser, getUserById } from "./utils/user";
 
 declare module "next-auth" {
 	interface Session extends DefaultSession {
@@ -49,26 +48,32 @@ const providers: Provider[] = [
 		},
 		async authorize(credentials, _req) {
 			try {
-				const parsed = await LoginSchema.parseAsync(credentials);
-				const { email, password } = parsed;
+				const identifier =
+					typeof credentials?.email === "string"
+						? credentials.email.trim()
+						: undefined;
+				const password =
+					typeof credentials?.password === "string"
+						? credentials.password.trim()
+						: undefined;
 
-				if (!credentials?.email || !credentials?.password) {
+				if (!identifier || !password || password.length < 8) {
 					return null;
 				}
 
-				// Find user by email or username
-				const user = await db.query.users.findFirst({
-					where: (users, { or, eq }) =>
-						or(eq(users.email, email), eq(users.username, email)),
+				const normalized = identifier.toLowerCase();
+				const isEmail = normalized.includes("@");
+
+				const user = await findUser({
+					email: isEmail ? normalized : undefined,
+					username: !isEmail ? normalized : undefined,
 				});
 
 				if (!user || !user.password) {
 					return null;
 				}
 
-				// Verify password
 				const isValid = await verifyPassword(password, user.password);
-
 				if (!isValid) {
 					return null;
 				}
