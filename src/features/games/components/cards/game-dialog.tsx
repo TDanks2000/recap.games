@@ -70,7 +70,11 @@ export default function GameCardDialog({
 			)}
 			aria-label={`Game card for ${title ?? "Untitled Game"}`}
 		>
-			<TrailerDialog url={trailerLink} title={title ?? "Untitled Game"}>
+			<TrailerDialog
+				url={trailerLink}
+				title={title ?? "Untitled Game"}
+				description={`Announced: ${conference?.name} - ${getFormattedDate(conference?.startTime)}`}
+			>
 				<CardContent className="relative p-0 text-left">
 					{features?.length > 0 && (
 						<div className="absolute top-2 right-2 z-10">

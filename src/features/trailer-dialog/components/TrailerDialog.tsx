@@ -1,6 +1,7 @@
 import { ExternalLink, VideoOff } from "lucide-react";
 import type { PropsWithChildren } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -30,29 +31,39 @@ export const TrailerDialog = ({
 	return (
 		<Dialog>
 			<DialogTrigger className="cursor-pointer">{children}</DialogTrigger>
-			<DialogContent className="flex h-[94svh] min-h-[94svh] w-[95svw] min-w-[95svw] flex-col sm:w-[90svw] sm:min-w-[90svw] md:w-[85svw] md:min-w-[85svw] lg:w-[70svw] lg:min-w-[70svw]">
+
+			<DialogContent className="max-h-[100svh] min-w-[65svw] overflow-hidden">
 				<DialogHeader className="flex-shrink-0">
 					<DialogTitle className="line-clamp-2">{title}</DialogTitle>
 					{!!description?.length && (
-						<DialogDescription>{description}</DialogDescription>
+						<DialogDescription className="truncate">
+							{description}
+						</DialogDescription>
 					)}
 				</DialogHeader>
 
-				{/* Show Trailer */}
-				<div className="size-full flex-1 flex-grow overflow-hidden p-1">
+				<div className="flex size-full flex-1 items-center justify-center">
 					{embed?.length ? (
-						<div className="aspect-video size-full overflow-hidden rounded-md border-0">
-							<iframe
-								src={embed ?? undefined}
-								title={title}
-								loading="lazy"
-								allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-								allowFullScreen
-								className="size-full object-contain"
-							/>
+						<div className="flex size-full w-full items-center justify-center">
+							<AspectRatio
+								ratio={16 / 9}
+								className={"overflow-hidden rounded-md"}
+							>
+								<iframe
+									src={embed}
+									title={title}
+									loading="lazy"
+									allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+									allowFullScreen
+									width="100%"
+									height="100%"
+									className="block h-full w-full"
+									style={{ border: 0 }}
+								/>
+							</AspectRatio>
 						</div>
 					) : (
-						<div className="flex size-full flex-1 items-center justify-center p-2">
+						<div className="flex h-full w-full items-center justify-center p-2">
 							<Alert className="w-full max-w-lg">
 								<VideoOff />
 								<AlertTitle>No trailer available</AlertTitle>
