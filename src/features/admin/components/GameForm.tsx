@@ -119,7 +119,7 @@ const formFieldConfigs = {
 	},
 } as const;
 
-// Helper components moved outside
+// Helper components
 const FormFieldWrapper = ({ children }: { children: React.ReactNode }) => (
 	<FormItem className="flex min-h-20 flex-col justify-start">
 		{children}
@@ -199,35 +199,111 @@ interface ArrayInputFieldProps {
 	name: "developer" | "publisher";
 	config: (typeof formFieldConfigs)[keyof typeof formFieldConfigs];
 	control: Control<GameFormValues>;
-	onArrayInput: (value: string, onChange: (value: string[]) => void) => void;
-	arrayToString: (array?: string[]) => string;
 }
 
-const ArrayInputField = ({
-	name,
-	config,
-	control,
-	onArrayInput,
-	arrayToString,
-}: ArrayInputFieldProps) => (
-	<FormField
-		control={control}
-		name={name}
-		render={({ field }) => (
-			<FormFieldWrapper>
-				<FormLabel>{config.label}</FormLabel>
-				<FormDescription className="mb-2">{config.description}</FormDescription>
-				<FormControl>
-					<Input
-						placeholder={config.placeholder}
-						value={arrayToString(field.value)}
-						onChange={(e) => onArrayInput(e.target.value, field.onChange)}
-					/>
-				</FormControl>
-				<FormMessage />
-			</FormFieldWrapper>
-		)}
-	/>
+const ArrayInputField = ({ name, config, control }: ArrayInputFieldProps) => {
+	const handleArrayInput = (
+		value: string,
+		onChange: (value: string[]) => void,
+	) => {
+		if (!value.trim()) {
+			onChange([]);
+			return;
+		}
+		onChange(value.split(",").map((item) => item.trim()));
+	};
+
+	const arrayToString = (array?: string[]) => array?.join(", ") ?? "";
+
+	return (
+		<FormField
+			control={control}
+			name={name}
+			render={({ field }) => (
+				<FormFieldWrapper>
+					<FormLabel>{config.label}</FormLabel>
+					<FormDescription className="mb-2">
+						{config.description}
+					</FormDescription>
+					<FormControl>
+						<Input
+							placeholder={config.placeholder}
+							value={arrayToString(field.value)}
+							onChange={(e) => handleArrayInput(e.target.value, field.onChange)}
+						/>
+					</FormControl>
+					<FormMessage />
+				</FormFieldWrapper>
+			)}
+		/>
+	);
+};
+
+interface MediaItemProps {
+	control: Control<GameFormValues>;
+	index: number;
+	onRemove: () => void;
+	canRemove: boolean;
+}
+
+const MediaItem = ({ control, index, onRemove, canRemove }: MediaItemProps) => (
+	<div className="flex items-start gap-4">
+		<div className="grid flex-1 gap-x-6 gap-y-4 md:grid-cols-[auto_1fr]">
+			<FormField
+				control={control}
+				name={`media.${index}.type`}
+				render={({ field }) => (
+					<FormFieldWrapper>
+						<FormLabel>Media Type</FormLabel>
+						<FormDescription className="mb-2">
+							Required. Select the type of media (e.g., video, image).
+						</FormDescription>
+						<Select onValueChange={field.onChange} value={field.value}>
+							<FormControl>
+								<SelectTrigger>
+									<SelectValue placeholder="Select media type" />
+								</SelectTrigger>
+							</FormControl>
+							<SelectContent>
+								{Object.values(MediaType).map((type) => (
+									<SelectItem key={type} value={type}>
+										{type}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<FormMessage />
+					</FormFieldWrapper>
+				)}
+			/>
+			<FormField
+				control={control}
+				name={`media.${index}.link`}
+				render={({ field }) => (
+					<FormFieldWrapper>
+						<FormLabel>Media URL</FormLabel>
+						<FormDescription className="mb-2">
+							Required. Provide a valid URL for the media item.
+						</FormDescription>
+						<FormControl>
+							<Input placeholder="https://example.com/media" {...field} />
+						</FormControl>
+						<FormMessage />
+					</FormFieldWrapper>
+				)}
+			/>
+		</div>
+		<Button
+			type="button"
+			variant="ghost"
+			size="icon"
+			className="mt-8"
+			onClick={onRemove}
+			disabled={!canRemove}
+		>
+			<Trash2 className="h-4 w-4" />
+		</Button>
+	</div>
 );
 
 export default function GameForm({
@@ -236,9 +312,10 @@ export default function GameForm({
 	onFormSubmitSuccess,
 }: GameFormProps) {
 	const utils = api.useUtils();
-	const conferences = api.conference.getAll.useQuery();
+	const { data: conferences, isLoading: conferencesLoading } =
+		api.conference.getAll.useQuery();
 
-	// Calculate default values with initial data
+	// Calculate default values
 	const defaultFormValues = useMemo((): GameFormValues => {
 		const baseDefaults: GameFormValues = {
 			title: "",
@@ -256,25 +333,24 @@ export default function GameForm({
 		if (!initialData) return baseDefaults;
 
 		return {
-			title: initialData.title || baseDefaults.title,
-			releaseDate: initialData.releaseDate || baseDefaults.releaseDate,
-			genres: initialData.genres || baseDefaults.genres,
-			exclusive: initialData.exclusive || baseDefaults.exclusive,
-			features: initialData.features || baseDefaults.features,
-			developer: initialData.developer || baseDefaults.developer,
-			publisher: initialData.publisher || baseDefaults.publisher,
-			hidden: initialData.hidden ?? baseDefaults.hidden,
+			...baseDefaults,
+			...initialData,
 			media:
 				initialData.media && initialData.media.length > 0
 					? initialData.media
 					: baseDefaults.media,
-			conferenceId: initialData.conference?.id || baseDefaults.conferenceId,
+			conferenceId: initialData.conference?.id,
 		};
 	}, [initialData]);
 
 	const form = useForm<GameFormValues>({
 		resolver: zodResolver(gameFormSchema),
 		defaultValues: defaultFormValues,
+	});
+
+	const { fields, append, remove } = useFieldArray({
+		control: form.control,
+		name: "media",
 	});
 
 	const createGameMutation = api.combined.createGameWithMedia.useMutation({
@@ -292,7 +368,7 @@ export default function GameForm({
 				media: [{ type: MediaType.Video, link: "" }],
 				conferenceId: undefined,
 			});
-			utils.game.getAll.invalidate();
+			void utils.game.getAll.invalidate();
 			onFormSubmitSuccess?.();
 		},
 		onError: (error) => {
@@ -300,29 +376,9 @@ export default function GameForm({
 		},
 	});
 
-	const { fields, append, remove } = useFieldArray({
-		control: form.control,
-		name: "media",
-	});
-
-	// Only reset when defaultFormValues change (which happens when initialData changes)
 	useEffect(() => {
 		form.reset(defaultFormValues);
 	}, [defaultFormValues, form]);
-
-	// Utility functions
-	const handleArrayInput = (
-		value: string,
-		onChange: (value: string[]) => void,
-	) => {
-		if (!value.trim()) {
-			onChange([]);
-			return;
-		}
-		onChange(value.split(",").map((item) => item.trim()));
-	};
-
-	const arrayToString = (array?: string[]) => array?.join(", ") ?? "";
 
 	const onSubmit = (data: GameFormValues) => {
 		createGameMutation.mutate({
@@ -395,66 +451,60 @@ export default function GameForm({
 								name="developer"
 								config={formFieldConfigs.developer}
 								control={form.control}
-								onArrayInput={handleArrayInput}
-								arrayToString={arrayToString}
 							/>
 							<ArrayInputField
 								name="publisher"
 								config={formFieldConfigs.publisher}
 								control={form.control}
-								onArrayInput={handleArrayInput}
-								arrayToString={arrayToString}
 							/>
 
 							{/* Conference Field */}
 							<FormField
 								control={form.control}
 								name="conferenceId"
-								render={({ field }) => {
-									return (
-										<FormFieldWrapper>
-											<FormLabel>{formFieldConfigs.conference.label}</FormLabel>
-											<FormDescription className="mb-2">
-												{formFieldConfigs.conference.description}
-											</FormDescription>
-											<Select
-												onValueChange={(value) =>
-													field.onChange(
-														value === "none" ? undefined : Number(value),
-													)
-												}
-												value={field.value ? field.value.toString() : "none"}
-												disabled={conferences.isLoading}
-											>
-												<FormControl>
-													<SelectTrigger>
-														<SelectValue
-															placeholder={
-																conferences.isLoading
-																	? "Loading conferences..."
-																	: formFieldConfigs.conference.placeholder
-															}
-														/>
-													</SelectTrigger>
-												</FormControl>
-												<SelectContent>
-													<SelectItem value="none">None</SelectItem>
-													{conferences.data?.map((conference) =>
-														conference.id ? (
-															<SelectItem
-																key={conference.id}
-																value={conference.id.toString()}
-															>
-																{conference.name}
-															</SelectItem>
-														) : null,
-													)}
-												</SelectContent>
-											</Select>
-											<FormMessage />
-										</FormFieldWrapper>
-									);
-								}}
+								render={({ field }) => (
+									<FormFieldWrapper>
+										<FormLabel>{formFieldConfigs.conference.label}</FormLabel>
+										<FormDescription className="mb-2">
+											{formFieldConfigs.conference.description}
+										</FormDescription>
+										<Select
+											onValueChange={(value) =>
+												field.onChange(
+													value === "none" ? undefined : Number(value),
+												)
+											}
+											value={field.value ? field.value.toString() : "none"}
+											disabled={conferencesLoading}
+										>
+											<FormControl>
+												<SelectTrigger>
+													<SelectValue
+														placeholder={
+															conferencesLoading
+																? "Loading conferences..."
+																: formFieldConfigs.conference.placeholder
+														}
+													/>
+												</SelectTrigger>
+											</FormControl>
+											<SelectContent>
+												<SelectItem value="none">None</SelectItem>
+												{conferences?.map((conference) =>
+													conference.id ? (
+														<SelectItem
+															key={conference.id}
+															value={conference.id.toString()}
+														>
+															{conference.name}
+														</SelectItem>
+													) : null,
+												)}
+											</SelectContent>
+										</Select>
+										<FormMessage />
+									</FormFieldWrapper>
+								)}
 							/>
 						</div>
 					</div>
@@ -478,70 +528,13 @@ export default function GameForm({
 						</div>
 
 						{fields.map((item, index) => (
-							<div key={item.id} className="flex items-start gap-4">
-								<div className="grid flex-1 gap-x-6 gap-y-4 md:grid-cols-[auto_1fr]">
-									<FormField
-										control={form.control}
-										name={`media.${index}.type`}
-										render={({ field }) => (
-											<FormFieldWrapper>
-												<FormLabel>Media Type</FormLabel>
-												<FormDescription className="mb-2">
-													Required. Select the type of media (e.g., video,
-													image).
-												</FormDescription>
-												<Select
-													onValueChange={field.onChange}
-													value={field.value}
-												>
-													<FormControl>
-														<SelectTrigger>
-															<SelectValue placeholder="Select media type" />
-														</SelectTrigger>
-													</FormControl>
-													<SelectContent>
-														{Object.values(MediaType).map((type) => (
-															<SelectItem key={type} value={type}>
-																{type}
-															</SelectItem>
-														))}
-													</SelectContent>
-												</Select>
-												<FormMessage />
-											</FormFieldWrapper>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name={`media.${index}.link`}
-										render={({ field }) => (
-											<FormFieldWrapper>
-												<FormLabel>Media URL</FormLabel>
-												<FormDescription className="mb-2">
-													Required. Provide a valid URL for the media item.
-												</FormDescription>
-												<FormControl>
-													<Input
-														placeholder="https://example.com/media"
-														{...field}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormFieldWrapper>
-										)}
-									/>
-								</div>
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon"
-									className="mt-8"
-									onClick={() => remove(index)}
-									disabled={fields.length === 1}
-								>
-									<Trash2 className="h-4 w-4" />
-								</Button>
-							</div>
+							<MediaItem
+								key={item.id}
+								control={form.control}
+								index={index}
+								onRemove={() => remove(index)}
+								canRemove={fields.length > 1}
+							/>
 						))}
 						<FormField
 							control={form.control}
