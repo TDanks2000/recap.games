@@ -20,7 +20,7 @@ import type { conferences, games, media } from "@/server/db/schema";
 interface GameCardProps extends InferSelectModel<typeof games> {
 	conference: InferSelectModel<typeof conferences> | null;
 	media: Array<InferSelectModel<typeof media>>;
-	priority?: boolean; // Add priority prop for critical, above-the-fold images
+	priority?: boolean;
 }
 
 export default function GameCardDialog({
@@ -30,6 +30,7 @@ export default function GameCardDialog({
 	releaseDate,
 	title,
 	priority = false,
+	createdAt,
 }: GameCardProps) {
 	const selectedMedia = media?.[0] ?? null;
 
@@ -73,7 +74,7 @@ export default function GameCardDialog({
 			<TrailerDialog
 				url={trailerLink}
 				title={title ?? "Untitled Game"}
-				description={`Announced: ${conference?.name} - ${getFormattedDate(conference?.startTime)}`}
+				description={`Announced: ${conference?.name ?? "Upcoming"} ${conference?.startTime ? `- ${getFormattedDate(conference?.startTime)}` : createdAt ? `- ${getFormattedDate(createdAt)}` : ""}`}
 			>
 				<CardContent className="relative p-0 text-left">
 					{features?.length > 0 && (
