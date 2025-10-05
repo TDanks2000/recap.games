@@ -40,3 +40,22 @@ export function findSpecificLinks(text: string, searchTerm: string): string[] {
 		link.toLowerCase().includes(lowerSearchTerm),
 	);
 }
+
+export const getYouTubeEmbedUrl = (url: string | undefined): string | null => {
+	if (!url) return null;
+	try {
+		const parsed = new URL(url);
+
+		let videoId: string | null = null;
+
+		if (parsed.hostname.includes("youtube.com")) {
+			videoId = parsed.searchParams.get("v");
+		} else if (parsed.hostname === "youtu.be") {
+			videoId = parsed.pathname.slice(1);
+		}
+
+		return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+	} catch {
+		return null;
+	}
+};

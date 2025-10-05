@@ -12,6 +12,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card";
+import { TrailerDialog } from "@/features/trailer-dialog/components/TrailerDialog";
 import { getFormattedDate } from "@/lib";
 import { cn, combineFeatures, getImageFromURL } from "@/lib/utils";
 import type { conferences, games, media } from "@/server/db/schema";
@@ -22,7 +23,7 @@ interface GameCardProps extends InferSelectModel<typeof games> {
 	priority?: boolean; // Add priority prop for critical, above-the-fold images
 }
 
-export default function GameCard({
+export default function GameCardDialog({
 	features,
 	conference,
 	media,
@@ -69,14 +70,8 @@ export default function GameCard({
 			)}
 			aria-label={`Game card for ${title ?? "Untitled Game"}`}
 		>
-			<a
-				href={trailerLink ?? "#"}
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label={`Watch trailer for ${title ?? "Untitled Game"}`}
-				className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-			>
-				<CardContent className="relative p-0">
+			<TrailerDialog url={trailerLink} title={title ?? "Untitled Game"}>
+				<CardContent className="relative p-0 text-left">
 					{features?.length > 0 && (
 						<div className="absolute top-2 right-2 z-10">
 							<Badge
@@ -135,7 +130,7 @@ export default function GameCard({
 						</CardTitle>
 					</CardFooter>
 				</CardContent>
-			</a>
+			</TrailerDialog>
 		</Card>
 	);
 }

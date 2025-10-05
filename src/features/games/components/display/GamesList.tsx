@@ -3,7 +3,7 @@ import type { HomeSearchParams } from "@/@types";
 import { tryCatch } from "@/lib/try-catch";
 import { getYearFromSearchParams } from "@/lib/utils";
 import { api } from "@/trpc/server";
-import GameCard from "../cards/game";
+import GameCardDialog from "../cards/game-dialog";
 import { PaginationControls } from "./PaginationControls";
 
 type GamesListProps = {
@@ -82,7 +82,7 @@ export async function GamesList({ searchParams }: GamesListProps) {
 				}}
 			>
 				{games.map((game, index) => (
-					<GameCard key={game.id} {...game} priority={index < 4} />
+					<GameCardDialog key={game.id} {...game} priority={index < 4} />
 				))}
 			</div>
 			<div className="mt-6 flex w-full justify-center">
