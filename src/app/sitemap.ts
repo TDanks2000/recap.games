@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<SitemapEntry[]> {
 	const blogPosts = await getBlogPosts();
 
 	// Generate sitemap entries for blog posts
-	const blogEntries: SitemapEntry[] = (blogPosts ?? [])
+	const blogEntries: SitemapEntry[] = (blogPosts?.posts ?? [])
 		.filter((post) => post.published) // Only include published posts
 		.map((post) => ({
 			url: `${BASE_URL}/blog/${post.slug}`,
