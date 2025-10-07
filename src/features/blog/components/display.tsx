@@ -16,7 +16,6 @@ export const BlogDisplay = async () => {
 
 	return (
 		<div className="flex w-full flex-col gap-6">
-			{/* Header: responsive, accessible, with improved visual hierarchy */}
 			<div className="flex w-full flex-col gap-1 pb-4 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex items-start gap-3 sm:items-center">
 					<Newspaper className="h-6 w-6 text-primary" />
