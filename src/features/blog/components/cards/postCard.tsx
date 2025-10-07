@@ -8,7 +8,7 @@ import { useReadingTime } from "@/lib/readingTime";
 import { cn } from "@/lib/utils";
 import type { RouterOutputs } from "@/trpc/react";
 
-type Post = RouterOutputs["blog"]["listPosts"][number];
+type Post = RouterOutputs["blog"]["listPosts"]["posts"][number];
 
 interface PostCardProps extends Post {
 	featured?: boolean;
