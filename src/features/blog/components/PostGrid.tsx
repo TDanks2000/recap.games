@@ -3,7 +3,7 @@ import type { RouterOutputs } from "@/trpc/react";
 import { PostCard } from "./cards/postCard";
 
 interface PostGridProps {
-	posts: RouterOutputs["blog"]["listPosts"];
+	posts: RouterOutputs["blog"]["listPosts"]["posts"];
 	featuredPostId?: number;
 }
 

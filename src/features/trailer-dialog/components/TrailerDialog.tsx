@@ -57,8 +57,7 @@ export const TrailerDialog = ({
 									allowFullScreen
 									width="100%"
 									height="100%"
-									className="block h-full w-full"
-									style={{ border: 0 }}
+									className="block h-full w-full border-0"
 								/>
 							</AspectRatio>
 						</div>

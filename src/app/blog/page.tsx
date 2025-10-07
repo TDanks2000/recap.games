@@ -78,7 +78,7 @@ export default async function BlogsPage() {
 		},
 	};
 
-	const featuredPostId = posts?.[0]?.id;
+	const featuredPostId = posts?.posts?.[0]?.id;
 
 	return (
 		<HydrateClient>
@@ -91,7 +91,10 @@ export default async function BlogsPage() {
 
 				<section className="-mt-16 relative z-10">
 					<div className="mx-auto max-w-7xl px-8 py-8 sm:px-16">
-						<PostGrid posts={posts || []} featuredPostId={featuredPostId} />
+						<PostGrid
+							posts={posts?.posts || []}
+							featuredPostId={featuredPostId}
+						/>
 					</div>
 				</section>
 			</BlogLayout>

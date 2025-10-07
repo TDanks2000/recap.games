@@ -163,48 +163,94 @@ export const blogRouter = createTRPCRouter({
 		}),
 
 	// Fetch all published or due-scheduled blog posts with author info and analytics
-	listPosts: publicProcedure.query(async ({ ctx }) => {
-		const ip = ctx.ip;
-		if (!ip)
-			throw new TRPCError({
-				code: "BAD_REQUEST",
-				message: "IP address not found",
-			});
+	listPosts: publicProcedure
+		.input(
+			z
+				.object({
+					page: z.number().min(1).optional().default(1),
+					limit: z.number().min(1).max(50).optional().default(12),
+				})
+				.optional(),
+		)
+		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
 
-		const { success, resetAfter } = await rateLimit.low.limit(ip);
-		if (!success) throwRateLimit(resetAfter);
-		const now = Math.floor(Date.now() / 1000);
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
 
-		const posts = await ctx.db
-			.select({
-				id: blogPosts.id,
-				title: blogPosts.title,
-				description: blogPosts.description,
-				slug: blogPosts.slug,
-				published: blogPosts.published,
-				scheduledAt: blogPosts.scheduledAt,
-				createdAt: blogPosts.createdAt,
-				authorName: users.name,
-				content: blogPosts.content,
-				viewCount: blogPostAnalytics.viewCount,
-				updatedAt: blogPosts.updatedAt,
-			})
-			.from(blogPosts)
-			.leftJoin(users, eq(blogPosts.authorId, users.id))
-			.leftJoin(blogPostAnalytics, eq(blogPosts.id, blogPostAnalytics.postId))
-			.where(
-				and(
-					eq(blogPosts.published, true),
-					or(
-						isNull(blogPosts.scheduledAt),
-						sql`${blogPosts.scheduledAt} <= ${now}`,
+			const now = Math.floor(Date.now() / 1000);
+			const page = input?.page ?? 1;
+			const limit = input?.limit ?? 12;
+			const offset = (page - 1) * limit;
+
+			// total count (same filters as the posts query)
+			const totalResult = await ctx.db
+				.select({ total: sql<number>`count(${blogPosts.id})` })
+				.from(blogPosts)
+				.where(
+					and(
+						eq(blogPosts.published, true),
+						or(
+							isNull(blogPosts.scheduledAt),
+							sql`${blogPosts.scheduledAt} <= ${now}`,
+						),
 					),
-				),
-			)
-			.orderBy(desc(blogPosts.createdAt));
+				);
 
-		return posts;
-	}),
+			const total = Number(totalResult[0]?.total ?? 0);
+			const totalPages = Math.max(1, Math.ceil(total / limit));
+
+			const posts = await ctx.db
+				.select({
+					id: blogPosts.id,
+					title: blogPosts.title,
+					description: blogPosts.description,
+					slug: blogPosts.slug,
+					published: blogPosts.published,
+					scheduledAt: blogPosts.scheduledAt,
+					createdAt: blogPosts.createdAt,
+					authorName: users.name,
+					content: blogPosts.content,
+					viewCount: sql<number>`coalesce(${blogPostAnalytics.viewCount}, 0)`,
+					updatedAt: blogPosts.updatedAt,
+				})
+				.from(blogPosts)
+				.leftJoin(users, eq(blogPosts.authorId, users.id))
+				.leftJoin(blogPostAnalytics, eq(blogPosts.id, blogPostAnalytics.postId))
+				.where(
+					and(
+						eq(blogPosts.published, true),
+						or(
+							isNull(blogPosts.scheduledAt),
+							sql`${blogPosts.scheduledAt} <= ${now}`,
+						),
+					),
+				)
+				.orderBy(desc(blogPosts.createdAt))
+				.limit(limit)
+				.offset(offset);
+
+			// Ensure viewCount is a number on the returned objects
+			const normalized = posts.map((p) => ({
+				...p,
+				viewCount: Number((p as { viewCount?: unknown }).viewCount ?? 0),
+			}));
+
+			return {
+				posts: normalized,
+				meta: {
+					page,
+					limit,
+					total,
+					totalPages,
+				},
+			};
+		}),
 
 	// Fetch a single post by slug (includes markdown content, author, and analytics)
 	getPostBySlug: publicProcedure
