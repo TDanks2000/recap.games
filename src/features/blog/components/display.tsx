@@ -12,6 +12,8 @@ export const BlogDisplay = async () => {
 		}),
 	);
 
+	if (error) return null;
+
 	return (
 		<div className="flex w-full flex-col gap-6">
 			{/* Header: responsive, accessible, with improved visual hierarchy */}
