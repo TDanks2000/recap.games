@@ -52,7 +52,7 @@ export const blogRouter = createTRPCRouter({
 			})
 			.from(blogPostAnalytics)
 			.innerJoin(blogPosts, eq(blogPostAnalytics.postId, blogPosts.id))
-			.orderBy(desc(blogPostAnalytics.viewCount));
+			.orderBy(desc(blogPostAnalytics.updatedAt));
 
 		// Calculate total views across all posts
 		const totalStats = {
