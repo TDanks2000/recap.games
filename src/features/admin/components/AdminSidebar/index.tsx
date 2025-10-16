@@ -87,7 +87,7 @@ const navItems: NavItem[] = [
 			},
 			{
 				title: "Blog Posts",
-				href: "/blog",
+				href: "/admin/blog",
 				icon: <FileText className="size-5" />,
 			},
 		],

@@ -39,8 +39,8 @@ export default async function AdminDashboardPage() {
 		},
 		{
 			title: "Blog Posts",
-			description: "Create and publish articles, news, and editorial content",
-			href: "/blog",
+			description: "Manage blog posts, analytics, and editorial content",
+			href: "/admin/blog",
 			icon: <FileText className="h-10 w-10 text-green-500/80" />,
 		},
 	];

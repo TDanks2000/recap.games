@@ -37,6 +37,7 @@ export const blogRouter = createTRPCRouter({
 				postId: blogPostAnalytics.postId,
 				title: blogPosts.title,
 				slug: blogPosts.slug,
+				published: blogPosts.published,
 				scheduledAt: blogPosts.scheduledAt,
 				createdAt: blogPosts.createdAt,
 				updatedAt: blogPosts.updatedAt,
