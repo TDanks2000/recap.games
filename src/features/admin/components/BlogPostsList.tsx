@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { Edit, Eye, Trash2 } from "lucide-react";
+import { Edit, Eye, EyeOff, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -49,6 +49,16 @@ export default function BlogPostsList({ searchQuery }: Props) {
 		},
 	});
 
+	const updatePostMutation = api.blog.updatePost.useMutation({
+		onSuccess: () => {
+			toast.success("Blog post updated successfully");
+			utils.blog.getAllPostsAnalytics.invalidate();
+		},
+		onError: (error) => {
+			toast.error(`Error updating post: ${error.message}`);
+		},
+	});
+
 	const handleDelete = (id: number) => {
 		setPostToDelete(id);
 	};
@@ -58,6 +68,14 @@ export default function BlogPostsList({ searchQuery }: Props) {
 			deletePostMutation.mutate({ id: postToDelete });
 			setPostToDelete(null);
 		}
+	};
+
+	const handlePublish = (id: number) => {
+		updatePostMutation.mutate({ id, published: true });
+	};
+
+	const handleUnpublish = (id: number) => {
+		updatePostMutation.mutate({ id, published: false });
 	};
 
 	const formatDate = (date: Date | null | undefined) => {
@@ -166,6 +184,42 @@ export default function BlogPostsList({ searchQuery }: Props) {
 										<p>Edit this post</p>
 									</TooltipContent>
 								</Tooltip>
+
+								{!post.published ? (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => handlePublish(post.postId)}
+												disabled={updatePostMutation.isPending}
+												aria-label={`Publish ${post.title}`}
+											>
+												<Upload className="h-4 w-4 text-green-600" />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Publish this post</p>
+										</TooltipContent>
+									</Tooltip>
+								) : (
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Button
+												variant="ghost"
+												size="icon"
+												onClick={() => handleUnpublish(post.postId)}
+												disabled={updatePostMutation.isPending}
+												aria-label={`Unpublish ${post.title}`}
+											>
+												<EyeOff className="h-4 w-4 text-orange-600" />
+											</Button>
+										</TooltipTrigger>
+										<TooltipContent>
+											<p>Unpublish this post</p>
+										</TooltipContent>
+									</Tooltip>
+								)}
 
 								<Tooltip>
 									<TooltipTrigger asChild>
