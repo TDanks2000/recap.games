@@ -63,6 +63,7 @@ export default async function EditPage(props: EditPageProps) {
 						...post,
 						published: post.published ?? false,
 						description: post.description ?? undefined,
+						tagIds: post.tags?.map((tag) => tag.id) ?? [],
 					}}
 					isEditing={true}
 					id={post.id}

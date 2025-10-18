@@ -21,6 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { Editor } from "./editor";
+import { TagSelector } from "./tagSelector";
 
 const blogPostSchema = z.object({
 	title: z.string().min(1, "Title is required"),
@@ -28,6 +29,7 @@ const blogPostSchema = z.object({
 	content: z.string().min(1, "Content is required"),
 	published: z.boolean().optional(),
 	scheduleAt: z.date().nullable().optional(),
+	tagIds: z.array(z.number()).optional(),
 });
 
 type BlogPostData = z.infer<typeof blogPostSchema>;
@@ -57,6 +59,7 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 			content: initialData?.content ?? "",
 			published: initialData?.published ?? false,
 			scheduleAt: initialData?.scheduleAt ?? null,
+			tagIds: initialData?.tagIds ?? [],
 		},
 	});
 
@@ -156,6 +159,26 @@ export const BlogPostForm = (props: BlogPostFormProps) => {
 									placeholder="Enter a brief description of your blog post"
 									className="font-medium"
 									{...field}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
+
+				<FormField
+					control={form.control}
+					name="tagIds"
+					render={({ field }) => (
+						<FormItem>
+							<FormLabel className="font-semibold text-lg">Tags</FormLabel>
+							<FormDescription>
+								Add tags to help categorize and organize your blog post.
+							</FormDescription>
+							<FormControl>
+								<TagSelector
+									selectedTags={field.value ?? []}
+									onTagsChange={field.onChange}
 								/>
 							</FormControl>
 							<FormMessage />

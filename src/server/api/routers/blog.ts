@@ -1,11 +1,13 @@
 import { TRPCError } from "@trpc/server";
-import { and, desc, eq, gte, isNull, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
 	blogComments,
 	blogPostAnalytics,
 	blogPosts,
+	blogPostTags,
 	blogPostViews,
+	blogTags,
 	users,
 } from "@/server/db/schema";
 import {
@@ -242,8 +244,61 @@ export const blogRouter = createTRPCRouter({
 				viewCount: Number((p as { viewCount?: unknown }).viewCount ?? 0),
 			}));
 
+			// Get tags for all posts in a single query
+			const postIds = normalized.map((p) => p.id);
+			const postTags =
+				postIds.length > 0
+					? await ctx.db
+							.select({
+								postId: blogPostTags.postId,
+								tagId: blogTags.id,
+								tagName: blogTags.name,
+								tagSlug: blogTags.slug,
+								tagDescription: blogTags.description,
+								tagColor: blogTags.color,
+							})
+							.from(blogPostTags)
+							.innerJoin(blogTags, eq(blogPostTags.tagId, blogTags.id))
+							.where(inArray(blogPostTags.postId, postIds))
+							.orderBy(blogTags.name)
+					: [];
+
+			// Group tags by post ID
+			const tagsByPostId = postTags.reduce(
+				(acc, tag) => {
+					const postId = tag.postId;
+					if (!acc[postId]) {
+						acc[postId] = [];
+					}
+					acc[postId].push({
+						id: tag.tagId,
+						name: tag.tagName,
+						slug: tag.tagSlug,
+						description: tag.tagDescription,
+						color: tag.tagColor,
+					});
+					return acc;
+				},
+				{} as Record<
+					number,
+					Array<{
+						id: number;
+						name: string;
+						slug: string;
+						description: string | null;
+						color: string | null;
+					}>
+				>,
+			);
+
+			// Add tags to each post
+			const postsWithTags = normalized.map((post) => ({
+				...post,
+				tags: tagsByPostId[post.id] || [],
+			}));
+
 			return {
-				posts: normalized,
+				posts: postsWithTags,
 				meta: {
 					page,
 					limit,
@@ -253,7 +308,7 @@ export const blogRouter = createTRPCRouter({
 			};
 		}),
 
-	// Fetch a single post by slug (includes markdown content, author, and analytics)
+	// Fetch a single post by slug (includes markdown content, author, analytics, and tags)
 	getPostBySlug: publicProcedure
 		.input(z.object({ slug: z.string() }))
 		.query(async ({ ctx, input }) => {
@@ -301,7 +356,24 @@ export const blogRouter = createTRPCRouter({
 				throw new Error("Post not found");
 			}
 
-			return post;
+			// Get tags for this post
+			const tags = await ctx.db
+				.select({
+					id: blogTags.id,
+					name: blogTags.name,
+					slug: blogTags.slug,
+					description: blogTags.description,
+					color: blogTags.color,
+				})
+				.from(blogTags)
+				.innerJoin(blogPostTags, eq(blogTags.id, blogPostTags.tagId))
+				.where(eq(blogPostTags.postId, post.id))
+				.orderBy(blogTags.name);
+
+			return {
+				...post,
+				tags,
+			};
 		}),
 
 	// Admin-only: create a new blog post and initialize analytics
@@ -314,6 +386,7 @@ export const blogRouter = createTRPCRouter({
 				content: z.string().min(1),
 				published: z.boolean().optional(),
 				scheduledAt: z.number().optional(),
+				tagIds: z.array(z.number()).optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -344,8 +417,20 @@ export const blogRouter = createTRPCRouter({
 				})
 				.returning();
 
-			if (newPost?.id)
+			if (newPost?.id) {
+				// Initialize analytics
 				await ctx.db.insert(blogPostAnalytics).values({ postId: newPost.id });
+
+				// Add tags if provided
+				if (input.tagIds && input.tagIds.length > 0) {
+					await ctx.db.insert(blogPostTags).values(
+						input.tagIds.map((tagId) => ({
+							postId: newPost.id,
+							tagId,
+						})),
+					);
+				}
+			}
 
 			return newPost;
 		}),
@@ -360,6 +445,7 @@ export const blogRouter = createTRPCRouter({
 				content: z.string().optional(),
 				published: z.boolean().optional(),
 				scheduledAt: z.number().nullable().optional(),
+				tagIds: z.array(z.number()).optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -394,6 +480,24 @@ export const blogRouter = createTRPCRouter({
 				throw new Error("Failed to update post");
 			}
 
+			// Update tags if provided
+			if (input.tagIds !== undefined) {
+				// Remove existing tags
+				await ctx.db
+					.delete(blogPostTags)
+					.where(eq(blogPostTags.postId, input.id));
+
+				// Add new tags
+				if (input.tagIds.length > 0) {
+					await ctx.db.insert(blogPostTags).values(
+						input.tagIds.map((tagId) => ({
+							postId: input.id,
+							tagId,
+						})),
+					);
+				}
+			}
+
 			return updated;
 		}),
 
@@ -410,9 +514,18 @@ export const blogRouter = createTRPCRouter({
 
 			const { success, resetAfter } = await rateLimit.high.limit(ip);
 			if (!success) throwRateLimit(resetAfter);
+
+			// Delete post-tag associations first (cascade should handle this, but being explicit)
+			await ctx.db
+				.delete(blogPostTags)
+				.where(eq(blogPostTags.postId, input.id));
+
+			// Delete analytics
 			await ctx.db
 				.delete(blogPostAnalytics)
 				.where(eq(blogPostAnalytics.postId, input.id));
+
+			// Delete the post
 			await ctx.db.delete(blogPosts).where(eq(blogPosts.id, input.id));
 			return { success: true };
 		}),
@@ -598,6 +711,236 @@ export const blogRouter = createTRPCRouter({
 				success: true,
 				debounced: true,
 				isNewVisitor: !anyPreviousView,
+			};
+		}),
+
+	// Tag Management Routes
+
+	// Admin-only: create a new tag
+	createTag: adminProcedure
+		.input(
+			z.object({
+				name: z.string().min(1).max(50),
+				slug: z.string().min(1).max(50),
+				description: z.string().optional(),
+				color: z
+					.string()
+					.regex(/^#[0-9A-Fa-f]{6}$/)
+					.optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
+
+			const [newTag] = await ctx.db
+				.insert(blogTags)
+				.values({
+					name: input.name,
+					slug: input.slug,
+					description: input.description,
+					color: input.color,
+				})
+				.returning();
+
+			return newTag;
+		}),
+
+	// Admin-only: update a tag
+	updateTag: adminProcedure
+		.input(
+			z.object({
+				id: z.number(),
+				name: z.string().min(1).max(50).optional(),
+				slug: z.string().min(1).max(50).optional(),
+				description: z.string().optional(),
+				color: z
+					.string()
+					.regex(/^#[0-9A-Fa-f]{6}$/)
+					.optional(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
+
+			const [updatedTag] = await ctx.db
+				.update(blogTags)
+				.set({
+					name: input.name,
+					slug: input.slug,
+					description: input.description,
+					color: input.color,
+					updatedAt: sql`(unixepoch())`,
+				})
+				.where(eq(blogTags.id, input.id))
+				.returning();
+
+			if (!updatedTag) {
+				throw new Error("Tag not found");
+			}
+
+			return updatedTag;
+		}),
+
+	// Admin-only: delete a tag
+	deleteTag: adminProcedure
+		.input(z.object({ id: z.number() }))
+		.mutation(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.high.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
+
+			// Delete all post-tag associations first
+			await ctx.db.delete(blogPostTags).where(eq(blogPostTags.tagId, input.id));
+
+			// Delete the tag
+			await ctx.db.delete(blogTags).where(eq(blogTags.id, input.id));
+
+			return { success: true };
+		}),
+
+	// Public: get all tags
+	getAllTags: publicProcedure.query(async ({ ctx }) => {
+		const ip = ctx.ip;
+		if (!ip)
+			throw new TRPCError({
+				code: "BAD_REQUEST",
+				message: "IP address not found",
+			});
+
+		const { success, resetAfter } = await rateLimit.low.limit(ip);
+		if (!success) throwRateLimit(resetAfter);
+
+		const tags = await ctx.db
+			.select({
+				id: blogTags.id,
+				name: blogTags.name,
+				slug: blogTags.slug,
+				description: blogTags.description,
+				color: blogTags.color,
+				createdAt: blogTags.createdAt,
+			})
+			.from(blogTags)
+			.orderBy(blogTags.name);
+
+		return tags;
+	}),
+
+	// Public: get posts by tag
+	getPostsByTag: publicProcedure
+		.input(
+			z.object({
+				tagSlug: z.string(),
+				page: z.number().min(1).optional().default(1),
+				limit: z.number().min(1).max(50).optional().default(12),
+			}),
+		)
+		.query(async ({ ctx, input }) => {
+			const ip = ctx.ip;
+			if (!ip)
+				throw new TRPCError({
+					code: "BAD_REQUEST",
+					message: "IP address not found",
+				});
+
+			const { success, resetAfter } = await rateLimit.low.limit(ip);
+			if (!success) throwRateLimit(resetAfter);
+
+			const now = Math.floor(Date.now() / 1000);
+			const page = input.page ?? 1;
+			const limit = input.limit ?? 12;
+			const offset = (page - 1) * limit;
+
+			// Get total count
+			const totalResult = await ctx.db
+				.select({ total: sql<number>`count(distinct ${blogPosts.id})` })
+				.from(blogPosts)
+				.innerJoin(blogPostTags, eq(blogPosts.id, blogPostTags.postId))
+				.innerJoin(blogTags, eq(blogPostTags.tagId, blogTags.id))
+				.where(
+					and(
+						eq(blogPosts.published, true),
+						eq(blogTags.slug, input.tagSlug),
+						or(
+							isNull(blogPosts.scheduledAt),
+							sql`${blogPosts.scheduledAt} <= ${now}`,
+						),
+					),
+				);
+
+			const total = Number(totalResult[0]?.total ?? 0);
+			const totalPages = Math.max(1, Math.ceil(total / limit));
+
+			// Get posts with tag
+			const posts = await ctx.db
+				.select({
+					id: blogPosts.id,
+					title: blogPosts.title,
+					description: blogPosts.description,
+					slug: blogPosts.slug,
+					published: blogPosts.published,
+					scheduledAt: blogPosts.scheduledAt,
+					createdAt: blogPosts.createdAt,
+					authorName: users.name,
+					content: blogPosts.content,
+					viewCount: sql<number>`coalesce(${blogPostAnalytics.viewCount}, 0)`,
+					updatedAt: blogPosts.updatedAt,
+				})
+				.from(blogPosts)
+				.innerJoin(blogPostTags, eq(blogPosts.id, blogPostTags.postId))
+				.innerJoin(blogTags, eq(blogPostTags.tagId, blogTags.id))
+				.leftJoin(users, eq(blogPosts.authorId, users.id))
+				.leftJoin(blogPostAnalytics, eq(blogPosts.id, blogPostAnalytics.postId))
+				.where(
+					and(
+						eq(blogPosts.published, true),
+						eq(blogTags.slug, input.tagSlug),
+						or(
+							isNull(blogPosts.scheduledAt),
+							sql`${blogPosts.scheduledAt} <= ${now}`,
+						),
+					),
+				)
+				.orderBy(desc(blogPosts.createdAt))
+				.limit(limit)
+				.offset(offset);
+
+			// Normalize viewCount
+			const normalized = posts.map((p) => ({
+				...p,
+				viewCount: Number((p as { viewCount?: unknown }).viewCount ?? 0),
+			}));
+
+			return {
+				posts: normalized,
+				meta: {
+					page,
+					limit,
+					total,
+					totalPages,
+					tagSlug: input.tagSlug,
+				},
 			};
 		}),
 });

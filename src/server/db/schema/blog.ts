@@ -29,6 +29,7 @@ export const blogPostsRelations = relations(blogPosts, ({ one, many }) => ({
 	}),
 	comments: many(blogComments),
 	views: many(blogPostViews),
+	tags: many(blogPostTags),
 }));
 
 export const blogComments = createTable("blog_comment", (d) => ({
@@ -114,5 +115,51 @@ export const blogPostViewsRelations = relations(blogPostViews, ({ one }) => ({
 	user: one(users, {
 		fields: [blogPostViews.userId],
 		references: [users.id],
+	}),
+}));
+
+// Blog Tags Table
+export const blogTags = createTable("blog_tag", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	name: d.text().notNull().unique(),
+	slug: d.text().notNull().unique(),
+	description: d.text(),
+	color: d.text({ length: 7 }), // Hex color code for tag display
+	createdAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+	updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
+}));
+
+export const blogTagsRelations = relations(blogTags, ({ many }) => ({
+	posts: many(blogPostTags),
+}));
+
+// Blog Post Tags Junction Table (Many-to-Many)
+export const blogPostTags = createTable("blog_post_tag", (d) => ({
+	id: d.integer().primaryKey({ autoIncrement: true }),
+	postId: d
+		.integer()
+		.notNull()
+		.references(() => blogPosts.id, { onDelete: "cascade" }),
+	tagId: d
+		.integer()
+		.notNull()
+		.references(() => blogTags.id, { onDelete: "cascade" }),
+	createdAt: d
+		.integer({ mode: "timestamp" })
+		.default(sql`(unixepoch())`)
+		.notNull(),
+}));
+
+export const blogPostTagsRelations = relations(blogPostTags, ({ one }) => ({
+	post: one(blogPosts, {
+		fields: [blogPostTags.postId],
+		references: [blogPosts.id],
+	}),
+	tag: one(blogTags, {
+		fields: [blogPostTags.tagId],
+		references: [blogTags.id],
 	}),
 }));

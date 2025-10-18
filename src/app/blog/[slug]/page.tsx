@@ -79,11 +79,14 @@ export async function generateMetadata({
 		},
 		datePublished: publishedTime,
 		dateModified: modifiedTime,
+		keywords: post.tags?.map((tag) => tag.name).join(", ") || "",
+		articleSection: post.tags?.map((tag) => tag.name) || [],
 	};
 
 	return {
 		title: seoTitle,
 		description: metaDescription,
+		keywords: post.tags?.map((tag) => tag.name).join(", ") || "",
 		alternates: { canonical: url },
 		robots:
 			post.published === false
@@ -112,6 +115,7 @@ export async function generateMetadata({
 			publishedTime,
 			modifiedTime,
 			authors: post.authorName ? [post.authorName] : [],
+			tags: post.tags?.map((tag) => tag.name) || [],
 			images: [
 				{
 					url: postImageUrl,

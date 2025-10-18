@@ -46,6 +46,12 @@ interface MultiSelectProps<T extends BaseOption> {
 	emptyState?: React.ReactNode;
 	optionsGroupLabel?: string;
 	selectedBadgeDisplay?: SelectedBadgeDisplay;
+	customActions?: Array<{
+		label: string;
+		onSelect: () => void;
+		disabled?: boolean;
+		icon?: React.ReactNode;
+	}>;
 }
 
 function getBadgeLabel(
@@ -80,6 +86,7 @@ export function MultiSelect<T extends BaseOption>({
 	emptyState,
 	optionsGroupLabel = "Options",
 	selectedBadgeDisplay = "abbreviate",
+	customActions = [],
 }: MultiSelectProps<T>) {
 	const [open, setOpen] = React.useState(false);
 	const [query, setQuery] = React.useState("");
@@ -207,6 +214,16 @@ export function MultiSelect<T extends BaseOption>({
 							>
 								Clear All
 							</CommandItem>
+							{customActions.map((action, index) => (
+								<CommandItem
+									key={`custom-action-${action.label}-${index}`}
+									onSelect={action.onSelect}
+									disabled={Boolean(disabled) || action.disabled}
+								>
+									{action.icon && <span className="mr-2">{action.icon}</span>}
+									{action.label}
+								</CommandItem>
+							))}
 						</CommandGroup>
 						<CommandGroup heading={optionsGroupLabel}>
 							<div className="ios-scroll relative z-10 max-h-[200px] overflow-y-auto">
