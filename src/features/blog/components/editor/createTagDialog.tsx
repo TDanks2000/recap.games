@@ -103,7 +103,6 @@ export const CreateTagDialog = ({
 		});
 
 	const handleSubmit = (data: CreateTagData) => {
-		console.log(data);
 		if (isEditing && initialData) {
 			updateTag({ id: initialData.id, ...data });
 		} else {
