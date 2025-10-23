@@ -33,15 +33,6 @@ const ConferenceCard = (conference: ConferenceCardProps) => {
 			rel="noreferrer"
 			aria-label={`View ${conference.name} conference stream`}
 		>
-			{isLive && (
-				<div className="pointer-events-none absolute top-3 right-3 flex items-center gap-1 rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] text-red-600 ring-1 ring-red-500/30">
-					<span
-						className="h-1.5 w-1.5 animate-pulse rounded-full bg-red-500"
-						aria-hidden="true"
-					/>
-					Live
-				</div>
-			)}
 			<CardHeader {...conference} />
 			<DateTimeDetails {...conference} />
 
