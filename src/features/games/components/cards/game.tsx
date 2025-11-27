@@ -1,6 +1,7 @@
 "use client";
 
 import type { InferSelectModel } from "drizzle-orm";
+import { PlayCircle } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { MediaType } from "@/@types";
@@ -19,7 +20,7 @@ import type { conferences, games, media } from "@/server/db/schema";
 interface GameCardProps extends InferSelectModel<typeof games> {
 	conference: InferSelectModel<typeof conferences> | null;
 	media: Array<InferSelectModel<typeof media>>;
-	priority?: boolean; // Add priority prop for critical, above-the-fold images
+	priority?: boolean;
 }
 
 export default function GameCard({
@@ -52,6 +53,8 @@ export default function GameCard({
 		[media],
 	);
 
+	const hasTrailer = !!trailerLink;
+
 	const handleImageError = () => {
 		setImageSrc("/icon.png");
 		setIsLoading(false);
@@ -61,81 +64,120 @@ export default function GameCard({
 		setIsLoading(false);
 	};
 
+	const CardWrapper = hasTrailer ? "a" : "div";
+	const wrapperProps = hasTrailer
+		? {
+				href: trailerLink,
+				target: "_blank",
+				rel: "noopener noreferrer",
+				"aria-label": `Watch trailer for ${title ?? "Untitled Game"}`,
+				className:
+					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-xl",
+			}
+		: {};
+
 	return (
 		<Card
 			className={cn(
-				"group hover:-translate-y-1 relative w-full max-w-full cursor-pointer overflow-hidden rounded-xl bg-card/50 pt-0 shadow-sm transition-transform duration-300 hover:bg-card hover:shadow-lg",
-				{ "pointer-events-none opacity-60": !trailerLink },
+				"group relative w-full max-w-full overflow-hidden rounded-xl bg-card shadow-sm transition-all duration-300",
+				hasTrailer
+					? "hover:-translate-y-1 cursor-pointer hover:shadow-primary/5 hover:shadow-xl"
+					: "cursor-default",
 			)}
 			aria-label={`Game card for ${title ?? "Untitled Game"}`}
 		>
-			<a
-				href={trailerLink ?? "#"}
-				target="_blank"
-				rel="noopener noreferrer"
-				aria-label={`Watch trailer for ${title ?? "Untitled Game"}`}
-				className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-			>
+			<CardWrapper {...wrapperProps}>
 				<CardContent className="relative p-0">
-					{features?.length > 0 && (
-						<div className="absolute top-2 right-2 z-10">
+					{/* Features Badge - Top Right */}
+					{features && features.length > 0 && (
+						<div className="absolute top-3 right-3 z-20">
 							<Badge
 								variant="secondary"
-								className="max-w-full truncate capitalize transition-shadow duration-300 group-hover:shadow-lg"
+								className="max-w-[calc(100%-1.5rem)] truncate bg-background/90 capitalize shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:bg-background"
 							>
 								{combineFeatures(features)}
 							</Badge>
 						</div>
 					)}
 
-					<div className="relative overflow-hidden">
+					{/* Trailer Indicator - Top Left */}
+					{hasTrailer && (
+						<div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 rounded-full bg-primary/90 px-2.5 py-1 font-medium text-primary-foreground text-xs shadow-lg backdrop-blur-sm transition-all duration-300 group-hover:bg-primary">
+							<PlayCircle className="h-3.5 w-3.5" />
+							<span>Watch Trailer</span>
+						</div>
+					)}
+
+					{/* Image Container */}
+					<div className="relative aspect-video overflow-hidden bg-muted">
 						{isLoading && (
-							<div className="absolute inset-0 z-10 flex items-center justify-center bg-muted/10 backdrop-blur-[2px]">
-								<div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+							<div className="absolute inset-0 z-10 flex items-center justify-center bg-muted">
+								<div className="h-8 w-8 animate-spin rounded-full border-3 border-primary border-t-transparent" />
 							</div>
 						)}
 						<Image
 							src={imageSrc}
 							alt={title || "Game"}
-							width={260}
-							height={146}
+							fill
 							priority={priority}
 							sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
 							onError={handleImageError}
 							onLoad={handleImageLoad}
 							className={cn(
-								"aspect-video w-full transform-gpu object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110",
-								{ "object-contain": imageSrc === "/icon.png" },
+								"object-cover transition-all duration-500",
+								hasTrailer &&
+									"group-hover:scale-105 group-hover:brightness-110",
+								imageSrc === "/icon.png" && "object-contain p-8",
 							)}
 						/>
-						<div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+						{/* Gradient Overlay on Hover */}
+						{hasTrailer && (
+							<div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+						)}
 					</div>
 
-					<CardFooter className="flex flex-col items-start gap-2 p-4">
-						<Badge
-							variant="secondary"
-							className="max-w-full transition-shadow duration-300 hover:shadow-md"
-						>
-							<span className="block overflow-hidden text-ellipsis whitespace-nowrap">
+					{/* Footer with Improved Layout */}
+					<CardFooter className="flex flex-col gap-3 p-4">
+						{/* Top Row: Conference & Release Date */}
+						<div className="flex w-full items-center justify-between gap-2">
+							<Badge
+								variant="outline"
+								className="max-w-[60%] truncate text-xs"
+								title={conference?.name ?? "Upcoming"}
+							>
 								{conference?.name ?? "Upcoming"}
-							</span>
-						</Badge>
+							</Badge>
 
-						<CardDescription
-							className="truncate text-muted-foreground/80 text-xs transition-colors group-hover:text-muted-foreground sm:text-sm"
-							title={releaseDate?.toString()}
-						>
-							{getFormattedDate(releaseDate)}
-						</CardDescription>
+							{releaseDate && (
+								<CardDescription
+									className="text-muted-foreground text-xs"
+									title={releaseDate.toString()}
+								>
+									{getFormattedDate(releaseDate)}
+								</CardDescription>
+							)}
+						</div>
+
+						{/* Title - More Prominent */}
 						<CardTitle
-							className="line-clamp-2 font-semibold text-sm leading-tight transition-colors duration-300 group-hover:text-primary sm:text-base"
+							className={cn(
+								"line-clamp-2 font-bold text-base leading-tight transition-colors duration-300",
+								hasTrailer && "group-hover:text-primary",
+							)}
 							title={title ?? "Untitled"}
 						>
 							{title ?? "Untitled"}
 						</CardTitle>
+
+						{/* No Trailer Message */}
+						{!hasTrailer && (
+							<p className="text-muted-foreground/60 text-xs italic">
+								Trailer coming soon
+							</p>
+						)}
 					</CardFooter>
 				</CardContent>
-			</a>
+			</CardWrapper>
 		</Card>
 	);
 }
