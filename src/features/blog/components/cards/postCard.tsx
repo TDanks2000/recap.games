@@ -1,4 +1,4 @@
-import { ArrowRight, Calendar, Clock, Gamepad2 } from "lucide-react";
+import { ArrowRight, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
@@ -11,18 +11,15 @@ import type { RouterOutputs } from "@/trpc/react";
 type Post = RouterOutputs["blog"]["listPosts"]["posts"][number];
 
 interface PostCardProps extends Post {
-	featured?: boolean;
 	size?: "default" | "large";
 }
 
 export function PostCard({
-	id,
 	slug,
 	title,
 	description,
 	createdAt,
 	content,
-	featured = false,
 	size = "default",
 }: PostCardProps) {
 	const { text: readingTime } = useReadingTime(content, {
@@ -30,23 +27,16 @@ export function PostCard({
 	});
 
 	return (
-		<Link href={`/blog/${slug}`} key={id} className="group block">
+		<Link href={`/blog/${slug}`} className="group block h-full">
 			<article
 				className={cn(
-					"relative overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card via-card to-card/80 transition-all duration-300",
+					"relative flex h-full min-h-64 flex-col overflow-hidden rounded-xl border border-border/50 bg-gradient-to-br from-card via-card to-card/80 transition-all duration-300",
 					"hover:-translate-y-1 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/10",
-					"h-64 before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100",
-					featured && "shadow-lg shadow-primary/5 ring-2 ring-primary/20",
+					"before:absolute before:inset-0 before:bg-gradient-to-br before:from-primary/5 before:to-transparent before:opacity-0 before:transition-opacity before:duration-300 hover:before:opacity-100",
 				)}
 			>
+				{/* Top accent line */}
 				<div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-primary via-accent to-primary opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-				{featured && (
-					<div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 rounded-full bg-primary/90 px-3 py-1.5 font-medium text-primary-foreground text-xs backdrop-blur-sm">
-						<Gamepad2 className="h-3 w-3" />
-						Featured
-					</div>
-				)}
 
 				<div className="relative z-10 flex h-full flex-col p-6">
 					{/* Header */}
@@ -59,7 +49,6 @@ export function PostCard({
 						>
 							{title}
 						</h2>
-
 						{/* Metadata */}
 						<div className="flex items-center gap-3 text-muted-foreground text-sm">
 							<div className="flex items-center gap-1.5">
@@ -77,7 +66,9 @@ export function PostCard({
 					{/* Content Preview */}
 					<div className="mb-4 flex-1">
 						<div className="line-clamp-3 text-muted-foreground text-sm leading-relaxed">
-							{!description?.length ? (
+							{description ? (
+								<p>{description}</p>
+							) : (
 								<ReactMarkdown
 									remarkPlugins={[remarkGfm]}
 									rehypePlugins={[rehypeSanitize]}
@@ -99,8 +90,6 @@ export function PostCard({
 								>
 									{content ?? "No content available"}
 								</ReactMarkdown>
-							) : (
-								<p>{description}</p>
 							)}
 						</div>
 					</div>
@@ -108,7 +97,7 @@ export function PostCard({
 					{/* CTA Footer */}
 					<footer className="mt-auto flex items-center justify-between border-border/30 border-t pt-4">
 						<span className="font-medium text-muted-foreground/70 text-xs uppercase tracking-wider">
-							Read Blog Post
+							Read More
 						</span>
 						<ArrowRight className="size-4 text-primary transition-transform duration-300 group-hover:translate-x-1" />
 					</footer>

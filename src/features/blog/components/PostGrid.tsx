@@ -33,7 +33,7 @@ export function PostGrid({ posts, featuredPostId }: PostGridProps) {
 					{posts
 						.filter((post) => post.id === featuredPostId)
 						.map((post) => (
-							<PostCard key={post.id} {...post} featured />
+							<PostCard key={post.id} {...post} />
 						))}
 				</div>
 			)}
