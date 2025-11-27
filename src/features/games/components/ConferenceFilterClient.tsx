@@ -74,6 +74,8 @@ export default function ConferenceFilterClient() {
 				onChange={handleConferenceChange}
 				placeholder="Filter by Conference"
 				optionsGroupLabel="Conferences"
+				enableDebounce={true}
+				debounceMs={1500}
 			/>
 		</div>
 	);

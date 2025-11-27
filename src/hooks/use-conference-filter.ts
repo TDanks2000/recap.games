@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useRef, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useTransition } from "react";
 
 export function useConferenceFilter() {
 	const searchParams = useSearchParams();
@@ -10,28 +10,34 @@ export function useConferenceFilter() {
 	const [isPending, startTransition] = useTransition();
 
 	// Track the latest state locally to avoid stale URL params
-	const latestStateRef = useRef<number[]>([]);
+	const latestStateRef = useRef<number[] | null>(null);
+	const isFirstRenderRef = useRef(true);
 
-	const selectedConferences = useMemo(() => {
+	const urlConferences = useMemo(() => {
 		const raw = searchParams.get("conferences") ?? "";
-		const fromUrl = raw
+		return raw
 			.split(",")
 			.map((s) => Number(s))
 			.filter((n) => !Number.isNaN(n) && n > 0);
-
-		// Initialize ref if empty
-		if (latestStateRef.current.length === 0) {
-			latestStateRef.current = fromUrl;
-		}
-
-		return latestStateRef.current;
 	}, [searchParams]);
+
+	// Initialize from URL on first render only
+	useEffect(() => {
+		if (isFirstRenderRef.current) {
+			latestStateRef.current = urlConferences;
+			isFirstRenderRef.current = false;
+		}
+	}, [urlConferences]);
+
+	// Always prefer local state over URL state
+	const selectedConferences = latestStateRef.current ?? urlConferences;
 
 	const onConferenceChange = useCallback(
 		(ids: number[]) => {
+			// Update local state immediately
 			latestStateRef.current = ids;
 
-			// Then update URL
+			// Then update URL in a transition
 			startTransition(() => {
 				const params = new URLSearchParams(searchParams.toString());
 				if (ids.length > 0) {
