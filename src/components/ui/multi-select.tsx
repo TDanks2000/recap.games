@@ -52,6 +52,8 @@ interface MultiSelectProps<T extends BaseOption> {
 		disabled?: boolean;
 		icon?: React.ReactNode;
 	}>;
+	enableDebounce?: boolean;
+	debounceMs?: number;
 }
 
 function getBadgeLabel(
@@ -87,9 +89,35 @@ export function MultiSelect<T extends BaseOption>({
 	optionsGroupLabel = "Options",
 	selectedBadgeDisplay = "abbreviate",
 	customActions = [],
+	enableDebounce = false,
+	debounceMs = 300,
 }: MultiSelectProps<T>) {
 	const [open, setOpen] = React.useState(false);
 	const [query, setQuery] = React.useState("");
+	const [debouncedQuery, setDebouncedQuery] = React.useState("");
+	const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+	// Debounce effect for search query
+	React.useEffect(() => {
+		if (!enableDebounce) {
+			setDebouncedQuery(query);
+			return;
+		}
+
+		if (debounceTimerRef.current) {
+			clearTimeout(debounceTimerRef.current);
+		}
+
+		debounceTimerRef.current = setTimeout(() => {
+			setDebouncedQuery(query);
+		}, debounceMs);
+
+		return () => {
+			if (debounceTimerRef.current) {
+				clearTimeout(debounceTimerRef.current);
+			}
+		};
+	}, [query, enableDebounce, debounceMs]);
 
 	const toggleSelect = (value: T["value"]) => {
 		if (selected.includes(value)) {
@@ -114,8 +142,9 @@ export function MultiSelect<T extends BaseOption>({
 		onChange([]);
 	};
 
+	const searchQuery = enableDebounce ? debouncedQuery : query;
 	const filteredOptions = options.filter((opt) =>
-		opt.label.toLowerCase().includes(query.toLowerCase()),
+		opt.label.toLowerCase().includes(searchQuery.toLowerCase()),
 	);
 
 	// For tooltip

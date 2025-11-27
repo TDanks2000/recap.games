@@ -56,6 +56,7 @@ export const combinedRouter = createTRPCRouter({
 					publisher: z.array(z.string()).optional(),
 					hidden: z.boolean().optional(),
 					conferenceId: z.number().optional(),
+					year: z.number().optional(),
 				}),
 				// Media data
 				media: z.array(
@@ -100,6 +101,7 @@ export const combinedRouter = createTRPCRouter({
 						: undefined,
 					hidden: input.game.hidden,
 					conferenceId: input.game.conferenceId,
+					year: input.game.year,
 				})
 				.returning();
 
@@ -145,6 +147,7 @@ export const combinedRouter = createTRPCRouter({
 					name: z.string().min(1),
 					startTime: z.date().optional(),
 					endTime: z.date().optional(),
+					year: z.number().optional(),
 				}),
 				// Stream data
 				stream: z.object({
@@ -170,6 +173,7 @@ export const combinedRouter = createTRPCRouter({
 					name: input.conference.name,
 					startTime: input.conference.startTime || undefined,
 					endTime: input.conference.endTime || undefined,
+					year: input.conference.year ?? undefined,
 				})
 				.returning();
 

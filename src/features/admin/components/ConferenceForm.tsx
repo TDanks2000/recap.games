@@ -32,6 +32,7 @@ const conferenceFormSchema = z
 			name: z.string().min(1, { message: "Conference name is required" }),
 			startTime: z.date().optional(),
 			endTime: z.date().optional(),
+			year: z.number().min(1900).max(2100),
 		}),
 		stream: z.object({
 			title: z.string().min(1, { message: "Stream title is required" }),
@@ -102,7 +103,18 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 						if (prev <= 1) {
 							clearInterval(id);
 							setShowConfirmation(false);
-							form.reset();
+							form.reset({
+								conference: {
+									name: "",
+									startTime: new Date(),
+									endTime: undefined,
+									year: new Date().getFullYear(),
+								},
+								stream: {
+									title: "",
+									link: "",
+								},
+							});
 							setEndTimeManuallyEdited(false);
 							utils.conference.getAll.invalidate();
 							return 0;
@@ -119,7 +131,18 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 						onDismiss: () => {
 							if (resetTimeoutId) clearInterval(resetTimeoutId);
 							setShowConfirmation(false);
-							form.reset();
+							form.reset({
+								conference: {
+									name: "",
+									startTime: new Date(),
+									endTime: undefined,
+									year: new Date().getFullYear(),
+								},
+								stream: {
+									title: "",
+									link: "",
+								},
+							});
 							setEndTimeManuallyEdited(false);
 							utils.conference.getAll.invalidate();
 						},
@@ -128,7 +151,18 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 							onClick: () => {
 								if (resetTimeoutId) clearInterval(resetTimeoutId);
 								setShowConfirmation(false);
-								form.reset();
+								form.reset({
+									conference: {
+										name: "",
+										startTime: new Date(),
+										endTime: undefined,
+										year: new Date().getFullYear(),
+									},
+									stream: {
+										title: "",
+										link: "",
+									},
+								});
 								setEndTimeManuallyEdited(false);
 								utils.conference.getAll.invalidate();
 							},
@@ -148,6 +182,7 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 				name: "",
 				startTime: new Date(),
 				endTime: undefined,
+				year: new Date().getFullYear(),
 			},
 			stream: {
 				title: "",
@@ -202,6 +237,7 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 				name: data.conference.name,
 				startTime: data.conference.startTime,
 				endTime: data.conference.endTime,
+				year: data.conference.year,
 			},
 			stream: data.stream,
 		});
@@ -226,8 +262,6 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 							render={({ field }) => (
 								<FormItem className="flex min-h-20 flex-col justify-start">
 									<div className="mb-2 flex min-h-[24px] items-center">
-										{" "}
-										{/* Consistent height for label row */}
 										<FormLabel>Conference Name</FormLabel>
 									</div>
 									<FormControl>
@@ -244,6 +278,33 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 							)}
 						/>
 
+						<FormField
+							control={form.control}
+							name="conference.year"
+							render={({ field }) => (
+								<FormItem className="flex min-h-20 flex-col justify-start">
+									<div className="mb-2 flex min-h-[24px] items-center">
+										<FormLabel>Year</FormLabel>
+									</div>
+									<FormControl>
+										<Input
+											type="number"
+											placeholder="2024"
+											className={
+												formErrors.conference?.year ? "border-destructive" : ""
+											}
+											{...field}
+											onChange={(e) => field.onChange(Number(e.target.value))}
+										/>
+									</FormControl>
+									<FormDescription className="text-xs">
+										The year of the conference
+									</FormDescription>
+									<FormMessage className="text-xs" />
+								</FormItem>
+							)}
+						/>
+
 						<div className="grid gap-6 md:grid-cols-2">
 							<FormField
 								control={form.control}
@@ -251,8 +312,6 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 								render={({ field }) => (
 									<FormItem className="flex min-h-20 flex-col justify-start">
 										<div className="mb-2 flex min-h-[24px] items-center">
-											{" "}
-											{/* Consistent height for label row */}
 											<FormLabel>Start Time</FormLabel>
 										</div>
 										<FormControl>
@@ -284,8 +343,6 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 								render={({ field }) => (
 									<FormItem className="flex min-h-20 flex-col justify-start">
 										<div className="mb-2 flex min-h-[24px] items-center gap-2">
-											{" "}
-											{/* Consistent height for label row */}
 											<FormLabel>End Time</FormLabel>
 											<Button
 												type="button"
@@ -382,8 +439,6 @@ export default function ConferenceForm({ formIndex }: { formIndex: number }) {
 									render={({ field }) => (
 										<FormItem className="flex min-h-20 flex-col justify-start">
 											<div className="mb-2 flex min-h-[24px] items-center">
-												{" "}
-												{/* Consistent height for label row */}
 												<FormLabel>Stream URL</FormLabel>
 											</div>
 											<FormControl>

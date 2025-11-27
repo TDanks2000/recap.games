@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { type Control, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -40,6 +40,7 @@ const mediaSchema = z.object({
 const gameFormSchema = z.object({
 	title: z.string().min(1, { message: "Title is required" }),
 	releaseDate: z.string().optional(),
+	year: z.number().min(1900).max(2100),
 	genres: z.array(z.nativeEnum(Genre)).optional(),
 	exclusive: z.array(z.nativeEnum(Platform)).optional(),
 	features: z.array(z.nativeEnum(Feature)).optional(),
@@ -57,6 +58,7 @@ type GameFormValues = z.infer<typeof gameFormSchema>;
 export interface GameFormInitialData {
 	title?: string;
 	releaseDate?: string;
+	year?: number;
 	genres?: Genre[];
 	exclusive?: Platform[];
 	features?: Feature[];
@@ -84,6 +86,11 @@ const formFieldConfigs = {
 		description:
 			'Optional. Enter the release date in MM-DD-YYYY format or use text like "Q4 2023".',
 		placeholder: "Release date",
+	},
+	year: {
+		label: "Year",
+		description: "The year of the game. This field is required.",
+		placeholder: "2024",
 	},
 	genres: {
 		label: "Genres",
@@ -202,18 +209,21 @@ interface ArrayInputFieldProps {
 }
 
 const ArrayInputField = ({ name, config, control }: ArrayInputFieldProps) => {
-	const handleArrayInput = (
-		value: string,
-		onChange: (value: string[]) => void,
-	) => {
-		if (!value.trim()) {
-			onChange([]);
-			return;
-		}
-		onChange(value.split(",").map((item) => item.trim()));
-	};
+	const handleArrayInput = useCallback(
+		(value: string, onChange: (value: string[]) => void) => {
+			if (!value.trim()) {
+				onChange([]);
+				return;
+			}
+			onChange(value.split(",").map((item) => item.trim()));
+		},
+		[],
+	);
 
-	const arrayToString = (array?: string[]) => array?.join(", ") ?? "";
+	const arrayToString = useCallback(
+		(array?: string[]) => array?.join(", ") ?? "",
+		[],
+	);
 
 	return (
 		<FormField
@@ -315,11 +325,13 @@ export default function GameForm({
 	const { data: conferences, isLoading: conferencesLoading } =
 		api.conference.getAll.useQuery();
 
-	// Calculate default values
+	// Calculate default values - memoized to prevent unnecessary recalculations
 	const defaultFormValues = useMemo((): GameFormValues => {
+		const currentYear = new Date().getFullYear();
 		const baseDefaults: GameFormValues = {
 			title: "",
 			releaseDate: "",
+			year: currentYear,
 			genres: [],
 			exclusive: [],
 			features: [],
@@ -335,6 +347,7 @@ export default function GameForm({
 		return {
 			...baseDefaults,
 			...initialData,
+			year: initialData.year ?? currentYear,
 			media:
 				initialData.media && initialData.media.length > 0
 					? initialData.media
@@ -353,21 +366,28 @@ export default function GameForm({
 		name: "media",
 	});
 
+	// Memoize the reset values to avoid recreating on every render
+	const getResetValues = useCallback((): GameFormValues => {
+		const currentYear = new Date().getFullYear();
+		return {
+			title: "",
+			releaseDate: "",
+			year: currentYear,
+			genres: [],
+			exclusive: [],
+			features: [],
+			developer: [],
+			publisher: [],
+			hidden: false,
+			media: [{ type: MediaType.Video, link: "" }],
+			conferenceId: undefined,
+		};
+	}, []);
+
 	const createGameMutation = api.combined.createGameWithMedia.useMutation({
 		onSuccess: () => {
 			toast.success(`Game created successfully (Form ${formIndex})`);
-			form.reset({
-				title: "",
-				releaseDate: "",
-				genres: [],
-				exclusive: [],
-				features: [],
-				developer: [],
-				publisher: [],
-				hidden: false,
-				media: [{ type: MediaType.Video, link: "" }],
-				conferenceId: undefined,
-			});
+			form.reset(getResetValues());
 			void utils.game.getAll.invalidate();
 			onFormSubmitSuccess?.();
 		},
@@ -376,26 +396,35 @@ export default function GameForm({
 		},
 	});
 
+	// Only reset when defaultFormValues actually changes
 	useEffect(() => {
 		form.reset(defaultFormValues);
 	}, [defaultFormValues, form]);
 
-	const onSubmit = (data: GameFormValues) => {
-		createGameMutation.mutate({
-			game: {
-				title: data.title,
-				releaseDate: data.releaseDate,
-				genres: data.genres,
-				exclusive: data.exclusive,
-				features: data.features,
-				developer: data.developer,
-				publisher: data.publisher,
-				hidden: data.hidden,
-				conferenceId: data.conferenceId,
-			},
-			media: data.media,
-		});
-	};
+	const onSubmit = useCallback(
+		(data: GameFormValues) => {
+			createGameMutation.mutate({
+				game: {
+					title: data.title,
+					releaseDate: data.releaseDate,
+					year: data.year,
+					genres: data.genres,
+					exclusive: data.exclusive,
+					features: data.features,
+					developer: data.developer,
+					publisher: data.publisher,
+					hidden: data.hidden,
+					conferenceId: data.conferenceId,
+				},
+				media: data.media,
+			});
+		},
+		[createGameMutation],
+	);
+
+	const handleAppendMedia = useCallback(() => {
+		append({ type: MediaType.Video, link: "" });
+	}, [append]);
 
 	return (
 		<Form {...form}>
@@ -416,6 +445,27 @@ export default function GameForm({
 								name="releaseDate"
 								config={formFieldConfigs.releaseDate}
 								control={form.control}
+							/>
+							<FormField
+								control={form.control}
+								name="year"
+								render={({ field }) => (
+									<FormFieldWrapper>
+										<FormLabel>{formFieldConfigs.year.label}</FormLabel>
+										<FormDescription className="mb-2">
+											{formFieldConfigs.year.description}
+										</FormDescription>
+										<FormControl>
+											<Input
+												type="number"
+												placeholder={formFieldConfigs.year.placeholder}
+												{...field}
+												onChange={(e) => field.onChange(Number(e.target.value))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormFieldWrapper>
+								)}
 							/>
 						</div>
 					</div>
@@ -519,7 +569,7 @@ export default function GameForm({
 								type="button"
 								variant="outline"
 								size="sm"
-								onClick={() => append({ type: MediaType.Video, link: "" })}
+								onClick={handleAppendMedia}
 								className="flex items-center gap-2"
 							>
 								<PlusCircle className="h-4 w-4" />
