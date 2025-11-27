@@ -3,15 +3,15 @@ import { RateLimiter, Ratelimit } from "../utils/rate-limiter";
 
 export const rateLimit = {
 	low: new RateLimiter({
-		limiter: Ratelimit.slidingWindow(10, "10s"), // 10 requests per 10s
+		limiter: Ratelimit.slidingWindow(15, "10s"), // 15 requests per 10s
 		prefix: "ratelimit:low",
 	}),
 	medium: new RateLimiter({
-		limiter: Ratelimit.tokenBucket(30, "10s"), // 30 tokens per 10s
+		limiter: Ratelimit.tokenBucket(35, "10s"), // 35 tokens per 10s
 		prefix: "ratelimit:medium",
 	}),
 	high: new RateLimiter({
-		limiter: Ratelimit.fixedWindow(60, "10s"), // 60 requests per 10s
+		limiter: Ratelimit.fixedWindow(65, "10s"), // 65 requests per 10s
 		prefix: "ratelimit:high",
 	}),
 };
