@@ -1,6 +1,7 @@
-import { AlertTriangle, ArrowRight, Gamepad2, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowRight, Gamepad2 } from "lucide-react";
 import Link from "next/link";
 import type { HomeSearchParams } from "@/@types";
+import { RetryButton } from "@/components/RetryButton";
 import { Button } from "@/components/ui/button";
 import { tryCatch } from "@/lib/try-catch";
 import { getYearFromSearchParams } from "@/lib/utils";
@@ -45,15 +46,7 @@ export async function GamesList({ searchParams }: GamesListProps) {
 					</p>
 				</div>
 				<div className="flex flex-col gap-3 sm:flex-row">
-					<Button
-						variant="default"
-						size="sm"
-						onClick={() => window.location.reload()}
-						className="gap-2"
-					>
-						<RefreshCw className="h-4 w-4" />
-						Retry
-					</Button>
+					<RetryButton />
 					<Button variant="outline" size="sm" asChild>
 						<Link href="/">Go Home</Link>
 					</Button>

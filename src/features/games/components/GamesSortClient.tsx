@@ -1,5 +1,4 @@
 "use client";
-
 import { ArrowUpNarrowWide } from "lucide-react";
 import { useId } from "react";
 import type { SortOption } from "@/@types";
@@ -25,6 +24,7 @@ type Props = {
 };
 
 export default function GamesSortClient({ directionOnLeft }: Props) {
+	const selectId = useId(); // ✅ Call at the top level
 	const { currentSort, currentDirection, onSortChange, toggleDirection } =
 		useGamesSort();
 
@@ -42,7 +42,7 @@ export default function GamesSortClient({ directionOnLeft }: Props) {
 					}
 				>
 					<SelectTrigger
-						id={useId()}
+						id={selectId} // ✅ Use the ID variable
 						className="w-full"
 						name="sort games"
 						aria-label="Sort games"
