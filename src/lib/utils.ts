@@ -17,7 +17,7 @@ export function getYearFromSearchParams(
 			return parsedYear;
 		}
 	}
-	return new Date().getFullYear();
+	return 2025;
 }
 
 export const getIdFromURL = (
